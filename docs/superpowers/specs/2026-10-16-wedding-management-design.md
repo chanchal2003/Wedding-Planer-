@@ -1,7 +1,7 @@
 # Wedding Management App: Design
 
 Date: 2026-10-16
-Status: Approved (revised after the second review, 2026-10-16)
+Status: Approved (revised 2026-10-16). The PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`) is based on this version.
 Language: ASD-STE100 Simplified Technical English (STE)
 
 ## 1. Intent
@@ -81,7 +81,7 @@ Each organizer has a "can see money" switch. An admin sets this switch. The defa
 | Own tasks. Set a purchase task to done and enter the cost. | Yes | Yes |
 | Expenses that the organizer entered | Sees | Sees |
 | Budgets, other expenses, who paid, repayments, money due, side split | Sees | Does not see |
-| Gifts and shagun | Sees | Does not see |
+| Gifts and shagun | Sees all. Records gifts. | Records gifts. Sees only the gifts that the organizer recorded. |
 
 "Does not see" means that the server does not send the data. It is not sufficient to hide the data in the user interface.
 
@@ -107,6 +107,7 @@ Each organizer has a "can see money" switch. An admin sets this switch. The defa
   - After the bride or groom signs in, other persons cannot remove their admin role. Only the bride or groom can remove their own admin role.
   - Before the bride or groom signs in, the admin that made the wedding can edit their entry. For example, the admin can correct an incorrect email.
 - *Decision of the writer:* An admin can demote a different admin. This is not possible if that admin is a bride or groom who signed in.
+- **Remove an organizer (decided):** Before an admin removes an organizer, the app asks the admin to give the families and the open tasks of that organizer to a different team member. The app does not remove the organizer until all families and open tasks have a new owner. The records of that person (expenses, payments, history) stay.
 
 ## 6. Features
 
@@ -127,6 +128,8 @@ Each organizer has a "can see money" switch. An admin sets this switch. The defa
   - Dress code or note
   - Budget
   - "Hosted by": bride side, groom side, or both.
+- **Who manages events (decided):** Only admins can add or delete an event. Organizers can edit the details of an event (for example, time, venue or note). Organizers cannot edit the budget unless they have money access.
+- If an admin deletes an event, the app shows how many families, replies, expenses and tasks link to it, and asks for confirmation. Expenses and tasks of that event move to "whole wedding".
 - The event list shows "hosted by".
 - "Hosted by" is the default "charged to" side for each expense of that event. A user can change the side for each expense.
 - The dashboard shows the weddings of the user. Then the wedding dashboard shows:
@@ -166,6 +169,7 @@ Each organizer has a "can see money" switch. An admin sets this switch. The defa
 - Each family has a list of the events on its invitation. For example: "Haldi, Wedding". There is no limit on the number of persons (refer to Section 6.3).
 - The names of each family member are optional in the first version.
 - **Make the guest list (decided):** Import an Excel or CSV file. This is the main method, because typing 500 guests is not practical. An organizer can also add one family at a time. The builder selects the file format. Guests cannot add themselves to the list in the first version.
+- **Import columns (decided):** The import file has these columns: family name, contact name, city, primary number, secondary number, side, one column for each event (yes or no), assigned organizer (email or name), notes. Only family name and one event are required. The builder gives a template file to download.
 - The import shows a preview before the app saves the data.
 - The import flags duplicates:
   - The same phone number in two families.
@@ -420,7 +424,7 @@ The team has three persons: the admin, Ankit (a friend, organizer, no money acce
   - A cash or shagun amount, or a description of an item
   - The event.
 - Purpose: thank-you notes, and the correct gift to give back at events of that family.
-- Only admins and organizers with money access can see and edit gifts.
+- **Who records gifts (decided):** Admins and all organizers can record a gift. An organizer without money access sees only the gifts that they recorded. Admins and organizers with money access see and edit all gifts.
 - Gifts have the same edit history and soft delete as expenses.
 
 ## 7. Messages and guest access (decided: free and manual)
@@ -501,7 +505,7 @@ The team has three persons: the admin, Ankit (a friend, organizer, no money acce
     - An organizer gets money and gifts only with money access.
   - The India DPDP Act applies to guest data. Keep only the data that is necessary.
 - **Data retention (decided):**
-  - The app deletes guest phone numbers and stay data 6 months after the wedding date. This is automatic.
+  - The app deletes guest phone numbers, stay data, access requests and guest devices 6 months after the wedding date. This is automatic.
   - Before the delete, the app gives a warning to the admins. The admins can download a full CSV export.
   - The app keeps expenses and totals for the couple.
   - The couple can delete all data of a wedding at any time.
@@ -546,7 +550,7 @@ This section gives the main tables and rules. The builder decides the columns, n
 - **Purchase task to expense:** When a user sets a purchase task to "done", the app makes the expense, makes the payment and updates the task in one transaction. If one step fails, no step stays.
 - **Soft delete:** Expenses, payments and gifts have a `deleted_at` column. A delete sets this column. A restore clears it.
 - **Edit history:** Each change to an expense, payment or gift adds a row to `history` in the same transaction as the change.
-- **Data retention:** The 6-month delete (Section 8) clears phone numbers and stay data, and removes `guest_devices`. It keeps expenses, payments and totals.
+- **Data retention:** The 6-month delete (Section 8) clears phone numbers and stay data, and removes `guest_devices` and `access_requests`. It keeps expenses, payments and totals.
 
 ## 9. Build sequence and cut line (decided)
 
