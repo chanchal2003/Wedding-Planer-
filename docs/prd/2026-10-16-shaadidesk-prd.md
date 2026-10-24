@@ -14,15 +14,19 @@
 | Document | Product Requirements Document (PRD) |
 | Author | Chanchal (owner), with Claude Code (writer) |
 | Created | 2026-10-16 |
-| Updated | 2026-10-16 |
-| Version | v0.1 |
+| Updated | 2026-10-24 |
+| Version | v0.3 (practice project with dummy data; build in waves) |
 | Status | Draft. The owner reviews each section. |
+| Context | Practice project. Dummy data only. The real wedding moved (2026-10-24). `[Confirmed]` |
 | Language | ASD-STE100 Simplified Technical English (STE) `[Confirmed]` |
 | Build team | The owner, with Claude Code `[Confirmed]` |
 | Source document | Design document: `docs/superpowers/specs/2026-10-16-wedding-management-design.md` `[Confirmed]` |
+| Architecture | `docs/architecture/2026-10-24-shaadidesk-architecture.md` `[Confirmed]` |
 | Rule if documents do not agree | This PRD gives the requirements. The design document gives the details. If the two documents do not agree, stop and ask the owner. `[Proposed]` |
 
 ## 2. Product Overview
+
+> **Change on 2026-10-24** `[Confirmed]`: The first real wedding moved. ShaadiDesk is now a **practice project**. It uses **dummy data only**. The features and rules in this PRD do not change. The original wedding (approximately 500 families, 5 events, mid-January 2027) is now the **test scenario**: the dummy data must have this size and shape. Text about real guests, real dates and launch describes the target product, for a real wedding in the future.
 
 ### 2.1 Product summary
 
@@ -35,7 +39,7 @@ ShaadiDesk is a free web app for Indian weddings. The couple and their family an
 - Many family members pay many vendors. Money comes from the bride side and the groom side. `[Confirmed]`
 - Many family members and friends help. Each helper does different tasks. `[Confirmed]`
 - Today, families keep this data in WhatsApp chats, spreadsheets and their memory. `[Confirmed]`
-- The first user is one real wedding: approximately 500 families, 5 events, wedding in approximately mid-January 2027. `[Confirmed]`
+- The test scenario is one wedding: approximately 500 families, 5 events, wedding in approximately mid-January 2027. It was a real wedding, and it moved. The app now uses dummy data for this scenario. `[Confirmed]`
 - The app must support many weddings from the start. `[Confirmed]`
 
 ### 2.3 Why it is needed now
@@ -164,7 +168,7 @@ These persons are examples only. They are not real research.
 
 | ID | Goal |
 |---|---|
-| G1 | Manage all of one real wedding with ShaadiDesk: approximately 500 families, 5 events, mid-January 2027. `[Confirmed]` |
+| G1 | Manage all of one wedding with ShaadiDesk: approximately 500 families, 5 events (test scenario with dummy data). `[Confirmed]` |
 | G2 | Make the guest list, invitation tracking and RSVP operate before the family sends invitations in December 2026. `[Confirmed]` |
 | G3 | Show the money clearly: budget, spent, due, who paid, and the share of each side. `[Confirmed]` |
 | G4 | Keep money private from helpers who do not need it. `[Confirmed]` |
@@ -179,6 +183,8 @@ Not applicable for this release. ShaadiDesk is free and has no business model no
 ### 5.3 Success metrics
 
 The owner accepted these metrics on 2026-10-16 and changed M4. There is no earlier data, so each baseline is TBD.
+
+**With dummy data** `[Confirmed]`: M1, M2, M3 and M5 need real guests, so they are not measured. The reports for them (FR-54) are tested with the dummy data. M4 does not apply. M6, M7 and M8 apply as written.
 
 | ID | Metric | Why it matters | Baseline | Target | Timeframe | Measurement method |
 |---|---|---|---|---|---|---|
@@ -211,12 +217,12 @@ The owner accepted these metrics on 2026-10-16 and changed M4. There is no earli
 
 ### 6.1 MoSCoW
 
-The release has three dates `[Confirmed]`:
-- **Must Have:** by approximately 10 November 2026.
-- **Should Have (November):** by 30 November 2026.
-- **Should Have (December):** before the stay last date in December 2026.
+**Build order (changed on 2026-10-24)** `[Confirmed]`: There are no fixed dates now. The Must Have items are built in two waves:
+- **Wave 1 (first):** weddings and team (roles, money switch, Google sign-in), guest list and Excel import, RSVP page (family search, 4-digit check, one-time reply, last date, link preview, privacy note), organizers enter replies, "My families" and "Invitation sent" with progress, guest count dashboard, server access rules, CSV export and daily database copy.
+- **Wave 2 (after Wave 1, the owner decides):** request access and approval, reminder list and "Send reminder", fast expense form, event type icons and colors, "needs attention" list.
+- Then the Should Have items, in the order of the table. Could Have items only if the owner asks.
 
-All Must Have and Should Have items are in this release. Only the date is different. `[Confirmed]`
+The dates in the table are from the original plan for the real wedding. They show the order, not deadlines.
 
 | Priority | Item | Date |
 |---|---|---|
@@ -409,7 +415,8 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | AF-6 | Two family members submit at the same time | The app keeps the first reply. The second person sees the first reply. |
 | AF-7 | Guest opens the link after the RSVP last date | The app shows "Replies are closed. Contact <organizer>." |
 | AF-8 | Family reached the device limit | The app shows "Too many devices. Contact <organizer>." An organizer resets the devices. |
-| AF-9 | Import file has errors (duplicate numbers, missing family name, no event) | The preview shows each error. The admin corrects the file or the rows before the save. |
+| AF-9 | Import file has errors (duplicate numbers, missing family name, no event) | The preview shows each error. The admin downloads the error list, corrects the file and uploads it again. Save is possible only with 0 errors. |
+| AF-16 | A second import has families that are already in the app | The app skips them with the note "already in the app". It adds only the new families. |
 | AF-10 | Family has no phone number | The app flags the family. Guests of this family use "Request access". Organizers can enter the reply. |
 | AF-11 | Admin removes an organizer | The app asks the admin to give the families and open tasks to a different person first. |
 | AF-12 | Admin deletes an event | The app shows the linked families, replies, expenses and tasks, and asks for confirmation. Replies for that event are removed. Expenses and tasks move to "whole wedding". |
@@ -451,7 +458,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 |---|---|---|---|---|
 | FR-15 | A family has: family name, contact name, city, primary number, secondary number (optional), side (bride, groom or both), assigned organizer, events on the invitation, "Invitation sent" with date, and notes. | Must | US-10 | FR-2 |
 | FR-16 | An admin can import families from an Excel or CSV file. The app gives a template file to download. Columns: family name, contact name, city, primary number, secondary number, side, one column for each event (yes or no), assigned organizer (email or name), notes. Only family name and one event are required. | Must | US-9 | FR-5, FR-15 |
-| FR-17 | The import shows a preview before the save. The preview flags: the same number in two families, a number that is already in the list, a missing family name, a family with no event, and a family with no phone number. | Must | US-9 | FR-16, FR-18 |
+| FR-17 | The import shows a preview before the save. The preview flags: the same number in two families, a number that is already in the list, a missing family name, a family with no event, and a family with no phone number. Save is possible only when there are 0 errors: the admin corrects the file and uploads it again. Warnings (for example, no phone number) do not stop the save. A family that is already in the app (same family name and same number) is skipped, with the note "already in the app". A number that a different family uses is an error. `[Confirmed]` | Must | US-9 | FR-16, FR-18 |
 | FR-18 | The app keeps phone numbers in one standard format. It removes the differences of "+91", a "0" at the start, spaces and dashes. A number cannot be in two families of the same wedding. | Must | US-9, US-10 | FR-15 |
 | FR-19 | The app flags families with no number. An organizer can add a number in one step. An organizer can mark a number as incorrect. The app shows these numbers in a list to correct. | Must | US-10 | FR-15 |
 | FR-20 | An organizer can add and edit a family. This includes the two numbers, making the secondary number the primary, and the events on the invitation. If an organizer removes an event from a family, the app removes the reply for that event. | Must | US-10 | FR-5, FR-15 |

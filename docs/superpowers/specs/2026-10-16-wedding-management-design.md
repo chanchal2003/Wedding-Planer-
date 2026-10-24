@@ -2,6 +2,7 @@
 
 Date: 2026-10-16
 Status: Approved (revised 2026-10-16). The PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`) is based on this version.
+Change on 2026-10-24: The wedding moved. The app is a practice project with dummy data only. The real wedding in this document is now the test scenario. The build order is in the PRD, Section 6.1.
 Language: ASD-STE100 Simplified Technical English (STE)
 
 ## 1. Intent
@@ -174,6 +175,8 @@ Each organizer has a "can see money" switch. An admin sets this switch. The defa
 - The import flags duplicates:
   - The same phone number in two families.
   - A phone number that is already in the list.
+- **Save rule (decided 2026-10-24):** The app saves an import only when there are 0 errors. The admin downloads the error list, corrects the file and uploads it again. Warnings do not stop the save.
+- **Second import (decided 2026-10-24):** A family that is already in the app (same family name and same number) is skipped, with the note "already in the app". A number that a different family uses is an error.
 - You can import a family with no phone number. The app flags this family. Guests of this family cannot confirm on the RSVP page until an organizer adds a number. They can use "Request access". Organizers can enter an RSVP for this family.
 - An organizer can add or change the phone number of a family in one step from the dashboard.
 - An organizer can mark a number as incorrect or not reachable. The app then shows this number in a list to correct.
@@ -474,7 +477,7 @@ The team has three persons: the admin, Ankit (a friend, organizer, no money acce
 
 ## 8. Constraints
 
-- **Stack: PERN (decided).** This is PostgreSQL, Express, React and Node. The user changed the stack from MERN to PERN. Reason: the data has many relations, and money needs exact totals and safe changes. Section 8.1 gives the database design.
+- **Stack: Next.js and PostgreSQL (decided 2026-10-24).** Next.js (App Router, TypeScript) for the pages and the server code, PostgreSQL on Neon, Cloudflare R2 for photos and backups, Vercel for hosting, and a private GitHub repository. There is no Express. This replaces PERN (MERN before that). Reason for PostgreSQL: the data has many relations, and money needs exact totals and safe changes. Section 8.1 gives the database design. The architecture document (`docs/architecture/2026-10-24-shaadidesk-architecture.md`) gives the details.
 - **Free to operate:**
   - Use free tiers for hosting, the database and storage. For example: a free PostgreSQL tier (Neon is one example), free hosting for the API and the frontend, and free storage for banner and receipt photos.
   - The database must also agree with the "fast first load" rule. Some free PostgreSQL plans pause a project after some days with no use. Do not use a plan that pauses for days. A plan that wakes in less than approximately 1 second is satisfactory.
@@ -576,7 +579,7 @@ The builder makes these decisions:
 - Hosting providers. They must agree with the "fast first load" rule.
 - Project structure, libraries, user interface kit and visual design. The design will get more work later.
 - The details of the database: columns, names, indexes and migrations. The tables and rules in Section 8.1 must stay.
-- The database tool for Node: Prisma or Drizzle are good examples.
+- The database tool for Node: Drizzle (decided in the architecture document).
 - The CSV format, the start list of categories, and how to keep the expense split.
 - The exact device limit (10 to 15). The number of incorrect attempts that causes a stop, and the length of the stop.
 - The format of the RSVP link (for example, a short name of the couple).

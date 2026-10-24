@@ -77,7 +77,7 @@ The owner selected a simple version, not the full WCAG 2.2 AA standard. `[Confir
 | ID | Requirement | Measure | Label |
 |---|---|---|---|
 | NFR-28 | Guests do not make an account and do not sign in. | — | `[Confirmed]` |
-| NFR-29 | A guest replies in a few taps. | 3 to 5 relatives reply with no help before launch | Rule `[Confirmed]`, measure `[Proposed]` |
+| NFR-29 | A guest replies in a few taps. | 3 to 5 test persons reply on their own phones with no help, with dummy data | Rule `[Confirmed]`, measure `[Proposed]` |
 | NFR-30 | The app is in English only. | — | `[Confirmed]` |
 | NFR-31 | The app uses India time for all dates and last dates. | — | `[Confirmed]` |
 | NFR-32 | Money uses ₹ and the Indian number format, for example ₹1,50,000. | — | `[Proposed]` |
@@ -224,7 +224,7 @@ Organizer opens Requests ──► Approve or Reject
 | My weddings | "You have no weddings. Make a wedding." | Pending invitation: "<name> added you to <wedding>." |
 | Wedding dashboard | "Add your first event." | Test wedding: "TEST" label on all pages. |
 | Families | "Import your guest list." with "Download template". | Flags: no number, incorrect number, duplicate. |
-| Import | — | Preview with the errors of each row. The admin corrects or removes the rows with errors. Then "Save" is available. `[Proposed]` |
+| Import | — | Preview with the errors of each row and "Download error list". The admin corrects the file and uploads it again. "Save" is available only with 0 errors. `[Confirmed]` |
 | My families | "No families are assigned to you. Ask an admin." | All sent: "All invitations sent." |
 | Requests | "No requests." | — |
 | Expenses | "No expenses. Add the first expense." | Organizer without money access: only their own expenses. |
@@ -296,6 +296,9 @@ Organizer opens Requests ──► Approve or Reject
 | AC-17.1 | The file has the same number in two rows | Priya imports the file | The preview flags both rows. Nothing is saved before Priya confirms |
 | AC-17.2 | The file has a row with no family name, or with no event | Priya imports the file | The preview shows the error on that row |
 | AC-17.3 | The file has a family with no number | Priya imports the file | The preview flags the family. The family can be saved |
+| AC-17.4 | The preview shows 5 errors | Priya tries to save | "Save" is not available. She can download the error list and upload a corrected file |
+| AC-17.5 | The app has the Sharma family with 98765 11111 | Priya imports a file with "Sharma family, 98765 11111" and 50 new families | The preview shows "50 new families, 1 already in the app". The save adds only the 50 new families. The Sharma family does not change |
+| AC-17.6 | The app has the Sharma family with 98765 11111 | Priya imports a file with "Gupta family, 98765 11111" | The preview shows an error on that row: the number is used by the Sharma family |
 | AC-18.1 | A number is typed as "+91 98765-11111" | The app saves it | It is kept as the same number as "09876511111" |
 | AC-18.2 | The Sharma family has 98765 11111 | An organizer adds the same number to a different family | The app does not save it and shows which family has the number |
 | AC-19.1 | Rohan marks a number as incorrect | He opens the list of numbers to correct | The family is in the list |
@@ -459,10 +462,10 @@ All integrations are free. The app does not use paid services. `[Confirmed]`
 | WhatsApp links (`wa.me`) | "Send reminder", the WhatsApp help button and the task button open a chat with a ready message. The person pushes "send". | A link only. No WhatsApp API. No automatic messages. | `[Confirmed]` |
 | WhatsApp link preview | The preview card of the RSVP link | Open Graph tags on the RSVP page | `[Confirmed]` |
 | Maps | The map link of each venue | The team pastes a link (for example, a Google Maps link). No map API. | `[Proposed]` |
-| PostgreSQL host | The database | Free tier that wakes in approximately 1 second (for example, Neon). The builder selects. | `[Confirmed]` |
-| App hosting | Frontend and API | Free tiers that do not stop for 30 to 60 seconds. The builder selects. | `[Confirmed]` |
-| Photo storage | Banner and bill photos | Free tier. The builder selects. | `[Confirmed]` |
-| Backup host | The daily database copy | A free host that is different from the database host. The builder selects. | `[Confirmed]` |
+| PostgreSQL host | The database | Neon free tier. It wakes in approximately 1 second. | `[Confirmed]` |
+| App hosting | Frontend and server code | Vercel free plan, at a free `vercel.app` address | `[Confirmed]` |
+| Photo storage | Banner and bill photos | Cloudflare R2 (S3 API), free tier | `[Confirmed]` |
+| Backup host | The daily database copy | Cloudflare R2. A GitHub Actions job makes the copy each night. | `[Confirmed]` |
 
 **Not integrated in this release** `[Confirmed]`: WhatsApp Business API, SMS or OTP, email messages, payment gateways, photo gallery, live stream.
 
@@ -478,6 +481,8 @@ All integrations are free. The app does not use paid services. `[Confirmed]`
 ## 13. Risks
 
 Likelihood and impact are the estimate of the writer. `[Assumption]` The owner of all risks is Chanchal, unless the table gives a different owner.
+
+**Practice project** (2026-10-24): R-2, R-7, R-8, R-9, R-10 and R-13 need real guests or a real team. They apply only when a real wedding uses the app. R-1 now means: Wave 1 takes longer than planned. The other risks apply as written.
 
 | ID | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|
@@ -498,6 +503,8 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | R-15 | The guest data does not agree with the India DPDP Act. | Low | Medium | Keep only necessary data. Privacy note. Automatic delete (FR-67). |
 
 ## 14. Timeline and Launch
+
+**Practice project** (2026-10-24) `[Confirmed]`: The wedding moved, so there are no fixed dates. The build follows the waves in Section 6.1. The milestones and launch steps below are from the original plan. Use them when a real wedding uses the app. Until then, steps 1 (test wedding) and 5 (go criteria) apply to the dummy data, and the other steps do not apply.
 
 ### 14.1 Milestones
 
@@ -558,7 +565,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | Q-1 | How many devices can each family have? | Builder | Before the build of FR-30 | 12 devices `[Proposed]` |
 | Q-2 | How many incorrect attempts cause a stop, and for how long? What is the total limit for one device? | Builder | Before the build of FR-31 | 5 incorrect attempts for one family, then a 15-minute stop. 20 attempts for one device in one hour. `[Proposed]` |
 | Q-3 | What is the format of the RSVP link? | Builder | Before the build of FR-22 | A short name of the couple, for example `/priya-rahul` (design document) |
-| Q-4 | Which providers for the database, hosting, photos and backups? | Builder | Start of the build | The builder examines the free plans against NFR-1 to NFR-6 |
+| Q-4 | Which providers for the database, hosting, photos and backups? | Builder | Start of the build | Decided on 2026-10-24: Neon, Vercel, Cloudflare R2, GitHub Actions (D-1). Check the current free plan rules at setup. |
 | Q-5 | How long are daily database copies kept? | Owner | Before the build of FR-66 | 30 days `[Proposed]` |
 | Q-6 | What are the real RSVP last date and stay last date? | Admins | Before the invitations | — |
 | Q-7 | What is the start list of expense categories? | Builder | Before the build of FR-47 | Food, decor, venue, clothes, jewellery, gifts, photography, other `[Proposed]` |
@@ -569,7 +576,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 
 | ID | Decision | Date | By |
 |---|---|---|---|
-| D-1 | Stack is PERN (PostgreSQL, Express, React, Node), not MERN. | 2026-10-16 | Owner |
+| D-1 | Stack is Next.js (App Router, TypeScript) with PostgreSQL on Neon, Cloudflare R2 for files and backups, Vercel hosting and a private GitHub repository. No Express. This replaces PERN (2026-10-16). Refer to the architecture document. | 2026-10-24 | Owner |
 | D-2 | Free tiers only. ₹0 cost to operate. No hosting that stops for 30 to 60 seconds. | 2026-10-16 | Owner |
 | D-3 | The app does not make or send the invitation card. One RSVP link for the full wedding. | 2026-10-16 | Owner |
 | D-4 | Guests confirm with the family name and the last 4 digits of the primary or secondary number. No OTP. | 2026-10-16 | Owner |
@@ -583,6 +590,10 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-12 | Event type list. All event types use the same form. Starter tasks in December. | 2026-10-16 | Owner (writer proposal) |
 | D-13 | Only the bride or the groom can delete a full wedding (FR-68). | 2026-10-16 | Owner |
 | D-14 | The PRD is in STE, in two documents: Sections 1 to 8, and Sections 9 to 17. | 2026-10-16 | Owner |
+| D-15 | Import: save only with 0 errors (correct the file and upload again). Families that are already in the app are skipped (FR-17). | 2026-10-24 | Owner |
+| D-16 | The RSVP link uses a free `vercel.app` address. No own domain. | 2026-10-24 | Owner |
+| D-17 | The wedding moved. ShaadiDesk is a practice project with dummy data only. The features do not change. | 2026-10-24 | Owner |
+| D-18 | Build the Must Have items in two waves. Wave 1 first. Then the owner decides about Wave 2 (Section 6.1). | 2026-10-24 | Owner |
 
 ### 15.4 Proposals that the owner must approve
 
@@ -592,7 +603,7 @@ These items have the label `[Proposed]`. If the owner does not approve an item, 
 |---|---|
 | Requirements | FR-6 (icon and color), FR-14 (starter tasks), FR-42 and AF-14 (network failure), FR-26, FR-40, FR-59 (Could items) |
 | NFR | NFR-5, NFR-8, NFR-20, NFR-21 and NFR-23 numbers, NFR-29 measure, NFR-32, NFR-34 |
-| UX | UX-3, UX-4, UX-6, phone menu, new messages (Section 10.4), import save rule, delete-wedding confirmation, reminder text |
+| UX | UX-3, UX-4, UX-6, phone menu, new messages (Section 10.4), delete-wedding confirmation, reminder text |
 | Other | "settled" label (AC-48.2), map links (Section 12.3), backup copies 30 days (Q-5), launch steps 4, 5 and 7, go criteria, plan if the app fails, Q-1, Q-2, Q-7, Q-8 proposals |
 
 ## 16. Glossary
@@ -629,7 +640,9 @@ These items have the label `[Proposed]`. If the owner does not approve an item, 
 | Soft delete | A delete that keeps the record in a "Deleted" list, so an admin can restore it. |
 | `wa.me` link | A link that opens a WhatsApp chat with a ready message. The person pushes "send". |
 | Open Graph | Tags on a web page that set the preview card in WhatsApp. |
-| PERN | PostgreSQL, Express, React and Node. |
+| Next.js | A React framework. It makes pages on the server and runs the server code of the app. |
+| Neon | The service that hosts the PostgreSQL database. |
+| Cloudflare R2 | The service that keeps photos and database copies. It uses the S3 API. |
 | `pg_dump` | A tool that makes a copy of a PostgreSQL database. |
 | DPDP Act | The India Digital Personal Data Protection Act. |
 | MoSCoW | Must, Should, Could, Won't. A method to set priorities. |
@@ -641,6 +654,7 @@ These items have the label `[Proposed]`. If the owner does not approve an item, 
 |---|---|
 | Design document: `docs/superpowers/specs/2026-10-16-wedding-management-design.md` | The source of the details for all sections. If this PRD and the design document do not agree, stop and ask the owner. |
 | PRD main document: `docs/prd/2026-10-16-shaadidesk-prd.md` | Sections 1 to 8 |
+| Architecture document: `docs/architecture/2026-10-24-shaadidesk-architecture.md` | Stack, system diagram, main flows and folder structure |
 
 No other research or data was used.
 
@@ -650,7 +664,7 @@ No other research or data was used.
 
 ### Summary in 5 points
 
-1. **What:** ShaadiDesk is a free web app (PERN, ₹0 cost) for an Indian wedding. The first use is one wedding: approximately 500 families, 5 events, mid-January 2027.
+1. **What:** ShaadiDesk is a free web app (Next.js and PostgreSQL, ₹0 cost) for an Indian wedding. The first use is one wedding: approximately 500 families, 5 events, mid-January 2027.
 2. **Guests:** One RSVP link. Guests find their family, confirm with 4 digits, see only their events and reply one time. Help comes from "Request access" and organizers.
 3. **Team:** Admins (close family) and organizers (helpers) import the list, track invitations, send reminders by WhatsApp links, and record expenses, tasks, stay and gifts. Money is private by default.
 4. **Plan:** Must items by approximately 10 Nov, full expenses by 30 Nov, tasks, stay and gifts in December. Invitations go out in December.
