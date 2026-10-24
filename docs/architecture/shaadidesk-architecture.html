@@ -1,0 +1,441 @@
+<title>ShaadiDesk Architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; the system map breaks out wider and scrolls on phones; flows sit in tabs. */
+:root {
+  --bg: #F5F6FA;
+  --surface: #FFFFFF;
+  --ink: #1D1F3B;
+  --muted: #5A5E7D;
+  --line: #D8DBE8;
+  --accent: #E08A00;
+  --accent-ink: #8F5300;
+  --z-app: #ECEEFA;
+  --z-data: #E6F3EF;
+  --z-files: #FBF0DE;
+  --z-ext: #F0F1F5;
+  --ok: #1F7A55;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121427; --surface: #1B1E37; --ink: #E7E8F4; --muted: #A2A6C6; --line: #343858;
+    --accent: #F5A623; --accent-ink: #F7BD55;
+    --z-app: #20244A; --z-data: #16302A; --z-files: #33281A; --z-ext: #23253D; --ok: #4FC08D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121427; --surface: #1B1E37; --ink: #E7E8F4; --muted: #A2A6C6; --line: #343858;
+  --accent: #F5A623; --accent-ink: #F7BD55;
+  --z-app: #20244A; --z-data: #16302A; --z-files: #33281A; --z-ext: #23253D; --ok: #4FC08D;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 48px;
+}
+.col { max-width: 720px; display: grid; gap: 16px; min-width: 0; }
+
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 500; }
+p { margin: 0; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--accent-ink);
+}
+.lede { font-size: 1.125rem; color: var(--muted); max-width: 62ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.9em; }
+code { background: var(--z-ext); padding: 1px 5px; border-radius: 4px; }
+
+/* Stack strip */
+.stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.chip {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; display: grid; gap: 4px; min-width: 0;
+}
+.chip .k { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chip .v { font-weight: 600; }
+.chip .w { font-size: 0.875rem; color: var(--muted); }
+
+/* System map */
+.map-frame {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.map-frame svg { display: block; min-width: 880px; width: 100%; height: auto; }
+.hint { font-size: 0.875rem; color: var(--muted); }
+.zone-app { fill: var(--z-app); }
+.zone-data { fill: var(--z-data); }
+.zone-files { fill: var(--z-files); }
+.zone-ext { fill: var(--z-ext); }
+.node { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.node-key { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.t-zone { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.t-node { font-family: var(--font-body); font-size: 15px; font-weight: 600; fill: var(--ink); }
+.t-sub { font-family: var(--font-body); font-size: 12.5px; fill: var(--muted); }
+.t-edge { font-family: var(--font-body); font-size: 12px; fill: var(--accent-ink); font-weight: 500; }
+.edge { stroke: var(--ink); stroke-width: 1.6; fill: none; opacity: 0.75; }
+.edge-dash { stroke-dasharray: 5 4; }
+.arrowhead { fill: var(--ink); opacity: 0.75; }
+
+/* Rules list */
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rules li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+.rules li::before {
+  content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Flows */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab {
+  font: 500 0.95rem var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; min-height: 44px; cursor: pointer;
+}
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 14px; }
+.panel .who { color: var(--muted); font-size: 0.95rem; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 0; }
+.steps li {
+  counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px;
+  padding: 10px 0; border-top: 1px solid var(--line);
+}
+.steps li:first-child { border-top: 0; }
+.steps li::before {
+  content: counter(s); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-ink);
+  border: 1.5px solid var(--accent); border-radius: 50%; width: 26px; height: 26px;
+  display: grid; place-items: center;
+}
+.where { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); display: block; margin-top: 2px; }
+.refuse { color: var(--accent-ink); font-weight: 600; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.pill {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; padding: 2px 8px;
+  border-radius: 999px; border: 1px solid currentColor; white-space: nowrap;
+}
+.pill.c { color: var(--ok); }
+.pill.p { color: var(--accent-ink); }
+
+pre.tree {
+  margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6;
+}
+pre.tree .c { color: var(--muted); }
+pre.tree .s { color: var(--accent-ink); }
+
+footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--line); padding-top: 16px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tab { transition: background 0.15s, color 0.15s; }
+}
+</style>
+
+<div class="wrap">
+  <header class="col">
+    <span class="eyebrow">ShaadiDesk · system architecture · approved 24 Oct 2026</span>
+    <h1>How ShaadiDesk fits together</h1>
+    <p class="lede">One Next.js app on Vercel, one PostgreSQL database on Neon, and Cloudflare R2 for photos and backups. Everything runs on free plans, and nothing sleeps when Meena Aunty opens the link.</p>
+  </header>
+
+  <section class="stack" aria-label="Stack">
+    <div class="chip"><span class="k">App</span><span class="v">Next.js + TypeScript</span><span class="w">Pages and server code in one project. No Express.</span></div>
+    <div class="chip"><span class="k">Database</span><span class="v">PostgreSQL on Neon</span><span class="w">Drizzle for queries. Wakes in under a second.</span></div>
+    <div class="chip"><span class="k">Files</span><span class="v">Cloudflare R2</span><span class="w">S3 API. Photos and 30 days of backups.</span></div>
+    <div class="chip"><span class="k">Hosting</span><span class="v">Vercel free plan</span><span class="w"><span class="mono">name.vercel.app/priya-rahul</span></span></div>
+    <div class="chip"><span class="k">Code and jobs</span><span class="v">Private GitHub repo</span><span class="w">Deploy on push. Nightly backup job.</span></div>
+    <div class="chip"><span class="k">Team sign-in</span><span class="v">Google via Auth.js</span><span class="w">Guests never sign in.</span></div>
+  </section>
+
+  <section style="display:grid; gap:16px;">
+    <div class="col">
+      <h2>The system map</h2>
+      <p class="hint">Solid arrows carry data. Dashed arrows are sign-in or messages a person sends by hand. On a phone, swipe the map sideways.</p>
+    </div>
+    <div class="map-frame">
+      <svg viewBox="0 0 960 540" role="img" aria-labelledby="map-title">
+        <title id="map-title">ShaadiDesk system map: guests and team, the Next.js app on Vercel with the lib/access guard, Neon databases, R2 buckets, Google sign-in, WhatsApp links and GitHub jobs.</title>
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+          </marker>
+        </defs>
+
+        <!-- People column -->
+        <rect x="12" y="40" width="196" height="330" rx="14" class="zone-ext"/>
+        <text x="28" y="64" class="t-zone">People</text>
+        <rect x="28" y="80" width="164" height="64" rx="10" class="node"/>
+        <text x="44" y="106" class="t-node">Guests</text>
+        <text x="44" y="126" class="t-sub">phone, WhatsApp browser</text>
+
+        <rect x="28" y="180" width="164" height="54" rx="10" class="node"/>
+        <text x="44" y="204" class="t-node">WhatsApp</text>
+        <text x="44" y="222" class="t-sub">wa.me link, sent by hand</text>
+
+        <rect x="28" y="276" width="164" height="64" rx="10" class="node"/>
+        <text x="44" y="302" class="t-node">Team</text>
+        <text x="44" y="322" class="t-sub">admins, organizers</text>
+
+        <!-- Vercel zone -->
+        <rect x="250" y="40" width="370" height="330" rx="14" class="zone-app"/>
+        <text x="266" y="64" class="t-zone">Vercel · Next.js app</text>
+        <rect x="266" y="80" width="160" height="64" rx="10" class="node"/>
+        <text x="282" y="106" class="t-node">RSVP pages</text>
+        <text x="282" y="126" class="t-sub">/priya-rahul</text>
+
+        <rect x="266" y="276" width="160" height="64" rx="10" class="node"/>
+        <text x="282" y="302" class="t-node">Team pages</text>
+        <text x="282" y="322" class="t-sub">dashboard, families…</text>
+
+        <rect x="452" y="80" width="152" height="260" rx="10" class="node"/>
+        <text x="468" y="106" class="t-node">Server code</text>
+        <text x="468" y="126" class="t-sub">Server Actions,</text>
+        <text x="468" y="143" class="t-sub">page data loaders</text>
+        <rect x="464" y="206" width="128" height="72" rx="8" class="node-key"/>
+        <text x="476" y="232" class="t-node">lib/access</text>
+        <text x="476" y="252" class="t-sub">the security guard</text>
+        <text x="476" y="268" class="t-sub">checks every request</text>
+
+        <!-- Neon zone -->
+        <rect x="660" y="40" width="288" height="170" rx="14" class="zone-data"/>
+        <text x="676" y="64" class="t-zone">Neon · PostgreSQL</text>
+        <rect x="676" y="80" width="124" height="100" rx="10" class="node"/>
+        <text x="690" y="108" class="t-node">Production</text>
+        <text x="690" y="128" class="t-sub">real families</text>
+        <text x="690" y="146" class="t-sub">and money</text>
+        <rect x="812" y="80" width="124" height="100" rx="10" class="node"/>
+        <text x="826" y="108" class="t-node">Development</text>
+        <text x="826" y="128" class="t-sub">fake data, laptop</text>
+        <text x="826" y="146" class="t-sub">and preview links</text>
+
+        <!-- R2 zone -->
+        <rect x="660" y="236" width="288" height="134" rx="14" class="zone-files"/>
+        <text x="676" y="260" class="t-zone">Cloudflare R2</text>
+        <rect x="676" y="276" width="124" height="76" rx="10" class="node"/>
+        <text x="690" y="304" class="t-node">photos</text>
+        <text x="690" y="324" class="t-sub">banner, bills</text>
+        <rect x="812" y="276" width="124" height="76" rx="10" class="node"/>
+        <text x="826" y="304" class="t-node">backups</text>
+        <text x="826" y="324" class="t-sub">last 30 days</text>
+
+        <!-- External row -->
+        <rect x="266" y="444" width="160" height="60" rx="10" class="node"/>
+        <text x="282" y="470" class="t-node">Google</text>
+        <text x="282" y="489" class="t-sub">team sign-in</text>
+
+        <rect x="676" y="444" width="260" height="60" rx="10" class="node"/>
+        <text x="692" y="470" class="t-node">GitHub</text>
+        <text x="692" y="489" class="t-sub">private repo + nightly Actions</text>
+
+        <!-- Edges -->
+        <path d="M192,112 L264,112" class="edge" marker-end="url(#ah)"/>
+        <text x="200" y="102" class="t-edge">opens link</text>
+
+        <path d="M192,308 L264,308" class="edge" marker-end="url(#ah)"/>
+        <text x="204" y="298" class="t-edge">signs in</text>
+
+        <path d="M110,276 L110,236" class="edge edge-dash" marker-end="url(#ah)"/>
+        <text x="118" y="262" class="t-edge">Send reminder</text>
+        <path d="M110,180 L110,146" class="edge edge-dash" marker-end="url(#ah)"/>
+        <text x="118" y="168" class="t-edge">card + link</text>
+
+        <path d="M426,112 L450,112" class="edge" marker-end="url(#ah)"/>
+        <path d="M426,308 L450,308" class="edge" marker-end="url(#ah)"/>
+
+        <path d="M346,340 L346,442" class="edge edge-dash" marker-end="url(#ah)"/>
+        <text x="354" y="398" class="t-edge">Google sign-in</text>
+
+        <path d="M592,232 L636,232 L636,130 L674,130" class="edge" marker-end="url(#ah)"/>
+        <text x="646" y="227" class="t-edge">▲ allowed data only · ▼ upload link</text>
+
+        <path d="M592,256 L636,256 L636,314 L674,314" class="edge" marker-end="url(#ah)"/>
+
+        <path d="M874,444 L874,354" class="edge" marker-end="url(#ah)"/>
+        <text x="882" y="408" class="t-edge">pg_dump</text>
+        <text x="882" y="424" class="t-edge">each night</text>
+
+        <path d="M676,474 L528,474 L528,372" class="edge" marker-end="url(#ah)"/>
+        <text x="540" y="466" class="t-edge">deploy on push</text>
+      </svg>
+    </div>
+    <div class="col">
+      <ul class="rules">
+        <li><span>Every page and every save goes through <code>lib/access</code> before it touches the database. Hiding a button is not protection.</span></li>
+        <li><span>Guests never sign in. A cookie on their phone links the phone to one family.</span></li>
+        <li><span>The app never sends WhatsApp messages. It opens a <code>wa.me</code> chat and a person pushes "send".</span></li>
+        <li><span>Backups run on GitHub, not on Vercel, so a problem on Vercel does not stop them.</span></li>
+        <li><span>Real phone numbers live only in production. The laptop and preview links use fake families.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section style="display:grid; gap:16px;">
+    <div class="col">
+      <h2>Four flows, step by step</h2>
+      <div class="tabs" role="tablist" aria-label="Flows">
+        <button class="tab" role="tab" id="t-reply" aria-controls="p-reply" aria-selected="true">Guest replies</button>
+        <button class="tab" role="tab" id="t-money" aria-controls="p-money" aria-selected="false">Money page refused</button>
+        <button class="tab" role="tab" id="t-import" aria-controls="p-import" aria-selected="false">Excel import</button>
+        <button class="tab" role="tab" id="t-night" aria-controls="p-night" aria-selected="false">Nightly jobs</button>
+      </div>
+    </div>
+
+    <div class="panel col" role="tabpanel" id="p-reply" aria-labelledby="t-reply">
+      <h3>Meena Aunty replies for the Sharma family</h3>
+      <ol class="steps">
+        <li><span>Taps the RSVP link on the card.<span class="where">RSVP page</span></span></li>
+        <li><span>No family cookie on this phone, so Screen 1 opens.<span class="where">lib/access</span></span></li>
+        <li><span>Types "Sha". After 3 letters the app shows "Sharma family (Meena, Jaipur)".<span class="where">Production DB</span></span></li>
+        <li><span>Types 1111. The guard checks the attempt limit and the last 4 digits, saves the device and sets the cookie.<span class="where">lib/access → guest_devices</span></span></li>
+        <li><span>Screen 2 shows only Haldi and Wedding. She picks Yes 2 and Yes 4, then "Yes, submit".<span class="where">Server Action</span></span></li>
+        <li><span>The database keeps one reply per family and event. If her son submitted a second earlier, his reply stays.<span class="where">replies (unique)</span></span></li>
+        <li><span>The page shows "Replied" only after the server confirms the save.<span class="where">RSVP page</span></span></li>
+      </ol>
+    </div>
+
+    <div class="panel col" role="tabpanel" id="p-money" aria-labelledby="t-money" hidden>
+      <h3>Ankit opens the money page without money access</h3>
+      <ol class="steps">
+        <li><span>Opens <code>/money</code> from a saved link. The menu never showed it to him.<span class="where">Team pages</span></span></li>
+        <li><span>The page asks the guard: is Ankit on this wedding's team?<span class="where">lib/access</span></span></li>
+        <li><span>Yes, he is an organizer. Is his "can see money" switch on? No.<span class="where">Production DB</span></span></li>
+        <li><span><span class="refuse">Refused.</span> The server sends no expense data at all.<span class="where">lib/access</span></span></li>
+        <li><span>Ankit sees "You do not have access to this page."<span class="where">Team pages</span></span></li>
+      </ol>
+    </div>
+
+    <div class="panel col" role="tabpanel" id="p-import" aria-labelledby="t-import" hidden>
+      <h3>Priya imports 200 families from Excel</h3>
+      <ol class="steps">
+        <li><span>Uploads the file. The server reads it and keeps it only for the check.<span class="where">lib/import</span></span></li>
+        <li><span>File validation, with no database: name, event, phone format, duplicates inside the file.<span class="where">validateImportFile</span></span></li>
+        <li><span>Database validation, read only: number already used, organizer in the team, events exist.<span class="where">validateImportAgainstDb</span></span></li>
+        <li><span>Errors? She downloads the error list, fixes the file and uploads again. Save stays locked until there are 0 errors. Warnings such as "no phone number" are allowed.<span class="where">Import page</span></span></li>
+        <li><span>She confirms "Save 195 families?".<span class="where">Import page</span></span></li>
+        <li><span>The server runs both checks again and saves all rows in one transaction. If Rohan used one of the numbers a minute ago, nothing is saved and she checks again.<span class="where">saveImport</span></span></li>
+      </ol>
+    </div>
+
+    <div class="panel col" role="tabpanel" id="p-night" aria-labelledby="t-night" hidden>
+      <h3>What runs every night</h3>
+      <ol class="steps">
+        <li><span>A scheduled GitHub Action starts.<span class="where">.github/workflows</span></span></li>
+        <li><span>It makes a copy of the production database with <code>pg_dump</code>.<span class="where">Production DB</span></span></li>
+        <li><span>It uploads the copy, with the date in its name, to the backups bucket.<span class="where">R2 backups</span></span></li>
+        <li><span>It deletes copies older than 30 days.<span class="where">R2 backups</span></span></li>
+        <li><span>It checks for weddings 6 months past their date and removes their phone numbers, stay data, access requests and guest devices.<span class="where">FR-67</span></span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>Where the code lives</h2>
+    <p class="hint">Only <code>app/</code> and <code>public/</code> mean something special to Next.js. The other folder names are our own choice.</p>
+<pre class="tree">shaadidesk/
+  <span class="s">app/</span>                 <span class="c">pages; each folder is an address</span>
+    [couple]/          <span class="c">RSVP page, e.g. /priya-rahul</span>
+    w/[weddingId]/     <span class="c">team pages</span>
+  components/          <span class="c">React components</span>
+  lib/
+    <span class="s">access/</span>            <span class="c">the security guard</span>
+    db/                <span class="c">Drizzle schema, connection</span>
+    import/            <span class="c">the three import steps</span>
+    money/             <span class="c">paise ↔ ₹, Indian format</span>
+    phone/             <span class="c">one phone format</span>
+    storage/           <span class="c">R2 upload links</span>
+  drizzle/             <span class="c">database migrations</span>
+  scripts/             <span class="c">fake families, backup</span>
+  tests/               <span class="c">Vitest, Playwright</span>
+  .github/workflows/   <span class="c">checks, nightly jobs</span></pre>
+  </section>
+
+  <section class="col">
+    <h2>Decisions so far</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>Choice</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>App framework</td><td>Next.js App Router, TypeScript, no Express</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Database</td><td>PostgreSQL on Neon</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Files and backups</td><td>Cloudflare R2 with the S3 API</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Address</td><td>Free <span class="mono">vercel.app</span> address</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Code</td><td>Private GitHub repo, Actions for jobs</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Access rules</td><td>One guard in <code>lib/access</code></td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Import</td><td>File check, database check, save in one transaction, 0 errors before save</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Second import</td><td>Families already in the app are skipped with a note. The same number on a different family is an error.</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Environments</td><td>Production and development databases</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Team sign-in</td><td>Auth.js with Google, sessions in PostgreSQL</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Money</td><td>Whole paise, shown as ₹1,50,000</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Look</td><td>Tailwind CSS and shadcn/ui</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Tests</td><td>Vitest and Playwright on each push</td><td><span class="pill c">Confirmed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>Still open</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Question</th><th>Proposal</th></tr></thead>
+        <tbody>
+          <tr><td>Is the <span class="mono">shaadidesk.vercel.app</span> name free?</td><td>Check on day 1, before the card is designed.</td></tr>
+          <tr><td>Neon free plan branch limit</td><td>Check at setup.</td></tr>
+          <tr><td>Google review to publish sign-in</td><td>Check at setup. Basic name and email only.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="col">Source: <span class="mono">docs/architecture/2026-10-24-shaadidesk-architecture.md</span> in the ShaadiDesk repo, based on the PRD and design document.</footer>
+</div>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function show(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        var n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        n.focus(); show(n);
+      }
+    });
+  });
+  show(tabs[0]);
+})();
+</script>
