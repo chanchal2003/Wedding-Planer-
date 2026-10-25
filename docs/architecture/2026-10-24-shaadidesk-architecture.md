@@ -22,7 +22,7 @@ Source documents: PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`, `docs/prd/2026-1
 | Code and jobs | Private GitHub repository and GitHub Actions | Automatic deploy to Vercel. Nightly backup and cleanup jobs. | `[Confirmed]` |
 | Team sign-in | Auth.js with Google, sessions in PostgreSQL | A removed organizer or a changed money switch applies at the next click. | `[Confirmed]` |
 | User interface | Tailwind CSS and shadcn/ui | Large text, strong contrast and big tap targets are easy (NFR-21 to NFR-24). | `[Confirmed]` |
-| Tests | Vitest (access rules, money, import rules) and Playwright (RSVP flow at phone size), on each push | Test the parts with the highest risk first. | `[Confirmed]` |
+| Tests | Small Vitest tests, only for the access rules and the import rules. No Playwright. No CI for now. | The parts with the highest risk get tests. The rest is checked by hand. Owner decision, 2026-10-25. | `[Confirmed]` |
 | Error log | Vercel logs. Sentry free plan only if necessary. | No setup. | `[Confirmed]` |
 
 ## 2. System diagram
@@ -184,7 +184,7 @@ shaadidesk/
     storage/            R2 upload links
   prisma/               schema.prisma and migrations
   scripts/              seed fake families, backup script
-  tests/                Vitest and Playwright
+  tests/                small Vitest tests (access, import)
   .github/workflows/    deploy checks, nightly backup and cleanup
 ```
 

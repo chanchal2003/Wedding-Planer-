@@ -41,6 +41,7 @@ Not in Wave 1: request access (FR-39), reminders (FR-25), expenses, event icons 
 | How we build | Claude Code writes, the owner reviews each step. |
 | Organizer invitation | "Invite on WhatsApp" and "Copy invite message". No email. |
 | Validation | Zod. |
+| Tests | **Small.** Vitest only, for the access rules (4.3) and the import (6.3, 6.4). No Playwright. No CI. Everything else is checked by hand with the fake data. (Owner decision, 2026-10-25.) |
 
 ## Open items that touch Wave 1
 
@@ -113,7 +114,7 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 **Done when:** `npm run dev` opens the start page on `http://localhost:3000`.
 **Commit:** `chore: create next.js project with typescript and tailwind`
 
-### 1.2 Folders, UI kit and base style 🤖
+### 1.2 Folders, UI kit and base style ✅ done 🤖
 - Make the folders from `CLAUDE.md` (`lib/access`, `lib/db`, `lib/import`, …).
 - Set up shadcn/ui. Base style: body text at least 16 px, strong contrast, tap targets at least 44 px, clear focus outline (NFR-21 to NFR-24).
 - A simple page layout for phones first (NFR-27).
@@ -121,19 +122,20 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 **Done when:** a sample page shows large buttons and text, also on a phone-size screen.
 **Commit:** `chore: add folder layout, shadcn/ui and base style`
 
-### 1.3 Environment variables with Zod 🤖 + 👤
+### 1.3 Environment variables with Zod ✅ done 🤖 + 👤
 - 🤖 `lib/env.ts` checks all environment variables with Zod when the app starts. `.env.example` lists the names with no values. `.gitignore` excludes `.env*` files (except the example).
 - 👤 Make `.env.local` and paste the **development** values: `DATABASE_URL` set to the local database address (already in `.env`), and the R2 values.
 
 **Done when:** the app starts with all values. If you remove one value, the app stops with a clear message that names it.
 **Commit:** `chore: validate environment variables with zod`
 
-### 1.4 Tests and CI 🤖
-- Vitest for unit tests. Playwright for browser tests, with a phone-size screen.
-- GitHub Actions workflow: lint, type check and unit tests on each push.
+### 1.4 Vitest (small) 🤖
+- Install Vitest. Add `npm test`.
+- **No Playwright. No GitHub Actions / CI.** Add CI later only if the owner asks.
+- Tests are written only for the access rules (step 4.3) and the import (steps 6.3 and 6.4).
 
-**Done when:** one sample test passes on the laptop and the GitHub Actions run is green.
-**Commit:** `chore: add vitest, playwright and ci workflow`
+**Done when:** one sample test passes with `npm test`.
+**Commit:** `chore: add vitest`
 
 ### 1.5 First deploy to Vercel 👤 + 🤖
 1. 👤 Sign up at vercel.com with GitHub. Import the `shaadidesk` repository.
@@ -203,18 +205,18 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 
 ---
 
-## Phase 3: Shared helpers (with unit tests)
+## Phase 3: Shared helpers
 
 ### 3.1 Phone numbers 🤖
 `lib/phone` with `libphonenumber-js`: one standard format, and the last 4 digits.
-**Done when:** tests pass for "+91 98765-11111", "09876511111" and "98765 11111" (AC-18.1).
+**Done when:** Claude Code runs a short check that shows the same standard number for "+91 98765-11111", "09876511111" and "98765 11111" (AC-18.1).
 **Commit:** `feat: add phone number normalisation`
 
 ### 3.2 Time and money 🤖
 - `lib/time`: show dates in India time. "Is it after the last date?" uses 23:59 India time.
 - `lib/money`: ₹ text ↔ paise, Indian format (₹1,50,000).
 
-**Done when:** tests pass, also for 23:59 and 00:01 on the last date (AC-37.1).
+**Done when:** a short check shows the right result for 23:59 and 00:01 India time on the last date (AC-37.1), and ₹1,50,000 converts to paise and back.
 **Commit:** `feat: add india time and money helpers`
 
 ### 3.3 Limits settings 🤖
@@ -352,10 +354,8 @@ Greeting, a card for each invited event only, privacy note. Yes or no, and perso
 **Done when:** AC-32.1, AC-33.1, AC-34.1, AC-34.2, AC-35.1, AC-36.1, AC-36.2, AC-37.1 and AC-42.1 pass.
 **Commit:** `feat: add rsvp screen 2 with one-time reply`
 
-### 7.5 Full RSVP browser test 🤖
-A Playwright test at phone size: open the link, search, 4 digits, reply, open again.
-**Done when:** the test passes on the laptop and in CI.
-**Commit:** `test: add end-to-end rsvp flow at phone size`
+### 7.5 Removed
+The Playwright test of the RSVP flow is removed (no Playwright). The owner tries the full flow by hand in step 10.1.
 
 ---
 

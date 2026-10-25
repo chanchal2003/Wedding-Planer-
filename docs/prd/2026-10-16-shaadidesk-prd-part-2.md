@@ -598,6 +598,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-20 | Validation uses Zod. Claude Code writes the code and the owner reviews each step. Build plan: `docs/plans/2026-10-24-wave-1-build-plan.md`. | 2026-10-24 | Owner |
 | D-21 | Development uses normal PostgreSQL on the laptop (not Docker). Neon is only for production. | 2026-10-25 | Owner |
 | D-22 | The database tool is Prisma 7, not Drizzle. | 2026-10-25 | Owner |
+| D-23 | Tests: a small number of Vitest tests, only for the access rules and the import rules. No Playwright. No CI for now. | 2026-10-25 | Owner |
 
 ### 15.4 Proposals that the owner must approve
 

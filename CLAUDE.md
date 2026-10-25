@@ -25,7 +25,7 @@ This project uses a new Next.js version (see `package.json`) with changes from o
 - PostgreSQL through **Prisma 7** (schema in `prisma/schema.prisma`, migrations in `prisma/migrations`, config in `prisma.config.ts`, generated client in `app/generated/prisma`, which is git-ignored). Use the client only through `import { db } from "@/lib/db"`. Run `npm run db:generate` after each schema change and `npm run db:check` to test the connection. **Development: normal PostgreSQL on the laptop** (Homebrew, PostgreSQL 17, database `shadidesk_local`). **Production: Neon** (one `main` branch, same major version). Prisma 7 does not allow `url` inside `schema.prisma`; the URL is in `prisma.config.ts`.
 - Cloudflare R2 through the S3 API (`lib/storage`) for photos and backups.
 - Auth.js with Google for the team. Guests never sign in.
-- Tailwind CSS + shadcn/ui. Vitest and Playwright.
+- Tailwind CSS + shadcn/ui. Vitest only, for the access rules and the import rules. No Playwright, no CI for now.
 - Hosting: Vercel (free plan). Nightly jobs: GitHub Actions.
 - Everything must stay on free plans (₹0).
 
@@ -63,12 +63,12 @@ lib/import/          validateImportFile, validateImportAgainstDb, saveImport
 lib/money/  lib/phone/  lib/storage/
 prisma/              schema.prisma and migrations
 scripts/             seed fake data, backup
-tests/               Vitest and Playwright
+tests/               small Vitest tests (access rules, import)
 ```
 
 ## Working style
 
 - The owner knows React and is new to Next.js and SQL. Prefer one simple, consistent pattern over clever ones, and explain new concepts briefly.
-- Write tests for access rules, money sums and import rules together with the code.
+- Write small Vitest tests only for the access rules (`lib/access`) and the import rules (`lib/import`), together with the code. Check everything else by hand with the fake data. No Playwright and no CI for now.
 - Commit messages: `<type>: <what changed>` (feat, bug, task, refactor, docs, test, chore), then one or two lines on why. Commit only when the owner asks.
 - Documents in `docs/` are written in ASD-STE100 Simplified Technical English.
