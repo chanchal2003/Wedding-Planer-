@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/app/generated/prisma/client";
+import { env } from "@/lib/env";
 
 // One PrismaClient per server process. In `next dev`, hot reload runs this
 // file again and again, so the client is kept on globalThis to avoid opening
@@ -7,11 +8,9 @@ import { PrismaClient } from "@/app/generated/prisma/client";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is not set. Add it to .env (see .env.example).");
-  }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  return new PrismaClient({
+    adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
+  });
 }
 
 export const db = globalForPrisma.prisma ?? createClient();
