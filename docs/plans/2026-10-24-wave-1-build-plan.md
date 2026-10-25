@@ -32,6 +32,8 @@ Not in Wave 1: request access (FR-39), reminders (FR-25), expenses, event icons 
 | Topic | Decision |
 |---|---|
 | Accounts | The owner has GitHub only. The plan creates Neon, Cloudflare, Vercel and Google Cloud. |
+| Databases | **Development: normal PostgreSQL on the laptop** (Homebrew, PostgreSQL 17). **Production: Neon**, one `main` branch, created at step 1.5. (Decided 2026-10-25.) |
+| ORM | **Prisma 7** with the `pg` driver adapter, not Drizzle. (Owner decision, 2026-10-25.) |
 | Node.js | `nvm`, the newest LTS that Vercel supports, in `.nvmrc`. |
 | Device and attempt limits | 12 devices per family. 5 wrong tries for one family on one device, then 15 minutes stop. 20 tries per device per hour. |
 | Import files | `.xlsx` and `.csv`. Template is `.xlsx`. |
@@ -70,19 +72,24 @@ These are `[Proposed]` in the PRD. Claude Code asks for a yes before the step th
 
 **Done when:** the private repository shows all earlier commits.
 
-### 0.3 Neon database 👤
+### 0.3 Local PostgreSQL ✅ done 👤
+The development database is a normal PostgreSQL 17 on the laptop (Homebrew), with the database `shadidesk_local`. The owner set it up and added `DATABASE_URL` to `.env` on 2026-10-25.
+
+**Done when:** `npm run db:check` prints "Database OK".
+
+### 0.4 Neon production database 👤 (do this at step 1.5, not before)
+Neon is only for the deployed app on Vercel and the nightly backup. The app does not need it on the laptop.
 1. Sign up at neon.tech with GitHub.
-2. Make a project named `shaadidesk`. Select the region nearest to India (for example Singapore, if it is available).
-3. The first branch (`main`) is **production**.
-4. Make a second branch named `development` from `main`.
-5. For **each** branch, copy two connection strings into a password manager:
+2. Make a project named `shaadidesk`. Select the region nearest to India (for example Singapore, if it is available). Select PostgreSQL 17, the same major version as the local database.
+3. The only branch (`main`) is **production**. Do not make a `development` branch.
+4. Copy two connection strings into a password manager:
    - **pooled** (the host name has `-pooler`): the app uses this one
    - **direct**: migrations and backups use this one
-6. Read the current free plan limits (storage, branches, compute hours). Tell Claude Code if a limit looks too small.
+5. Read the current free plan limits (storage, compute hours). Tell Claude Code if a limit looks too small.
 
-**Done when:** you have 4 connection strings saved, and none of them is in the chat.
+**Done when:** you have 2 connection strings saved, and none of them is in the chat.
 
-### 0.4 Cloudflare R2 👤
+### 0.5 Cloudflare R2 👤
 1. Sign up at cloudflare.com.
 2. Open R2 and turn it on. Cloudflare can ask for a payment card, also for the free plan. Read the free limits on that page before you continue.
 3. Make two **private** buckets: `shaadidesk-photos` and `shaadidesk-backups`.
@@ -116,7 +123,7 @@ These are `[Proposed]` in the PRD. Claude Code asks for a yes before the step th
 
 ### 1.3 Environment variables with Zod 🤖 + 👤
 - 🤖 `lib/env.ts` checks all environment variables with Zod when the app starts. `.env.example` lists the names with no values. `.gitignore` excludes `.env*` files (except the example).
-- 👤 Make `.env.local` and paste the **development** values (Neon development pooled and direct URLs, R2 values).
+- 👤 Make `.env.local` and paste the **development** values: `DATABASE_URL` set to the local database address (already in `.env`), and the R2 values.
 
 **Done when:** the app starts with all values. If you remove one value, the app stops with a clear message that names it.
 **Commit:** `chore: validate environment variables with zod`
@@ -133,8 +140,8 @@ These are `[Proposed]` in the PRD. Claude Code asks for a yes before the step th
 2. 👤 Try the project name `shaadidesk`. If the name is taken, select a near name. **This name is in the RSVP link.**
 3. 👤 Set the Node.js version to the same LTS as `.nvmrc`.
 4. 👤 Add environment variables:
-   - **Production:** Neon `main` values, R2 values
-   - **Preview:** Neon `development` values, R2 values
+   - **Production:** Neon `main` values (pooled for `DATABASE_URL`, direct for `DIRECT_URL`), R2 values
+   - **Preview:** none. Preview deployments have no database, so turn them off in the Vercel project settings (only `main` deploys). Decide again later if previews are necessary.
 5. 🤖 Write the final address into the architecture document.
 
 **Done when:** `https://<name>.vercel.app` shows the start page, and a push to `main` deploys again automatically.
@@ -144,14 +151,17 @@ These are `[Proposed]` in the PRD. Claude Code asks for a yes before the step th
 
 ## Phase 2: Database
 
-### 2.1 Connect to the database 🤖
-- Install `drizzle-orm`, `drizzle-kit` and `pg`.
-- `lib/db/index.ts`: a connection pool with the **pooled** URL. Server code only. Node.js runtime.
-- `drizzle.config.ts`: uses the **direct** URL for migrations.
-- Script `npm run db:check` runs `select 1`.
+### 2.0 Local PostgreSQL ✅ done
+No Docker. The local PostgreSQL from step 0.3 is the development database. To start again with an empty database, run `npx prisma migrate reset`.
 
-**Done when:** `npm run db:check` prints "Database OK" for the development branch.
-**Commit:** `feat: connect to neon postgres with drizzle`
+### 2.1 Connect to the database ✅ done 🤖
+- Prisma 7 is installed with `@prisma/adapter-pg`, `pg` and `dotenv`.
+- `prisma.config.ts` (the only file that holds the URL for the Prisma CLI), `prisma/schema.prisma` (generator, datasource) and the generated client in `app/generated/prisma` (git-ignored).
+- `lib/db/index.ts`: one `db` client per process, with the `pg` adapter. Server code only. Node.js runtime.
+- `npm run db:generate` and `npm run db:check`.
+- For production on Neon: the app uses the **pooled** URL, and Prisma CLI commands (migrations) use the **direct** URL. Set this up at step 1.5.
+
+**Done when:** `npm run db:check` prints "Database OK" for the local database.
 
 ### 2.2 Wave 1 tables 🤖
 Tables from design document Section 8.1, only the ones Wave 1 needs:
@@ -175,10 +185,10 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 **Commit:** `feat: add wave 1 database schema`
 
 ### 2.3 Run the migration 🤖 + 👤
-- 🤖 Run the migration on the **development** branch.
-- 👤 Run the same migration on **production** with the documented command. The owner always runs production migrations, before the code that needs them is merged.
+- 🤖 Run the migration on the **local** database (`npx prisma migrate dev`).
+- 👤 After Neon exists (step 0.4), run the same migration on **production** with the documented command. The owner always runs production migrations, before the code that needs them is merged.
 
-**Done when:** both branches have the tables (check in the Neon console or with `drizzle-kit studio`).
+**Done when:** the local database has the tables (check with `npx prisma studio`). Production gets them when Neon exists.
 
 ### 2.4 Dummy data 🤖 + 👤
 - `scripts/seed.ts` with `@faker-js/faker` (Indian names and cities):
@@ -188,7 +198,7 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 - 👤 Put your own Google email in `.env.local` as `SEED_ADMIN_EMAIL`, so that you are the admin of the dummy wedding.
 - The script refuses to run on production, unless you add a clear `--production` flag.
 
-**Done when:** the seed prints the counts, and you see the families in Drizzle Studio.
+**Done when:** the seed prints the counts, and you see the families in Prisma Studio (`npx prisma studio`).
 **Commit:** `feat: add seed script with dummy wedding data`
 
 ---
@@ -229,7 +239,7 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 **Done when:** the Client ID and Secret are saved in both places.
 
 ### 4.2 Sign-in with Auth.js 🤖
-- Auth.js with Google, the Drizzle adapter and **database sessions**.
+- Auth.js with Google, the Prisma adapter and **database sessions**.
 - Sign-in page and sign-out.
 - **No middleware.** Each team page and Server Action checks the sign-in through `lib/access` (Node.js runtime only).
 - When a person signs in, pending team invitations with the same email link to that person (AC-9.2).
@@ -386,7 +396,7 @@ Admins export the Wave 1 data (families, events, replies) to CSV. Later waves ad
 **Commit:** `chore: add nightly database backup to r2`
 
 ### 9.3 Restore test 👤 + 🤖
-Restore the latest copy into a temporary Neon branch and check the counts. Then delete the branch (NFR-20, needs a yes).
+Restore the latest copy into a **new local database** (for example `shadidesk_restore_test`) and check the counts. Then drop it (NFR-20, needs a yes).
 **Done when:** the restored counts are the same as production.
 
 ---

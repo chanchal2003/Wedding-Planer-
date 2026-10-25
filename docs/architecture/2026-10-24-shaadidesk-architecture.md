@@ -13,8 +13,8 @@ Source documents: PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`, `docs/prd/2026-1
 |---|---|---|---|
 | App | Next.js (App Router) with TypeScript, on Node.js | Server-rendered pages give a fast first load and a correct WhatsApp link preview. One codebase for pages and server code. Types catch errors early. | `[Confirmed]` |
 | Server code | Next.js Server Actions and server components. No Express. | Express needs a second project and usually a host that sleeps. | `[Confirmed]` |
-| Database | PostgreSQL on Neon (free tier) | The data has many links and strict rules: unique replies, cascades, transactions, exact money. Neon wakes in less than approximately 1 second. | `[Confirmed]` |
-| Database tool | Drizzle, with the `pg` driver over the Neon pooled connection | Type-safe queries and migrations. The `pg` driver supports transactions. | `[Confirmed]` |
+| Database | PostgreSQL. Production: Neon (free tier). Development: normal PostgreSQL on the laptop (Homebrew, version 17). | The data has many links and strict rules: unique replies, cascades, transactions, exact money. Neon wakes in less than approximately 1 second. | `[Confirmed]` |
+| Database tool | Prisma 7, with the `pg` driver adapter | Type-safe queries and migrations. Supports transactions, unique constraints and cascades. The owner selected it on 2026-10-25 (instead of Drizzle). | `[Confirmed]` |
 | Validation | Zod (form inputs, Server Actions, import rows, environment variables) | One schema runs in the browser and on the server. | `[Confirmed]` |
 | Node.js version | The newest LTS version that Vercel supports, set in `.nvmrc`. The owner uses `nvm`. | The laptop and Vercel run the same version. | `[Confirmed]` |
 | Files and backups | Cloudflare R2, with the S3 API | 10 GB free with no time limit. The same code operates with AWS S3 later. | `[Confirmed]` |
@@ -46,8 +46,11 @@ flowchart LR
   end
 
   subgraph Neon["Neon PostgreSQL (free)"]
-    PROD[("Production DB<br/>real families")]
-    DEV[("Development DB<br/>fake data")]
+    PROD[("Production DB<br/>the deployed app")]
+  end
+
+  subgraph Laptop["Owner laptop"]
+    DEV[("Development DB<br/>PostgreSQL on the laptop<br/>fake data only")]
   end
 
   subgraph R2["Cloudflare R2 (free)"]
@@ -76,7 +79,7 @@ flowchart LR
 - Every page and every Server Action goes through `lib/access` before it reads or writes the database (FR-64).
 - The app never sends WhatsApp messages. It only opens a `wa.me` link. A person pushes "send".
 - The backup job runs on GitHub, not on Vercel. A problem on Vercel does not stop the backups.
-- Preview links and the laptop use the development database. Real phone numbers stay only in production.
+- The laptop uses its own PostgreSQL, with fake data only. Neon is used only by the deployed app and the nightly backup.
 
 ## 3. Main flows
 
@@ -174,12 +177,12 @@ shaadidesk/
   components/           React components
   lib/
     access/             the security guard (FR-64)
-    db/                 Drizzle schema and database connection
+    db/                 Prisma client (the `db` object)
     import/             validateImportFile, validateImportAgainstDb, saveImport
     money/              paise <-> ₹, Indian number format
     phone/              one standard phone format (libphonenumber-js)
     storage/            R2 upload links
-  drizzle/              database migrations
+  prisma/               schema.prisma and migrations
   scripts/              seed fake families, backup script
   tests/                Vitest and Playwright
   .github/workflows/    deploy checks, nightly backup and cleanup
@@ -190,9 +193,11 @@ shaadidesk/
 | | Production | Development |
 |---|---|---|
 | Used by | Real guests and the team | The owner, while building |
-| Database | Neon production branch | Neon development branch, filled with approximately 500 fake families |
-| Address | `<name>.vercel.app` | Laptop, and a Vercel preview link for each branch |
+| Database | Neon (one `main` branch) | Normal PostgreSQL on the laptop, filled with approximately 500 fake families |
+| Address | `<name>.vercel.app` | `localhost:3000` (Vercel preview deployments are off, because they have no database) |
 | Database changes | After development | First |
+
+Decided on 2026-10-25: the development database is a normal PostgreSQL on the laptop (not Docker, not a Neon branch). Neon is normal PostgreSQL too, so the code is the same. Only the connection string changes.
 
 Label: `[Confirmed]`.
 
@@ -214,5 +219,4 @@ Label: `[Confirmed]`.
 | # | Question | Proposal |
 |---|---|---|
 | 1 | Is the name `shaadidesk.vercel.app` available? | Check on day 1, before the card is designed. |
-| 2 | How many branches does the Neon free plan permit now? | Check at setup. |
-| 3 | Does Google need a review to publish the sign-in project (basic scopes only)? | Check at setup. |
+| 2 | Does Google need a review to publish the sign-in project (basic scopes only)? | Check at setup. |

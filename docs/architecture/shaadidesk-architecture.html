@@ -161,12 +161,12 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
   <header class="col">
     <span class="eyebrow">ShaadiDesk · system architecture · approved 24 Oct 2026</span>
     <h1>How ShaadiDesk fits together</h1>
-    <p class="lede">One Next.js app on Vercel, one PostgreSQL database on Neon, and Cloudflare R2 for photos and backups. Everything runs on free plans, and nothing sleeps when Meena Aunty opens the link.</p>
+    <p class="lede">One Next.js app on Vercel, PostgreSQL (Neon online, local on the laptop), and Cloudflare R2 for photos and backups. Everything runs on free plans, and nothing sleeps when Meena Aunty opens the link.</p>
   </header>
 
   <section class="stack" aria-label="Stack">
     <div class="chip"><span class="k">App</span><span class="v">Next.js + TypeScript</span><span class="w">Pages and server code in one project. No Express.</span></div>
-    <div class="chip"><span class="k">Database</span><span class="v">PostgreSQL on Neon</span><span class="w">Drizzle for queries. Wakes in under a second.</span></div>
+    <div class="chip"><span class="k">Database</span><span class="v">PostgreSQL</span><span class="w">Neon for the deployed app. Local on the laptop. Prisma for queries.</span></div>
     <div class="chip"><span class="k">Files</span><span class="v">Cloudflare R2</span><span class="w">S3 API. Photos and 30 days of backups.</span></div>
     <div class="chip"><span class="k">Hosting</span><span class="v">Vercel free plan</span><span class="w"><span class="mono">name.vercel.app/priya-rahul</span></span></div>
     <div class="chip"><span class="k">Code and jobs</span><span class="v">Private GitHub repo</span><span class="w">Deploy on push. Nightly backup job.</span></div>
@@ -180,7 +180,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
     </div>
     <div class="map-frame">
       <svg viewBox="0 0 960 540" role="img" aria-labelledby="map-title">
-        <title id="map-title">ShaadiDesk system map: guests and team, the Next.js app on Vercel with the lib/access guard, Neon databases, R2 buckets, Google sign-in, WhatsApp links and GitHub jobs.</title>
+        <title id="map-title">ShaadiDesk system map: guests and team, the Next.js app on Vercel with the lib/access guard, the production (Neon) and development (local) databases, R2 buckets, Google sign-in, WhatsApp links and GitHub jobs.</title>
         <defs>
           <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
@@ -224,15 +224,15 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 
         <!-- Neon zone -->
         <rect x="660" y="40" width="288" height="170" rx="14" class="zone-data"/>
-        <text x="676" y="64" class="t-zone">Neon · PostgreSQL</text>
+        <text x="676" y="64" class="t-zone">PostgreSQL</text>
         <rect x="676" y="80" width="124" height="100" rx="10" class="node"/>
         <text x="690" y="108" class="t-node">Production</text>
-        <text x="690" y="128" class="t-sub">real families</text>
-        <text x="690" y="146" class="t-sub">and money</text>
+        <text x="690" y="128" class="t-sub">Neon, the</text>
+        <text x="690" y="146" class="t-sub">deployed app</text>
         <rect x="812" y="80" width="124" height="100" rx="10" class="node"/>
         <text x="826" y="108" class="t-node">Development</text>
-        <text x="826" y="128" class="t-sub">fake data, laptop</text>
-        <text x="826" y="146" class="t-sub">and preview links</text>
+        <text x="826" y="128" class="t-sub">Postgres on the</text>
+        <text x="826" y="146" class="t-sub">laptop, fake data</text>
 
         <!-- R2 zone -->
         <rect x="660" y="236" width="288" height="134" rx="14" class="zone-files"/>
@@ -364,12 +364,12 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
   components/          <span class="c">React components</span>
   lib/
     <span class="s">access/</span>            <span class="c">the security guard</span>
-    db/                <span class="c">Drizzle schema, connection</span>
+    db/                <span class="c">Prisma client (db)</span>
     import/            <span class="c">the three import steps</span>
     money/             <span class="c">paise ↔ ₹, Indian format</span>
     phone/             <span class="c">one phone format</span>
     storage/           <span class="c">R2 upload links</span>
-  drizzle/             <span class="c">database migrations</span>
+  prisma/              <span class="c">schema, migrations</span>
   scripts/             <span class="c">fake families, backup</span>
   tests/               <span class="c">Vitest, Playwright</span>
   .github/workflows/   <span class="c">checks, nightly jobs</span></pre>
@@ -382,14 +382,14 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
         <thead><tr><th>Topic</th><th>Choice</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td>App framework</td><td>Next.js App Router, TypeScript, no Express</td><td><span class="pill c">Confirmed</span></td></tr>
-          <tr><td>Database</td><td>PostgreSQL on Neon</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Database</td><td>PostgreSQL: Neon for production, local on the laptop for development</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Files and backups</td><td>Cloudflare R2 with the S3 API</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Address</td><td>Free <span class="mono">vercel.app</span> address</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Code</td><td>Private GitHub repo, Actions for jobs</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Access rules</td><td>One guard in <code>lib/access</code></td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Import</td><td>File check, database check, save in one transaction, 0 errors before save</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Second import</td><td>Families already in the app are skipped with a note. The same number on a different family is an error.</td><td><span class="pill c">Confirmed</span></td></tr>
-          <tr><td>Environments</td><td>Production and development databases</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Environments</td><td>Production (Neon) and development (local). No preview deployments.</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Team sign-in</td><td>Auth.js with Google, sessions in PostgreSQL</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Money</td><td>Whole paise, shown as ₹1,50,000</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Look</td><td>Tailwind CSS and shadcn/ui</td><td><span class="pill c">Confirmed</span></td></tr>
@@ -406,7 +406,6 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
         <thead><tr><th>Question</th><th>Proposal</th></tr></thead>
         <tbody>
           <tr><td>Is the <span class="mono">shaadidesk.vercel.app</span> name free?</td><td>Check on day 1, before the card is designed.</td></tr>
-          <tr><td>Neon free plan branch limit</td><td>Check at setup.</td></tr>
           <tr><td>Google review to publish sign-in</td><td>Check at setup. Basic name and email only.</td></tr>
         </tbody>
       </table>

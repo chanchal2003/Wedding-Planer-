@@ -462,7 +462,7 @@ All integrations are free. The app does not use paid services. `[Confirmed]`
 | WhatsApp links (`wa.me`) | "Send reminder", the WhatsApp help button and the task button open a chat with a ready message. The person pushes "send". | A link only. No WhatsApp API. No automatic messages. | `[Confirmed]` |
 | WhatsApp link preview | The preview card of the RSVP link | Open Graph tags on the RSVP page | `[Confirmed]` |
 | Maps | The map link of each venue | The team pastes a link (for example, a Google Maps link). No map API. | `[Proposed]` |
-| PostgreSQL host | The database | Neon free tier. It wakes in approximately 1 second. | `[Confirmed]` |
+| PostgreSQL host | The database | Neon free tier for the deployed app. It wakes in approximately 1 second. Development uses normal PostgreSQL on the laptop. | `[Confirmed]` |
 | App hosting | Frontend and server code | Vercel free plan, at a free `vercel.app` address | `[Confirmed]` |
 | Photo storage | Banner and bill photos | Cloudflare R2 (S3 API), free tier | `[Confirmed]` |
 | Backup host | The daily database copy | Cloudflare R2. A GitHub Actions job makes the copy each night. | `[Confirmed]` |
@@ -596,6 +596,8 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-18 | Build the Must Have items in two waves. Wave 1 first. Then the owner decides about Wave 2 (Section 6.1). | 2026-10-24 | Owner |
 | D-19 | Organizer invitations are shared by the admin on WhatsApp or by a copied message. The app sends no email (FR-9). | 2026-10-24 | Owner |
 | D-20 | Validation uses Zod. Claude Code writes the code and the owner reviews each step. Build plan: `docs/plans/2026-10-24-wave-1-build-plan.md`. | 2026-10-24 | Owner |
+| D-21 | Development uses normal PostgreSQL on the laptop (not Docker). Neon is only for production. | 2026-10-25 | Owner |
+| D-22 | The database tool is Prisma 7, not Drizzle. | 2026-10-25 | Owner |
 
 ### 15.4 Proposals that the owner must approve
 

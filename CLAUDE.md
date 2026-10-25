@@ -14,11 +14,15 @@ Read these before you change behaviour. If the code and these documents do not a
 
 Refer to requirements by ID (FR-29, AC-35.1, NFR-21) in code comments, tests and commits where it helps.
 
+## Next.js version warning
+
+This project uses a new Next.js version (see `package.json`) with changes from older versions. Before you write code for a Next.js feature (routing, caching, cookies, Server Actions, metadata), read the matching guide in `node_modules/next/dist/docs/`. `AGENTS.md` says the same. Do not rely on memory of older versions.
+
 ## Stack
 
 - Next.js (App Router) + TypeScript (strict). Server code is Server Actions and server components. **No Express.**
 - **Node.js runtime only.** Never `export const runtime = "edge"`.
-- PostgreSQL on Neon, through Drizzle (schema in `lib/db`, migrations in `drizzle/`).
+- PostgreSQL through **Prisma 7** (schema in `prisma/schema.prisma`, migrations in `prisma/migrations`, config in `prisma.config.ts`, generated client in `app/generated/prisma`, which is git-ignored). Use the client only through `import { db } from "@/lib/db"`. Run `npm run db:generate` after each schema change and `npm run db:check` to test the connection. **Development: normal PostgreSQL on the laptop** (Homebrew, PostgreSQL 17, database `shadidesk_local`). **Production: Neon** (one `main` branch, same major version). Prisma 7 does not allow `url` inside `schema.prisma`; the URL is in `prisma.config.ts`.
 - Cloudflare R2 through the S3 API (`lib/storage`) for photos and backups.
 - Auth.js with Google for the team. Guests never sign in.
 - Tailwind CSS + shadcn/ui. Vitest and Playwright.
@@ -54,10 +58,10 @@ app/[couple]/        RSVP page (guests)
 app/w/[weddingId]/   team pages
 components/          React components
 lib/access/          the security guard
-lib/db/              Drizzle schema and connection
+lib/db/              Prisma client (the `db` object)
 lib/import/          validateImportFile, validateImportAgainstDb, saveImport
 lib/money/  lib/phone/  lib/storage/
-drizzle/             migrations
+prisma/              schema.prisma and migrations
 scripts/             seed fake data, backup
 tests/               Vitest and Playwright
 ```

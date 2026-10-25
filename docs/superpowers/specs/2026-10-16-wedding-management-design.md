@@ -579,7 +579,7 @@ The builder makes these decisions:
 - Hosting providers. They must agree with the "fast first load" rule.
 - Project structure, libraries, user interface kit and visual design. The design will get more work later.
 - The details of the database: columns, names, indexes and migrations. The tables and rules in Section 8.1 must stay.
-- The database tool for Node: Drizzle (decided in the architecture document).
+- The database tool for Node: Prisma 7 (decided on 2026-10-25; the architecture document gives the details).
 - The CSV format, the start list of categories, and how to keep the expense split.
 - The exact device limit (10 to 15). The number of incorrect attempts that causes a stop, and the length of the stop.
 - The format of the RSVP link (for example, a short name of the couple).
