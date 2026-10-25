@@ -562,14 +562,14 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 
 | ID | Question | Owner | Needed by | Proposal |
 |---|---|---|---|---|
-| Q-1 | How many devices can each family have? | Builder | Before the build of FR-30 | 12 devices `[Proposed]` |
-| Q-2 | How many incorrect attempts cause a stop, and for how long? What is the total limit for one device? | Builder | Before the build of FR-31 | 5 incorrect attempts for one family, then a 15-minute stop. 20 attempts for one device in one hour. `[Proposed]` |
-| Q-3 | What is the format of the RSVP link? | Builder | Before the build of FR-22 | A short name of the couple, for example `/priya-rahul` (design document) |
+| Q-1 | How many devices can each family have? | Builder | Before the build of FR-30 | Decided 2026-10-24: 12 devices `[Confirmed]` |
+| Q-2 | How many incorrect attempts cause a stop, and for how long? What is the total limit for one device? | Builder | Before the build of FR-31 | Decided 2026-10-24: 5 incorrect attempts for one family, then a 15-minute stop. 20 attempts for one device in one hour. `[Confirmed]` |
+| Q-3 | What is the format of the RSVP link? | Builder | Before the build of FR-22 | Decided 2026-10-24: the app suggests a short name of the couple (`/priya-rahul`). The admin can change it. It must be unique. It locks when the first family is marked "Invitation sent". `[Confirmed]` |
 | Q-4 | Which providers for the database, hosting, photos and backups? | Builder | Start of the build | Decided on 2026-10-24: Neon, Vercel, Cloudflare R2, GitHub Actions (D-1). Check the current free plan rules at setup. |
 | Q-5 | How long are daily database copies kept? | Owner | Before the build of FR-66 | 30 days `[Proposed]` |
 | Q-6 | What are the real RSVP last date and stay last date? | Admins | Before the invitations | — |
 | Q-7 | What is the start list of expense categories? | Builder | Before the build of FR-47 | Food, decor, venue, clothes, jewellery, gifts, photography, other `[Proposed]` |
-| Q-8 | Which import formats (xlsx, csv)? | Builder | Before the build of FR-16 | Both `[Proposed]` |
+| Q-8 | Which import formats (xlsx, csv)? | Builder | Before the build of FR-16 | Decided 2026-10-24: both `.xlsx` and `.csv`. The template is `.xlsx`. `[Confirmed]` |
 | Q-9 | Which starter tasks for each event type? | Owner | December | The owner gives the lists |
 
 ### 15.3 Decisions
@@ -594,6 +594,8 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-16 | The RSVP link uses a free `vercel.app` address. No own domain. | 2026-10-24 | Owner |
 | D-17 | The wedding moved. ShaadiDesk is a practice project with dummy data only. The features do not change. | 2026-10-24 | Owner |
 | D-18 | Build the Must Have items in two waves. Wave 1 first. Then the owner decides about Wave 2 (Section 6.1). | 2026-10-24 | Owner |
+| D-19 | Organizer invitations are shared by the admin on WhatsApp or by a copied message. The app sends no email (FR-9). | 2026-10-24 | Owner |
+| D-20 | Validation uses Zod. Claude Code writes the code and the owner reviews each step. Build plan: `docs/plans/2026-10-24-wave-1-build-plan.md`. | 2026-10-24 | Owner |
 
 ### 15.4 Proposals that the owner must approve
 

@@ -445,7 +445,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | FR-6 | Each event type has an icon and a color. The RSVP page and the dashboard show them. `[Proposed]` | Must | US-35 | FR-5 |
 | FR-7 | Only admins can add or delete an event. Organizers can edit the event details. Organizers can edit the budget only with money access. | Must | US-2 | FR-5, FR-10 |
 | FR-8 | Before an admin deletes an event, the app shows the number of linked families, replies, expenses and tasks, and asks for confirmation. The app removes the replies for that event. Expenses and tasks move to "whole wedding". | Must | US-2 | FR-5 |
-| FR-9 | An admin can invite an organizer by email. The app shows pending invitations. An admin can send a pending invitation again, and can change the email. | Must | US-5 | FR-1, FR-2 |
+| FR-9 | An admin can invite an organizer by email. The app shows pending invitations. An admin can send a pending invitation again, and can change the email. The app does not send email: it shows "Invite on WhatsApp" and "Copy invite message" with the sign-in link and the email to use. "Send again" shows these buttons again. `[Confirmed]` | Must | US-5 | FR-1, FR-2 |
 | FR-10 | Each organizer has a "can see money" switch. The default is off. Only admins can change it. | Must | US-6 | FR-9 |
 | FR-11 | An admin can make a parent or sibling an admin. Only bride, groom, parent and sibling can be admin. | Must | US-7 | FR-2, FR-9 |
 | FR-12 | Nobody can remove or demote the last admin. After the bride or groom signs in, only they can remove their own admin role. Before that, the admin that made the wedding can edit their entry. | Must | US-7 | FR-11 |

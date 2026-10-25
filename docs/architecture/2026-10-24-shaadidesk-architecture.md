@@ -14,7 +14,9 @@ Source documents: PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`, `docs/prd/2026-1
 | App | Next.js (App Router) with TypeScript, on Node.js | Server-rendered pages give a fast first load and a correct WhatsApp link preview. One codebase for pages and server code. Types catch errors early. | `[Confirmed]` |
 | Server code | Next.js Server Actions and server components. No Express. | Express needs a second project and usually a host that sleeps. | `[Confirmed]` |
 | Database | PostgreSQL on Neon (free tier) | The data has many links and strict rules: unique replies, cascades, transactions, exact money. Neon wakes in less than approximately 1 second. | `[Confirmed]` |
-| Database tool | Drizzle | Type-safe queries and migrations. Light for serverless. | `[Confirmed]` |
+| Database tool | Drizzle, with the `pg` driver over the Neon pooled connection | Type-safe queries and migrations. The `pg` driver supports transactions. | `[Confirmed]` |
+| Validation | Zod (form inputs, Server Actions, import rows, environment variables) | One schema runs in the browser and on the server. | `[Confirmed]` |
+| Node.js version | The newest LTS version that Vercel supports, set in `.nvmrc`. The owner uses `nvm`. | The laptop and Vercel run the same version. | `[Confirmed]` |
 | Files and backups | Cloudflare R2, with the S3 API | 10 GB free with no time limit. The same code operates with AWS S3 later. | `[Confirmed]` |
 | Hosting | Vercel (free plan), at `<name>.vercel.app/<couple>` | Serverless functions start fast. Preview link for each branch. The free plan is for non-commercial use. | `[Confirmed]` |
 | Code and jobs | Private GitHub repository and GitHub Actions | Automatic deploy to Vercel. Nightly backup and cleanup jobs. | `[Confirmed]` |
