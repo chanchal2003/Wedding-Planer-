@@ -182,7 +182,8 @@ shaadidesk/
     money/              paise <-> ₹, Indian number format
     phone/              one standard phone format (libphonenumber-js)
     storage/            R2 upload links
-  prisma/               schema.prisma and migrations
+  prisma/schema/        the schema files, one for each area
+  prisma/migrations/    migration files
   scripts/              seed fake families, backup script
   tests/                small Vitest tests (access, import)
   .github/workflows/    deploy checks, nightly backup and cleanup

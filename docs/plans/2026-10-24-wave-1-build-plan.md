@@ -158,7 +158,7 @@ No Docker. The local PostgreSQL from step 0.3 is the development database. To st
 
 ### 2.1 Connect to the database ✅ done 🤖
 - Prisma 7 is installed with `@prisma/adapter-pg`, `pg` and `dotenv`.
-- `prisma.config.ts` (the only file that holds the URL for the Prisma CLI), `prisma/schema.prisma` (generator, datasource) and the generated client in `app/generated/prisma` (git-ignored).
+- `prisma.config.ts` (the only file that holds the URL for the Prisma CLI), the schema folder `prisma/schema/` (`base.prisma` has the generator and datasource) and the generated client in `app/generated/prisma` (git-ignored).
 - `lib/db/index.ts`: one `db` client per process, with the `pg` adapter. Server code only. Node.js runtime.
 - `npm run db:generate` and `npm run db:check`.
 - For production on Neon: the app uses the **pooled** URL, and Prisma CLI commands (migrations) use the **direct** URL. Set this up at step 1.5.

@@ -1,0 +1,342 @@
+<title>ShaadiDesk Database Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; the diagram scrolls sideways on phones; each table gets a card. */
+:root {
+  --bg: #F5F6FA; --surface: #FFFFFF; --ink: #1D1F3B; --muted: #5A5E7D; --line: #D8DBE8;
+  --accent: #E08A00; --accent-ink: #8F5300; --z: #ECEEFA; --ok: #1F7A55;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121427; --surface: #1B1E37; --ink: #E7E8F4; --muted: #A2A6C6; --line: #343858;
+    --accent: #F5A623; --accent-ink: #F7BD55; --z: #20244A; --ok: #4FC08D; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121427; --surface: #1B1E37; --ink: #E7E8F4; --muted: #A2A6C6; --line: #343858;
+  --accent: #F5A623; --accent-ink: #F7BD55; --z: #20244A; --ok: #4FC08D; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 44px; }
+.col { max-width: 760px; display: grid; gap: 14px; min-width: 0; }
+h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 500; }
+h4 { font-size: 0.8rem; font-family: var(--font-mono); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-ink); }
+.lede { font-size: 1.125rem; color: var(--muted); max-width: 64ch; }
+.hint { font-size: 0.9rem; color: var(--muted); }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--z); padding: 1px 5px; border-radius: 4px; }
+.rules, .plain { margin: 0; padding: 0; display: grid; gap: 10px; }
+.rules { list-style: none; }
+.rules li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+.rules li::before { content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 50%; background: var(--accent); }
+.plain { padding-left: 1.2rem; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.diagram .mermaid { margin: 0; min-width: 900px; text-align: center; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; max-width: 760px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.steps li:first-child { border-top: 0; }
+.steps li::before { content: counter(s); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-ink); border: 1.5px solid var(--accent); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
+.where { display: block; color: var(--muted); font-size: 0.92rem; margin-top: 2px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.card-h { display: flex; align-items: center; gap: 12px; }
+.num { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-ink); border: 1.5px solid var(--accent); border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; flex: none; }
+.card-h h3 { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 500; }
+.note { color: var(--muted); font-size: 0.95rem; border-left: 3px solid var(--accent); padding-left: 12px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+.sample td { font-family: var(--font-mono); font-size: 0.82rem; white-space: nowrap; }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; }
+.pill.pk { color: var(--accent-ink); } .pill.fk { color: var(--ok); } .pill.uk { color: var(--muted); }
+footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--line); padding-top: 16px; }
+
+</style>
+<div class="wrap">
+<header class="col"><span class="eyebrow">ShaadiDesk · database design · Wave 1 · draft 4</span><h1>How the data fits together</h1><p class="lede">Ten tables hold everything Wave 1 needs. This page shows how they connect, what each one stores, and a real example: the Sharma family replying to Priya &amp; Rahul's wedding. Nothing is built yet. This is for your review.</p></header>
+<section class="col"><h2>How to read the diagram</h2><ul class="rules"><li><span>A <b>box</b> is a table, like one sheet in a spreadsheet. A <b>line</b> between two boxes means "belongs to".</span></li><li><span>Read each line with its words. <i>One wedding has many events.</i> <i>One family gets at most one reply for each event.</i></span></li><li><span>Line ends: <code>||</code> exactly one · <code>o|</code> zero or one · <code>o{</code> zero or many.</span></li><li><span><b>PK</b> is the table's ID. <b>FK</b> points to a row in another table. <b>UK</b> means no two rows can have the same value.</span></li></ul></section>
+<section style="display:grid; gap:12px;"><div class="col"><h2>The diagram</h2><p class="hint">Key columns only. Every column is listed in the table cards below. On a phone, swipe sideways.</p></div><div class="diagram"><pre class="mermaid">erDiagram
+    users ||--o{ weddings : &quot;makes&quot;
+    users |o--o{ wedding_members : &quot;signs in as&quot;
+    weddings ||--o{ wedding_members : &quot;has team&quot;
+    weddings ||--o{ events : &quot;has&quot;
+    weddings ||--o{ families : &quot;invites&quot;
+    wedding_members |o--o{ families : &quot;looks after&quot;
+    families ||--o{ family_phones : &quot;has numbers&quot;
+    families ||--o{ family_events : &quot;invited to&quot;
+    events ||--o{ family_events : &quot;has guests&quot;
+    family_events ||--o| replies : &quot;gets one&quot;
+    families ||--o{ guest_devices : &quot;allowed phones&quot;
+    families |o--o{ access_attempts : &quot;tried&quot;
+
+    users {
+        uuid id PK
+        text name
+        text email UK
+    }
+    weddings {
+        uuid id PK
+        text slug UK
+        text bride_name
+        text groom_name
+        date wedding_date
+        boolean is_test
+        uuid created_by FK
+    }
+    wedding_members {
+        uuid id PK
+        uuid wedding_id FK
+        uuid user_id FK
+        text email
+        enum role
+        enum status
+        boolean can_see_money
+    }
+    events {
+        uuid id PK
+        uuid wedding_id FK
+        enum type
+        text name
+        timestamptz starts_at
+        enum hosted_by
+    }
+    families {
+        uuid id PK
+        uuid wedding_id FK
+        text family_name
+        enum side
+        uuid assigned_member_id FK
+    }
+    family_phones {
+        uuid id PK
+        uuid family_id FK
+        text phone
+        enum kind
+    }
+    family_events {
+        uuid id PK
+        uuid family_id FK
+        uuid event_id FK
+        uuid wedding_id FK
+    }
+    replies {
+        uuid id PK
+        uuid family_event_id FK
+        boolean attending
+        integer persons
+    }
+    guest_devices {
+        uuid id PK
+        uuid family_id FK
+        text token_hash UK
+    }
+    access_attempts {
+        uuid id PK
+        text device_hash
+        uuid family_id FK
+        boolean succeeded
+    }</pre></div><div class="col"><h3>Links that are not drawn</h3><ul class="plain"><li><code>families.invitation_sent_by</code> → <code>wedding_members.id</code>: who ticked &quot;Invitation sent&quot;</li><li><code>replies.updated_by</code> → <code>wedding_members.id</code>: which team member changed a reply</li><li><code>family_phones.wedding_id</code> → <code>weddings.id</code>: a copy of the family&#x27;s wedding, for the unique-number rule</li><li><code>family_events.wedding_id</code> → <code>weddings.id</code>: the wedding of the family and of the event, checked by the database</li></ul></div></section>
+<section class="col"><h2>One example, step by step</h2><p class="hint">The Priya &amp; Rahul test wedding. Each step shows which table gets a row.</p><ol class="steps">
+<li><span>Priya makes the wedding.<span class="where">weddings: One row: slug priya-rahul, bride Priya, groom Rahul, a test wedding.</span></span></li>
+<li><span>She adds the team.<span class="where">wedding_members: Rows for Priya and Dad (admins), Rohan (organizer), and Ankit (organizer, status pending: user_id is empty).</span></span></li>
+<li><span>She adds the events.<span class="where">events: Haldi on 12 Jan and the Wedding on 15 Jan.</span></span></li>
+<li><span>She imports the guest list. The Sharma family is one row.<span class="where">families: Assigned to Rohan. Marked sent on 2 Dec.</span></span></li>
+<li><span>Their two phone numbers are saved.<span class="where">family_phones: Meena&#x27;s number is primary. Her son&#x27;s number is secondary.</span></span></li>
+<li><span>The Sharma family is invited to Haldi and the Wedding.<span class="where">family_events: Two rows: Sharma + Haldi, Sharma + Wedding.</span></span></li>
+<li><span>Meena opens the link and types 5555, then 1111.<span class="where">access_attempts: One failed try and one that worked.</span></span></li>
+<li><span>Her phone is remembered.<span class="where">guest_devices: One row for the Sharma family with a hashed cookie code.</span></span></li>
+<li><span>She replies: Haldi 2 persons, Wedding 4 persons.<span class="where">replies: Two rows, each pointing to a family_events row.</span></span></li>
+</ol></section>
+<section style="display:grid; gap:20px;"><div class="col"><h2>The ten tables</h2><p class="hint">IDs are shortened: <code>w1…</code> stands for a full random code (UUID).</p></div>
+<article class="card"><div class="card-h"><span class="num">1</span><h3>users</h3></div><p>Everyone who has signed in with Google: admins and organizers. Guests are never in this table.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>name</code></td><td class="mono">text</td><td></td><td>Name from the Google account</td></tr>
+<tr><td><code>email</code></td><td class="mono">text</td><td><span class="pill uk">UK</span></td><td>Lowercase. Only one row per email.</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td>When the row was made</td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td>When the row last changed</td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>name</th><th>email</th></tr></thead><tbody>
+<tr><td>u1…</td><td>Priya Mehta</td><td>priya@example.com</td></tr>
+<tr><td>u2…</td><td>Suresh Mehta</td><td>suresh@example.com</td></tr>
+<tr><td>u3…</td><td>Rohan Mehta</td><td>rohan@example.com</td></tr>
+</tbody></table></div>
+<p class="note">Ankit has no row yet, because he has not signed in.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">2</span><h3>weddings</h3></div><p>One row per wedding. The couple&#x27;s names do not have to be unique. Only the id and the link name (slug) are unique.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>slug</code></td><td class="mono">text</td><td><span class="pill uk">UK</span></td><td>The RSVP link name, like priya-rahul</td></tr>
+<tr><td><code>slug_locked</code></td><td class="mono">boolean</td><td></td><td>Default false. Turns true at the first &quot;Invitation sent&quot;, so printed links never break.</td></tr>
+<tr><td><code>bride_name</code></td><td class="mono">text</td><td></td><td>Required</td></tr>
+<tr><td><code>groom_name</code></td><td class="mono">text</td><td></td><td>Required</td></tr>
+<tr><td><code>wedding_date</code></td><td class="mono">date</td><td></td><td>Required. A real wedding needs a future date. A test wedding can have any date.</td></tr>
+<tr><td><code>is_test</code></td><td class="mono">boolean</td><td></td><td>Default false. A practice wedding with fake data.</td></tr>
+<tr><td><code>greeting</code></td><td class="mono">text</td><td></td><td>Optional welcome text for guests</td></tr>
+<tr><td><code>theme_color</code></td><td class="mono">text</td><td></td><td>Optional. One hex color, like #9A3B3B.</td></tr>
+<tr><td><code>banner_key</code></td><td class="mono">text</td><td></td><td>Optional. Where the banner photo is stored in R2.</td></tr>
+<tr><td><code>rsvp_last_date</code></td><td class="mono">date</td><td></td><td>Optional. Guests can reply until 23:59 India time on this day.</td></tr>
+<tr><td><code>stay_last_date</code></td><td class="mono">date</td><td></td><td>Optional. Must be earlier than rsvp_last_date.</td></tr>
+<tr><td><code>created_by</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>users.id: who made the wedding</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>slug</th><th>bride_name</th><th>groom_name</th><th>wedding_date</th><th>is_test</th><th>rsvp_last_date</th><th>stay_last_date</th><th>slug_locked</th></tr></thead><tbody>
+<tr><td>w1…</td><td>priya-rahul</td><td>Priya</td><td>Rahul</td><td>2027-01-15</td><td>yes</td><td>2026-12-31</td><td>2026-12-20</td><td>no</td></tr>
+</tbody></table></div>
+<p class="note">If a second wedding for Priya and Rahul is made, it gets its own row and its own slug (for example priya-rahul-2).</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">3</span><h3>wedding_members</h3></div><p>The team of one wedding: admins and organizers. A person who was invited but has not signed in yet is &quot;pending&quot;: the row exists, but user_id is empty. Rows are never deleted. A removed person gets status removed, so old records still point to them.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>weddings.id. Delete the wedding and these rows go too.</td></tr>
+<tr><td><code>user_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>users.id. Empty while the person is pending.</td></tr>
+<tr><td><code>email</code></td><td class="mono">text</td><td></td><td>Lowercase. The Google email the admin typed.</td></tr>
+<tr><td><code>role</code></td><td class="mono">enum</td><td></td><td>admin or organizer</td></tr>
+<tr><td><code>relation</code></td><td class="mono">enum</td><td></td><td>bride, groom, parent, sibling, relative, friend, other</td></tr>
+<tr><td><code>can_see_money</code></td><td class="mono">boolean</td><td></td><td>Default false. Admins always see money.</td></tr>
+<tr><td><code>status</code></td><td class="mono">enum</td><td></td><td>pending (invited, not signed in), active (signed in), removed (taken off the team, row kept)</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>wedding_id</th><th>user_id</th><th>email</th><th>role</th><th>relation</th><th>can_see_money</th><th>status</th></tr></thead><tbody>
+<tr><td>m1…</td><td>w1…</td><td>u1…</td><td>priya@example.com</td><td>admin</td><td>bride</td><td>yes</td><td>active</td></tr>
+<tr><td>m2…</td><td>w1…</td><td>u2…</td><td>suresh@example.com</td><td>admin</td><td>parent</td><td>yes</td><td>active</td></tr>
+<tr><td>m3…</td><td>w1…</td><td>u3…</td><td>rohan@example.com</td><td>organizer</td><td>relative</td><td>yes</td><td>active</td></tr>
+<tr><td>m4…</td><td>w1…</td><td>(empty)</td><td>ankit@example.com</td><td>organizer</td><td>friend</td><td>no</td><td>pending</td></tr>
+</tbody></table></div>
+<p class="note">Row m4 is Ankit, pending. When he signs in with that email, the app fills in his user_id and sets status to active in one step. Unique: (wedding_id, email) and (wedding_id, user_id). A database check keeps status and user_id in step: pending needs an empty user_id, active needs a filled one.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">4</span><h3>events</h3></div><p>One row per event of a wedding: haldi, sangeet, the wedding and so on.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>weddings.id. Cascade.</td></tr>
+<tr><td><code>type</code></td><td class="mono">enum</td><td></td><td>haldi, mehendi, sangeet, mata_ki_chowki, wedding, reception, other</td></tr>
+<tr><td><code>name</code></td><td class="mono">text</td><td></td><td>The name guests see. For type other, the admin types it.</td></tr>
+<tr><td><code>starts_at</code></td><td class="mono">timestamptz</td><td></td><td>Date and start time</td></tr>
+<tr><td><code>venue_name</code></td><td class="mono">text</td><td></td><td>Optional</td></tr>
+<tr><td><code>map_link</code></td><td class="mono">text</td><td></td><td>Optional</td></tr>
+<tr><td><code>note</code></td><td class="mono">text</td><td></td><td>Optional. Dress code or other note.</td></tr>
+<tr><td><code>budget_amount_paise</code></td><td class="mono">bigint</td><td></td><td>Optional. ₹50,000 is stored as 5000000.</td></tr>
+<tr><td><code>budget_currency</code></td><td class="mono">text</td><td></td><td>Default INR</td></tr>
+<tr><td><code>hosted_by</code></td><td class="mono">enum</td><td></td><td>bride, groom or both</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>wedding_id</th><th>type</th><th>name</th><th>starts_at</th><th>venue_name</th><th>hosted_by</th><th>budget_amount_paise</th></tr></thead><tbody>
+<tr><td>e1…</td><td>w1…</td><td>haldi</td><td>Haldi</td><td>2027-01-12 10:00</td><td>Home, Delhi</td><td>bride</td><td>5000000</td></tr>
+<tr><td>e2…</td><td>w1…</td><td>wedding</td><td>Wedding</td><td>2027-01-15 19:00</td><td>Grand Palace</td><td>both</td><td>100000000</td></tr>
+</tbody></table></div>
+<p class="note">Also unique: (id, wedding_id), so family_events can check that its wedding matches the event&#x27;s wedding.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">5</span><h3>families</h3></div><p>One row per guest family. A guest who comes alone is a family of one.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>weddings.id. Cascade.</td></tr>
+<tr><td><code>family_name</code></td><td class="mono">text</td><td></td><td>Required</td></tr>
+<tr><td><code>contact_name</code></td><td class="mono">text</td><td></td><td>Optional. Helps to tell two Sharma families apart.</td></tr>
+<tr><td><code>city</code></td><td class="mono">text</td><td></td><td>Optional</td></tr>
+<tr><td><code>side</code></td><td class="mono">enum</td><td></td><td>bride, groom or both</td></tr>
+<tr><td><code>assigned_member_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>wedding_members.id: the organizer who looks after this family. Optional.</td></tr>
+<tr><td><code>invitation_sent_at</code></td><td class="mono">timestamptz</td><td></td><td>Optional</td></tr>
+<tr><td><code>invitation_sent_by</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>wedding_members.id: who ticked &quot;Invitation sent&quot;</td></tr>
+<tr><td><code>notes</code></td><td class="mono">text</td><td></td><td>Optional</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>wedding_id</th><th>family_name</th><th>contact_name</th><th>city</th><th>side</th><th>assigned_member_id</th><th>invitation_sent_at</th></tr></thead><tbody>
+<tr><td>f1…</td><td>w1…</td><td>Sharma family</td><td>Meena</td><td>Jaipur</td><td>groom</td><td>m3… (Rohan)</td><td>2026-12-02</td></tr>
+<tr><td>f2…</td><td>w1…</td><td>Verma family</td><td>Vikram</td><td>Pune</td><td>bride</td><td>m4… (Ankit)</td><td>(not sent)</td></tr>
+</tbody></table></div>
+<p class="note">A person cannot be set to removed while families are assigned to them. Move the families first. Also unique: (id, wedding_id), so family_phones can check that its wedding matches.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">6</span><h3>family_phones</h3></div><p>The phone numbers of a family. At most one primary and one secondary. A family with no number has no row here.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>family_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>families.id. Cascade.</td></tr>
+<tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>weddings.id. A copy of the family&#x27;s wedding, so the rule &quot;one number once per wedding&quot; can be enforced. A second database rule forces it to match the family&#x27;s wedding.</td></tr>
+<tr><td><code>phone</code></td><td class="mono">text</td><td></td><td>One standard format, like +919876511111</td></tr>
+<tr><td><code>kind</code></td><td class="mono">enum</td><td></td><td>primary or secondary</td></tr>
+<tr><td><code>is_incorrect</code></td><td class="mono">boolean</td><td></td><td>Default false. The team marked the number as not reachable.</td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>family_id</th><th>wedding_id</th><th>phone</th><th>kind</th><th>is_incorrect</th></tr></thead><tbody>
+<tr><td>p1…</td><td>f1…</td><td>w1…</td><td>+919876511111</td><td>primary</td><td>no</td></tr>
+<tr><td>p2…</td><td>f1…</td><td>w1…</td><td>+919876522222</td><td>secondary</td><td>no</td></tr>
+<tr><td>p3…</td><td>f2…</td><td>w1…</td><td>+919812300000</td><td>primary</td><td>no</td></tr>
+</tbody></table></div>
+<p class="note">Unique: (wedding_id, phone) blocks the same number in two families of one wedding. Unique: (family_id, kind) gives one primary and one secondary at most.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">7</span><h3>family_events</h3></div><p>Which events are on which family&#x27;s invitation. Haldi and Wedding for the Sharma family means two rows.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>family_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>families.id. Cascade.</td></tr>
+<tr><td><code>event_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>events.id. Cascade: delete an event and these rows go too.</td></tr>
+<tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>The wedding of this invitation. The database checks that the family and the event both belong to this wedding.</td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>family_id</th><th>event_id</th><th>wedding_id</th></tr></thead><tbody>
+<tr><td>fe1…</td><td>f1… (Sharma)</td><td>e1… (Haldi)</td><td>w1…</td></tr>
+<tr><td>fe2…</td><td>f1… (Sharma)</td><td>e2… (Wedding)</td><td>w1…</td></tr>
+<tr><td>fe3…</td><td>f2… (Verma)</td><td>e2… (Wedding)</td><td>w1…</td></tr>
+</tbody></table></div>
+<p class="note">Unique: (family_id, event_id). A family of one wedding can never be linked to an event of another wedding.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">8</span><h3>replies</h3></div><p>The answer of a family for one event. A family can only reply to events on its invitation, because a reply points to a family_events row.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>family_event_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>family_events.id. Unique: one reply for each family and event. The first reply stays. Cascade.</td></tr>
+<tr><td><code>attending</code></td><td class="mono">boolean</td><td></td><td>Yes or no</td></tr>
+<tr><td><code>persons</code></td><td class="mono">integer</td><td></td><td>How many come. At least 1 when attending is yes. No maximum.</td></tr>
+<tr><td><code>replied_by_name</code></td><td class="mono">text</td><td></td><td>The name shown in &quot;Replied by Meena&quot;</td></tr>
+<tr><td><code>source</code></td><td class="mono">enum</td><td></td><td>guest or team</td></tr>
+<tr><td><code>updated_by</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>wedding_members.id: set when the team changes the reply</td></tr>
+<tr><td><code>replied_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>family_event_id</th><th>attending</th><th>persons</th><th>replied_by_name</th><th>source</th><th>replied_at</th></tr></thead><tbody>
+<tr><td>r1…</td><td>fe1… (Sharma, Haldi)</td><td>yes</td><td>2</td><td>Meena</td><td>guest</td><td>2026-12-05</td></tr>
+<tr><td>r2…</td><td>fe2… (Sharma, Wedding)</td><td>yes</td><td>4</td><td>Meena</td><td>guest</td><td>2026-12-05</td></tr>
+</tbody></table></div>
+<p class="note">The Verma family has not replied, so there is no row for fe3.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">9</span><h3>guest_devices</h3></div><p>A phone or browser that has proved it belongs to a family. The cookie value is stored only as a hash.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>family_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>families.id. Cascade.</td></tr>
+<tr><td><code>token_hash</code></td><td class="mono">text</td><td><span class="pill uk">UK</span></td><td>Hash of the cookie code on the guest&#x27;s phone</td></tr>
+<tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+<tr><td><code>last_seen_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>family_id</th><th>token_hash</th><th>created_at</th></tr></thead><tbody>
+<tr><td>d1…</td><td>f1… (Sharma)</td><td>9f2c…</td><td>2026-12-05</td></tr>
+</tbody></table></div>
+<p class="note">The limit of 12 devices for each family is checked in the app code.</p>
+</article>
+<article class="card"><div class="card-h"><span class="num">10</span><h3>access_attempts</h3></div><p>A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wrong tries then a 15-minute stop, and 20 tries for each device each hour.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td class="mono">uuid</td><td><span class="pill pk">PK</span></td><td>Random code</td></tr>
+<tr><td><code>device_hash</code></td><td class="mono">text</td><td></td><td>Hash of an anonymous device code (a cookie) that the guest&#x27;s phone receives on the first visit, before access is granted</td></tr>
+<tr><td><code>family_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>families.id. Optional.</td></tr>
+<tr><td><code>succeeded</code></td><td class="mono">boolean</td><td></td><td></td></tr>
+<tr><td><code>attempted_at</code></td><td class="mono">timestamptz</td><td></td><td>Index with device_hash. Old rows are deleted later.</td></tr>
+</tbody></table></div>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>device_hash</th><th>family_id</th><th>succeeded</th><th>attempted_at</th></tr></thead><tbody>
+<tr><td>a1…</td><td>4b7e…</td><td>f1… (Sharma)</td><td>no (typed 5555)</td><td>2026-12-05 10:01</td></tr>
+<tr><td>a2…</td><td>4b7e…</td><td>f1… (Sharma)</td><td>yes (typed 1111)</td><td>2026-12-05 10:02</td></tr>
+</tbody></table></div>
+</article>
+</section>
+<section class="col"><h2>Rules</h2><h3>The database enforces</h3><ul class="plain"><li>One reply for each family and event. If two family members submit at the same time, the first one stays. (unique on replies.family_event_id)</li><li>The same phone number cannot be in two families of one wedding. (unique on family_phones: wedding_id + phone)</li><li>A family has at most one primary and one secondary number. (unique on family_phones: family_id + kind)</li><li>The wedding written on a phone row must be the wedding of its family. (a combined link from family_phones to families: family_id + wedding_id)</li><li>A family can only be invited to events of its own wedding. (family_events carries the wedding, with a combined link to the family and another to the event)</li><li>A team email appears once in each wedding. (unique on wedding_members: wedding_id + email)</li><li>A family cannot reply to an event that is not on its invitation. (a reply points to a family_events row)</li><li>Delete an event: its family_events rows and its replies go too.</li><li>Delete a family: its phones, devices and family_events rows go too.</li><li>Delete a wedding: everything inside it goes too.</li><li>A pending team member has no signed-in user, and an active one has a signed-in user. (a check written in the migration)</li><li>A team row cannot be deleted while families point to it. (a restrict rule on the link)</li></ul><h3>The app code checks</h3><ul class="plain"><li>stay_last_date is earlier than rsvp_last_date (Prisma cannot write this rule in the schema).</li><li>A family has at most 12 devices, and the attempt limits (5 wrong tries then 15 minutes, 20 tries each hour for one device).</li><li>Admins must be bride, groom, parent or sibling. Friends can only be organizers.</li><li>persons is at least 1 when attending is yes.</li><li>The last admin cannot be removed. The bride and groom are protected after they sign in.</li><li>A team member cannot be set to removed while families or open tasks are assigned to them. The same row can be made active again if they come back.</li><li>Every query filters by wedding_id, and every request goes through lib/access.</li></ul></section>
+<section class="col"><h2>Left out of Wave 1</h2><ul class="plain"><li><b>Sign-in tables (accounts, sessions, verification tokens)</b>: added at step 4.2, from the sign-in tool&#x27;s own documentation</li><li><b>access_requests</b>: Wave 2 (&quot;Request access&quot;)</li><li><b>expenses, payments, history</b>: Should Have, after Wave 1</li><li><b>tasks, stay, gifts</b>: Should Have (December tier)</li></ul></section>
+<section class="col"><h2>Already decided</h2><ul class="plain"><li>One list for relation (bride, groom, parent, sibling, relative, friend, other). The app checks which role may use which value</li><li>family_phones carries the wedding, and the database checks it matches the family&#x27;s wedding</li><li>Wrong tries are counted against an anonymous device cookie that is set on the first visit</li><li>Only the users table is created now. The other sign-in tables come at step 4.2</li><li>Pending people live in wedding_members, with an empty user_id</li><li>Team members have a status: pending, active or removed. Rows are never deleted, so old expenses and history keep pointing to them</li><li>A database check keeps status and user_id in step</li><li>Random IDs (UUID) in every table</li><li>Classic database names: families, family_name</li><li>Dates and times stored in UTC and shown in India time</li><li>Money as amount_paise (whole number) plus currency (default INR)</li><li>One theme color for each wedding</li><li>Last dates are plain dates; they close at 23:59 India time</li></ul></section>
+<section class="col"><h2>Open points for your review</h2><p>None. All points were decided on 26 Oct 2026.</p></section>
+<footer class="col">Source: <span class="mono">docs/architecture/2026-10-25-shaadidesk-database-design.md</span></footer></div>
