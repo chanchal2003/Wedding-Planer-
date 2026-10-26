@@ -1,0 +1,25 @@
+// Events of a wedding (haldi, sangeet, the wedding...).
+
+model Event {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  weddingId         String    @map("wedding_id") @db.Uuid
+  type              EventType
+  name              String
+  startsAt          DateTime  @map("starts_at") @db.Timestamptz(3)
+  venueName         String?   @map("venue_name")
+  mapLink           String?   @map("map_link")
+  note              String?
+  budgetAmountPaise BigInt?   @map("budget_amount_paise")
+  budgetCurrency    String    @default("INR") @map("budget_currency")
+  hostedBy          HostedBy  @map("hosted_by")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wedding      Wedding       @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  familyEvents FamilyEvent[]
+
+  // Lets family_events check that its wedding matches the event's wedding.
+  @@unique([id, weddingId])
+  @@index([weddingId, startsAt])
+  @@map("events")
+}

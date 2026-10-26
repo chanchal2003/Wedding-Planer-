@@ -1,0 +1,112 @@
+// Guest families, their phone numbers and invitations, replies, devices and attempts.
+
+model Family {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  weddingId          String    @map("wedding_id") @db.Uuid
+  familyName         String    @map("family_name")
+  contactName        String?   @map("contact_name")
+  city               String?
+  side               Side
+  assignedMemberId   String?   @map("assigned_member_id") @db.Uuid
+  invitationSentAt   DateTime? @map("invitation_sent_at") @db.Timestamptz(3)
+  invitationSentById String?   @map("invitation_sent_by") @db.Uuid
+  notes              String?
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wedding          Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  assignedMember   WeddingMember?  @relation("AssignedMember", fields: [assignedMemberId], references: [id], onDelete: Restrict)
+  invitationSentBy WeddingMember?  @relation("InvitationSentBy", fields: [invitationSentById], references: [id], onDelete: Restrict)
+  phones           FamilyPhone[]
+  familyEvents     FamilyEvent[]
+  devices          GuestDevice[]
+  attempts         AccessAttempt[]
+
+  // Lets family_phones check that its wedding matches the family's wedding.
+  @@unique([id, weddingId])
+  @@index([weddingId, familyName])
+  @@index([weddingId, assignedMemberId])
+  @@map("families")
+}
+
+// At most one primary and one secondary number for each family.
+// weddingId repeats the family's wedding so the same number can be blocked
+// twice in one wedding. The combined link to families keeps them in step.
+model FamilyPhone {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  familyId    String    @map("family_id") @db.Uuid
+  weddingId   String    @map("wedding_id") @db.Uuid
+  phone       String
+  kind        PhoneKind
+  isIncorrect Boolean   @default(false) @map("is_incorrect")
+
+  family  Family  @relation(fields: [familyId, weddingId], references: [id, weddingId], onDelete: Cascade)
+  wedding Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  @@unique([weddingId, phone])
+  @@unique([familyId, kind])
+  @@map("family_phones")
+}
+
+// Which events are on which family's invitation.
+model FamilyEvent {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  familyId  String @map("family_id") @db.Uuid
+  eventId   String @map("event_id") @db.Uuid
+  weddingId String @map("wedding_id") @db.Uuid
+
+  // The wedding must be the wedding of the family AND of the event, so a family
+  // can never be linked to an event of another wedding.
+  family Family @relation(fields: [familyId, weddingId], references: [id, weddingId], onDelete: Cascade)
+  event  Event  @relation(fields: [eventId, weddingId], references: [id, weddingId], onDelete: Cascade)
+  reply  Reply?
+
+  @@unique([familyId, eventId])
+  @@map("family_events")
+}
+
+// One reply for each family and event. The unique link means the first reply stays.
+model Reply {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  familyEventId String      @unique @map("family_event_id") @db.Uuid
+  attending     Boolean
+  persons       Int?
+  repliedByName String?     @map("replied_by_name")
+  source        ReplySource
+  updatedById   String?     @map("updated_by") @db.Uuid
+  repliedAt     DateTime    @default(now()) @map("replied_at") @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  familyEvent FamilyEvent    @relation(fields: [familyEventId], references: [id], onDelete: Cascade)
+  updatedBy   WeddingMember? @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@map("replies")
+}
+
+// A phone or browser that proved it belongs to a family. Only a hash of the cookie is stored.
+model GuestDevice {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  familyId   String   @map("family_id") @db.Uuid
+  tokenHash  String   @unique @map("token_hash")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@map("guest_devices")
+}
+
+// A log of tries to confirm a family with 4 digits. It makes the attempt limits work.
+model AccessAttempt {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deviceHash  String   @map("device_hash")
+  familyId    String?  @map("family_id") @db.Uuid
+  succeeded   Boolean
+  attemptedAt DateTime @default(now()) @map("attempted_at") @db.Timestamptz(3)
+
+  family Family? @relation(fields: [familyId], references: [id], onDelete: SetNull)
+
+  @@index([deviceHash, attemptedAt])
+  @@map("access_attempts")
+}

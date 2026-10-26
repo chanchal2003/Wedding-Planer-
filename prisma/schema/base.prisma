@@ -1,0 +1,25 @@
+// ShaadiDesk schema. This folder holds one file for each area:
+//   base.prisma (this file), enums.prisma, team.prisma, events.prisma, guests.prisma.
+// Prisma reads all files in this folder as one schema.
+// Design: docs/architecture/2026-10-25-shaadidesk-database-design.md
+//
+// Rules:
+// - Every change to the database goes through a migration (npm run db:migrate:create).
+//   Never use `prisma db push` and never change the database by hand.
+// - Names in the database are snake_case (@map / @@map). Names in the code are camelCase.
+// - IDs are random UUIDs made by the database (gen_random_uuid()).
+// - Times are timestamptz (stored in UTC). Last dates are plain dates.
+// - Money is amount_paise (whole number) plus currency.
+// - Checks that Prisma cannot write here are added as SQL to the migration file:
+//     wedding_members: status = pending needs user_id empty, status = active needs user_id filled
+//     weddings: stay_last_date earlier than rsvp_last_date
+//     replies: persons at least 1 when attending is yes
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

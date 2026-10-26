@@ -1,0 +1,70 @@
+// All lists of allowed values (enums). The database refuses any other value.
+
+enum MemberRole {
+  admin
+  organizer
+
+  @@map("member_role")
+}
+
+enum MemberRelation {
+  bride
+  groom
+  parent
+  sibling
+  relative
+  friend
+  other
+
+  @@map("member_relation")
+}
+
+enum MemberStatus {
+  pending
+  active
+  removed
+
+  @@map("member_status")
+}
+
+enum EventType {
+  haldi
+  mehendi
+  sangeet
+  mata_ki_chowki
+  wedding
+  reception
+  other
+
+  @@map("event_type")
+}
+
+enum HostedBy {
+  bride
+  groom
+  both
+
+  @@map("hosted_by")
+}
+
+enum Side {
+  bride
+  groom
+  both
+
+  @@map("side")
+}
+
+enum PhoneKind {
+  primary
+  secondary
+
+  @@map("phone_kind")
+}
+
+enum ReplySource {
+  guest
+  team
+
+  @@map("reply_source")
+}

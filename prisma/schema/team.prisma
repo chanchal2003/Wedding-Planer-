@@ -1,0 +1,67 @@
+// Sign-in users, weddings and the team of each wedding.
+
+// Everyone who signed in with Google. Guests are never here.
+// The other sign-in tables (accounts, sessions) are added at plan step 4.2.
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String?
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  weddingsCreated Wedding[]
+  memberships     WeddingMember[]
+
+  @@map("users")
+}
+
+model Wedding {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug         String    @unique
+  slugLocked   Boolean   @default(false) @map("slug_locked")
+  brideName    String    @map("bride_name")
+  groomName    String    @map("groom_name")
+  weddingDate  DateTime  @map("wedding_date") @db.Date
+  isTest       Boolean   @default(false) @map("is_test")
+  greeting     String?
+  themeColor   String?   @map("theme_color")
+  bannerKey    String?   @map("banner_key")
+  rsvpLastDate DateTime? @map("rsvp_last_date") @db.Date
+  stayLastDate DateTime? @map("stay_last_date") @db.Date
+  createdById  String    @map("created_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  createdBy User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  members   WeddingMember[]
+  events    Event[]
+  families  Family[]
+  phones    FamilyPhone[]
+
+  @@map("weddings")
+}
+
+// The team of one wedding. Rows are never deleted: a removed person gets
+// status = removed, so old records keep pointing to them.
+model WeddingMember {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  weddingId   String         @map("wedding_id") @db.Uuid
+  userId      String?        @map("user_id") @db.Uuid
+  email       String
+  role        MemberRole
+  relation    MemberRelation
+  canSeeMoney Boolean        @default(false) @map("can_see_money")
+  status      MemberStatus   @default(pending)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wedding          Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  user             User?    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  assignedFamilies Family[] @relation("AssignedMember")
+  sentFamilies     Family[] @relation("InvitationSentBy")
+  changedReplies   Reply[]
+
+  @@unique([weddingId, email])
+  @@unique([weddingId, userId])
+  @@map("wedding_members")
+}
