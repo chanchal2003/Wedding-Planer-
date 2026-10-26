@@ -184,7 +184,8 @@ shaadidesk/
     storage/            R2 upload links
   prisma/schema/        the schema files, one for each area
   prisma/migrations/    migration files
-  scripts/              seed fake families, backup script
+  scripts/              sample guest file generator, backup script
+  samples/              sample Excel files with fake families
   tests/                small Vitest tests (access, import)
   .github/workflows/    deploy checks, nightly backup and cleanup
 ```

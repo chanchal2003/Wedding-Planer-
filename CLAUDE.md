@@ -41,7 +41,7 @@ This project uses a new Next.js version (see `package.json`) with changes from o
 8. **Soft delete and history** for expenses, payments and gifts.
 9. **Time:** store UTC, show India time (Asia/Kolkata). Last dates close at 23:59 India time.
 10. **Secrets** live in `.env.local` (never committed), Vercel environment variables and GitHub Secrets.
-11. **Data:** only fake data in seeds, tests and screenshots.
+11. **Data:** only fake data, in sample files, tests and screenshots. There is no seed script: create the wedding, events and team in the app, and load families through the Excel import (sample files in `samples/`).
 12. **Migrations only:** every change to the database structure, including constraints and checks, goes through a Prisma migration file in `prisma/migrations`, committed to git. Never use `prisma db push`, never change the database by hand, and never edit a migration that was already applied (fix it with a new migration). Create with `npm run db:migrate:create` (it does not apply), add checks as SQL in that file, show the file to the owner, then apply with `npm run db:migrate`. Commands: `db:migrate`, `db:migrate:create`, `db:migrate:deploy` (production), `db:migrate:status`, `db:studio`, `db:generate`. Never run `prisma migrate reset` against any database except the local one.
 
 ## Scope order
@@ -61,10 +61,10 @@ components/          React components
 lib/access/          the security guard
 lib/db/              Prisma client (the `db` object)
 lib/import/          validateImportFile, validateImportAgainstDb, saveImport
-lib/money/  lib/phone/  lib/storage/
+lib/money/  lib/phone/  lib/time/  lib/limits.ts  lib/storage/   (each is made inside the first feature that needs it)
 prisma/schema/       the schema files (base, enums, team, events, guests)
 prisma/migrations/   migration files
-scripts/             seed fake data, backup
+scripts/             sample file generator, backup
 tests/               small Vitest tests (access rules, import)
 ```
 

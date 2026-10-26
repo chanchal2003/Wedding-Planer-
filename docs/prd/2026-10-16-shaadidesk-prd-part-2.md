@@ -599,6 +599,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-21 | Development uses normal PostgreSQL on the laptop (not Docker). Neon is only for production. | 2026-10-25 | Owner |
 | D-22 | The database tool is Prisma 7, not Drizzle. | 2026-10-25 | Owner |
 | D-23 | Tests: a small number of Vitest tests, only for the access rules and the import rules. No Playwright. No CI for now. | 2026-10-25 | Owner |
+| D-24 | No seed script. The wedding, events and team are created in the app. Fake families come from sample Excel files through the import. | 2026-10-26 | Owner |
 
 ### 15.4 Proposals that the owner must approve
 

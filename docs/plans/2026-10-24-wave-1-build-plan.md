@@ -10,8 +10,9 @@ Sources: PRD Section 6.1 (Wave 1 scope), PRD Sections 8 and 11 (FR-n, AC-n), arc
 - **🤖 Claude Code** = Claude Code writes the code. The owner reviews it.
 - Each step ends with **Done when**: something the owner can see or test. Then Claude Code explains what was built and the owner says "commit".
 - Do the steps in order. A step depends on the steps before it.
+- **Feature-wise (owner decision, 2026-10-26):** each feature is built from screen to database. A helper (phone, time, money, limits) is made inside the first feature that needs it. Before each feature, Claude Code discusses it with the owner.
 - **Secrets never go into the chat or the code.** The owner pastes them into `.env.local`, Vercel and GitHub Secrets.
-- **Dummy data only.** Seeds and tests use fake families.
+- **Dummy data only.** All data is fake. There is no seed script. The wedding, events and team are created in the app by hand. The families come from sample Excel files (step 6.2) through the import feature.
 
 ## Wave 1 scope
 
@@ -41,6 +42,8 @@ Not in Wave 1: request access (FR-39), reminders (FR-25), expenses, event icons 
 | How we build | Claude Code writes, the owner reviews each step. |
 | Organizer invitation | "Invite on WhatsApp" and "Copy invite message". No email. |
 | Validation | Zod. |
+| Phone numbers | A number with no `+` is treated as Indian (+91). A number typed with `+` and a country code is accepted. Any number that can really exist is valid, mobile or landline. Invalid numbers are rejected with "This is not a valid phone number". (Decided 2026-10-26.) |
+| Test data | **No seed script.** (Owner decision, 2026-10-26.) The wedding, events and team are created with the app's own screens. About 500 fake families come from a sample Excel file through the import. A second, messy file tests the import errors. Tests of the security rules create their own data and roll it back. |
 | Tests | **Small.** Vitest only, for the access rules (4.3) and the import (6.3, 6.4). No Playwright. No CI. Everything else is checked by hand with the fake data. (Owner decision, 2026-10-25.) |
 
 ## Open items that touch Wave 1
@@ -192,36 +195,20 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 
 **Done when:** the local database has the tables (check with `npx prisma studio`). Production gets them when Neon exists.
 
-### 2.4 Dummy data 🤖 + 👤
-- `scripts/seed.ts` with `@faker-js/faker` (Indian names and cities):
-  - Wedding "Priya & Rahul" (test flag on), 5 events
-  - About 500 families on both sides, with fake numbers, some with secondary numbers, some with no number
-  - 2 organizers, and about 40% of the families with replies
-- 👤 Put your own Google email in `.env.local` as `SEED_ADMIN_EMAIL`, so that you are the admin of the dummy wedding.
-- The script refuses to run on production, unless you add a clear `--production` flag.
-
-**Done when:** the seed prints the counts, and you see the families in Prisma Studio (`npx prisma studio`).
-**Commit:** `feat: add seed script with dummy wedding data`
+### 2.4 Removed
+The seed script is removed (owner decision, 2026-10-26). Data is made through the app. Fake families come from the sample Excel files in step 6.2.
 
 ---
 
-## Phase 3: Shared helpers
+## Phase 3: Removed (helpers are built inside the features)
+The separate helper phase is removed (owner decision, 2026-10-26). Its work moves into the features:
 
-### 3.1 Phone numbers 🤖
-`lib/phone` with `libphonenumber-js`: one standard format, and the last 4 digits.
-**Done when:** Claude Code runs a short check that shows the same standard number for "+91 98765-11111", "09876511111" and "98765 11111" (AC-18.1).
-**Commit:** `feat: add phone number normalisation`
-
-### 3.2 Time and money 🤖
-- `lib/time`: show dates in India time. "Is it after the last date?" uses 23:59 India time.
-- `lib/money`: ₹ text ↔ paise, Indian format (₹1,50,000).
-
-**Done when:** a short check shows the right result for 23:59 and 00:01 India time on the last date (AC-37.1), and ₹1,50,000 converts to paise and back.
-**Commit:** `feat: add india time and money helpers`
-
-### 3.3 Limits settings 🤖
-`lib/limits.ts`: 12 devices, 5 wrong tries, 15 minutes, 20 tries per hour. One file, one place to change.
-**Commit:** `feat: add guest access limit settings`
+| Helper | Built in | Details |
+|---|---|---|
+| India time (`lib/time`): show dates in India time, and "is it after the last date?" at 23:59 India time | **5.3** Wedding settings | First place a last date is saved. Also used in 7.4. |
+| Money (`lib/money`): ₹ text to paise and back, Indian format (₹1,50,000) | **5.4** Events | The event budget is the first money field. |
+| Phone numbers (`lib/phone`, `libphonenumber-js`): one standard form, rejects invalid numbers, last 4 digits | **6.1** Families | First place a number is typed. The import (6.3, 6.4) and the 4-digit check (7.3) reuse it. |
+| Limit settings (`lib/limits.ts`): 12 devices, 5 wrong tries, 15 minutes, 20 tries per hour | **7.3** 4-digit check and device access | The only place these numbers are used. |
 
 ---
 
@@ -275,13 +262,17 @@ Test flag, a "TEST" label on all pages, delete in one step with confirmation (FR
 
 ### 5.3 Wedding settings 🤖
 Greeting, colors, RSVP last date and stay last date (stay must be earlier: AC-4.1). Edit the link name until it locks. Banner photo: the browser makes it smaller (approximately 300 KB), uploads it to the private photos bucket with a short-time upload link, and the app shows it through its own address.
-**Done when:** AC-4.1 passes and the banner shows on the settings page.
-**Commit:** `feat: add wedding settings and banner upload`
+**Also in this step: the India time helper** (`lib/time`). It shows dates in India time and answers "is it after the last date?" (the last date closes at 23:59 India time). A short check shows the right result at 23:59 and 00:01 on the last date.
+
+**Done when:** AC-4.1 passes, the banner shows on the settings page, and the time check is right.
+**Commit:** `feat: add wedding settings, banner upload and india time helper`
 
 ### 5.4 Events 🤖
 Event list and event form: type list (or "Other" with a typed name), date and time, venue, map link, note, budget, hosted by. Only admins add or delete. Organizers edit details, and the budget only with money access. Delete shows the linked counts and asks for confirmation.
-**Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass.
-**Commit:** `feat: add events with type list and permissions`
+**Also in this step: the money helper** (`lib/money`). The budget is typed as ₹ and saved as paise (`budget_amount_paise`, currency `INR`), and shown in the Indian format (₹1,50,000). A short check shows ₹1,50,000 converting to paise and back.
+
+**Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass, and the money check is right.
+**Commit:** `feat: add events with type list, permissions and money helper`
 
 ### 5.5 Team 🤖
 - Add an organizer by email: pending, "Invite on WhatsApp", "Copy invite message", change email (FR-9).
@@ -299,13 +290,21 @@ Event list and event form: type list (or "Other" with a typed name), date and ti
 
 ### 6.1 Families 🤖
 Families list with search and filters (side, event, organizer, no reply, no number). Family page: add and edit, two numbers, swap primary and secondary, events on the invitation, mark a number as incorrect. A duplicate number shows the family that has it.
-**Done when:** AC-15.1, AC-18.2, AC-19.1 and AC-20.1 pass.
-**Commit:** `feat: add families list and family page`
+**Also in this step: the phone helper** (`lib/phone`, `libphonenumber-js`). `normalizePhone` gives the standard number (+919876511111) or the error "This is not a valid phone number". A number with no `+` is treated as Indian. `lastFourDigits` gives the digits for the RSVP check. A Zod rule (`phoneSchema`) is reused by the family form and the import. A short check shows `+91 98765-11111`, `09876511111` and `98765 11111` giving the same number (AC-18.1), and `98765 1111` and `hello` being rejected.
+
+**Done when:** AC-15.1, AC-18.1, AC-18.2, AC-19.1 and AC-20.1 pass.
+**Commit:** `feat: add families list, family page and phone helper`
 
 ### 6.2 Import template 🤖
 "Download template": `.xlsx` with the columns from FR-16 and one column for each event of the wedding. The phone columns are text, so Excel does not change them to "9.88E+09".
-**Done when:** AC-16.1 passes.
-**Commit:** `feat: add import template download`
+**Also in this step: two sample files with fake data** (made by a small script, `scripts/make-sample-guest-files.ts`, using `@faker-js/faker` for Indian names and cities; the files go in `samples/`):
+- `guests-clean-500.xlsx`: about 500 families on both sides, every family with a primary number, about 30% with a secondary number, a few with no number, different events for each family.
+- `guests-messy.xlsx`: about 20 rows with deliberate mistakes: a repeated number inside the file, a missing family name, no event, a number already used by another family, a phone number in a wrong format, an organizer who is not on the team, and an event column that does not exist.
+
+The events in the files must match the events created in the app (Haldi, Mehendi, Sangeet, Wedding, Reception), and the organizer emails must match the team.
+
+**Done when:** AC-16.1 passes, and both sample files exist.
+**Commit:** `feat: add import template download and sample guest files`
 
 ### 6.3 Import step 1: file validation 🤖
 `lib/import/validateImportFile`: read `.xlsx` (ExcelJS) or `.csv` (Papa Parse) into rows, then check each row with a Zod schema. Duplicates inside the file. No database.
@@ -322,7 +321,7 @@ Families list with search and filters (side, event, organizer, no reply, no numb
 
 ### 6.5 Import screens 🤖
 Upload → results (OK, errors, warnings, already in the app) → "Download error list" → upload again → confirm → done, or "Nothing was saved. Check again." The server does not keep the file.
-**Done when:** you import a dummy file with errors, correct it, and save it.
+**Done when:** you import `guests-messy.xlsx`, see all its errors, correct the file, and save it. Then you import `guests-clean-500.xlsx`, and the families list shows about 500 families.
 **Commit:** `feat: add import screens`
 
 ### 6.6 Assign families to organizers 🤖
@@ -346,8 +345,10 @@ Matches only after 3 letters. Each match shows the family name and the contact n
 
 ### 7.3 4-digit check and device access 🤖
 Check the last 4 digits against the primary or secondary number. On success: a random device code in an `httpOnly` cookie, stored hashed in `guest_devices`. Limits from `lib/limits`. Device limit message. Organizer resets the devices of a family.
+**Also in this step: the limit settings** (`lib/limits.ts`): 12 devices for each family, 5 wrong tries then a 15-minute wait, 20 tries for each device each hour. One file, one place to change.
+
 **Done when:** AC-29.1, AC-29.2, AC-30.1 to AC-30.3, AC-31.1 and AC-31.2 pass.
-**Commit:** `feat: add 4-digit check, device cookie and attempt limits`
+**Commit:** `feat: add 4-digit check, device cookie, attempt limits and limit settings`
 
 ### 7.4 Screen 2 and the reply 🤖
 Greeting, a card for each invited event only, privacy note. Yes or no, and persons. Summary and warning before submit. First reply wins. Read-only after submit, with "To change your reply, contact <organizer name>". Closed after the RSVP last date. Failed submit: "Not sent. Try again." (needs a yes on FR-42).
