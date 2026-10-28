@@ -1,7 +1,7 @@
 # ShaadiDesk: Database Design (Wave 1)
 
 Date: 2026-10-25  
-Status: **Draft 4. All open points are decided. the schema folder `prisma/schema/` is written from this design; no migration exists yet.**  
+Status: **Draft 5 (display_name added 2026-10-28). All open points are decided. the schema folder `prisma/schema/` is written from this design; no migration exists yet.**  
 Sources: PRD Sections 8 and 12, design document Section 8.1, build plan step 2.2.
 
 Nothing in this document is built yet. A visual version of this document, with the same diagram, is on the Database Design page: https://claude.ai/artifact/CJiwX1Y1DWcPP2Yzu3agwr
@@ -187,6 +187,7 @@ The team of one wedding: admins and organizers. A person who was invited but has
 | `wedding_id` | uuid | FK | weddings.id. Delete the wedding and these rows go too. |
 | `user_id` | uuid | FK | users.id. Empty while the person is pending. |
 | `email` | text |  | Lowercase. The Google email the admin typed. |
+| `display_name` | text |  | Optional. The name the admin typed when inviting ("Ankit"). Empty: the Google name is used after sign-in. Added by the second migration (2026-10-28). |
 | `role` | enum |  | admin or organizer |
 | `relation` | enum |  | bride, groom, parent, sibling, relative, friend, other |
 | `can_see_money` | boolean |  | Default false. Admins always see money. |
@@ -196,12 +197,12 @@ The team of one wedding: admins and organizers. A person who was invited but has
 
 **Sample rows**
 
-| id | wedding_id | user_id | email | role | relation | can_see_money | status |
-|---|---|---|---|---|---|---|---|
-| m1… | w1… | u1… | priya@example.com | admin | bride | yes | active |
-| m2… | w1… | u2… | suresh@example.com | admin | parent | yes | active |
-| m3… | w1… | u3… | rohan@example.com | organizer | relative | yes | active |
-| m4… | w1… | (empty) | ankit@example.com | organizer | friend | no | pending |
+| id | wedding_id | user_id | email | display_name | role | relation | can_see_money | status |
+|---|---|---|---|---|---|---|---|---|
+| m1… | w1… | u1… | priya@example.com | (empty) | admin | bride | yes | active |
+| m2… | w1… | u2… | suresh@example.com | Dad | admin | parent | yes | active |
+| m3… | w1… | u3… | rohan@example.com | (empty) | organizer | relative | yes | active |
+| m4… | w1… | (empty) | ankit@example.com | Ankit | organizer | friend | no | pending |
 
 Row m4 is Ankit, pending. When he signs in with that email, the app fills in his user_id and sets status to active in one step. Unique: (wedding_id, email) and (wedding_id, user_id). A database check keeps status and user_id in step: pending needs an empty user_id, active needs a filled one.
 

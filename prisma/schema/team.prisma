@@ -48,6 +48,9 @@ model WeddingMember {
   weddingId   String         @map("wedding_id") @db.Uuid
   userId      String?        @map("user_id") @db.Uuid
   email       String
+  // Name typed by the admin when inviting ("Ankit"). Optional. After sign-in, the
+  // Google name is used when this is empty.
+  displayName String?        @map("display_name")
   role        MemberRole
   relation    MemberRelation
   canSeeMoney Boolean        @default(false) @map("can_see_money")

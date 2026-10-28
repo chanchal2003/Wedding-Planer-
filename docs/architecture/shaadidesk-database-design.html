@@ -63,7 +63,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 
 </style>
 <div class="wrap">
-<header class="col"><span class="eyebrow">ShaadiDesk · database design · Wave 1 · draft 4</span><h1>How the data fits together</h1><p class="lede">Ten tables hold everything Wave 1 needs. This page shows how they connect, what each one stores, and a real example: the Sharma family replying to Priya &amp; Rahul's wedding. Nothing is built yet. This is for your review.</p></header>
+<header class="col"><span class="eyebrow">ShaadiDesk · database design · Wave 1 · draft 5</span><h1>How the data fits together</h1><p class="lede">Ten tables hold everything Wave 1 needs. This page shows how they connect, what each one stores, and a real example: the Sharma family replying to Priya &amp; Rahul's wedding. Nothing is built yet. This is for your review.</p></header>
 <section class="col"><h2>How to read the diagram</h2><ul class="rules"><li><span>A <b>box</b> is a table, like one sheet in a spreadsheet. A <b>line</b> between two boxes means "belongs to".</span></li><li><span>Read each line with its words. <i>One wedding has many events.</i> <i>One family gets at most one reply for each event.</i></span></li><li><span>Line ends: <code>||</code> exactly one · <code>o|</code> zero or one · <code>o{</code> zero or many.</span></li><li><span><b>PK</b> is the table's ID. <b>FK</b> points to a row in another table. <b>UK</b> means no two rows can have the same value.</span></li></ul></section>
 <section style="display:grid; gap:12px;"><div class="col"><h2>The diagram</h2><p class="hint">Key columns only. Every column is listed in the table cards below. On a phone, swipe sideways.</p></div><div class="diagram"><pre class="mermaid">erDiagram
     users ||--o{ weddings : &quot;makes&quot;
@@ -202,6 +202,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 <tr><td><code>wedding_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>weddings.id. Delete the wedding and these rows go too.</td></tr>
 <tr><td><code>user_id</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>users.id. Empty while the person is pending.</td></tr>
 <tr><td><code>email</code></td><td class="mono">text</td><td></td><td>Lowercase. The Google email the admin typed.</td></tr>
+<tr><td><code>display_name</code></td><td class="mono">text</td><td></td><td>Optional. The name the admin typed when inviting (&quot;Ankit&quot;). Empty: the Google name is used after sign-in. Added by the second migration (2026-10-28).</td></tr>
 <tr><td><code>role</code></td><td class="mono">enum</td><td></td><td>admin or organizer</td></tr>
 <tr><td><code>relation</code></td><td class="mono">enum</td><td></td><td>bride, groom, parent, sibling, relative, friend, other</td></tr>
 <tr><td><code>can_see_money</code></td><td class="mono">boolean</td><td></td><td>Default false. Admins always see money.</td></tr>
@@ -209,11 +210,11 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 <tr><td><code>created_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
 <tr><td><code>updated_at</code></td><td class="mono">timestamptz</td><td></td><td></td></tr>
 </tbody></table></div>
-<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>wedding_id</th><th>user_id</th><th>email</th><th>role</th><th>relation</th><th>can_see_money</th><th>status</th></tr></thead><tbody>
-<tr><td>m1…</td><td>w1…</td><td>u1…</td><td>priya@example.com</td><td>admin</td><td>bride</td><td>yes</td><td>active</td></tr>
-<tr><td>m2…</td><td>w1…</td><td>u2…</td><td>suresh@example.com</td><td>admin</td><td>parent</td><td>yes</td><td>active</td></tr>
-<tr><td>m3…</td><td>w1…</td><td>u3…</td><td>rohan@example.com</td><td>organizer</td><td>relative</td><td>yes</td><td>active</td></tr>
-<tr><td>m4…</td><td>w1…</td><td>(empty)</td><td>ankit@example.com</td><td>organizer</td><td>friend</td><td>no</td><td>pending</td></tr>
+<h4>Sample rows</h4><div class="table-wrap sample"><table><thead><tr><th>id</th><th>wedding_id</th><th>user_id</th><th>email</th><th>display_name</th><th>role</th><th>relation</th><th>can_see_money</th><th>status</th></tr></thead><tbody>
+<tr><td>m1…</td><td>w1…</td><td>u1…</td><td>priya@example.com</td><td>(empty)</td><td>admin</td><td>bride</td><td>yes</td><td>active</td></tr>
+<tr><td>m2…</td><td>w1…</td><td>u2…</td><td>suresh@example.com</td><td>Dad</td><td>admin</td><td>parent</td><td>yes</td><td>active</td></tr>
+<tr><td>m3…</td><td>w1…</td><td>u3…</td><td>rohan@example.com</td><td>(empty)</td><td>organizer</td><td>relative</td><td>yes</td><td>active</td></tr>
+<tr><td>m4…</td><td>w1…</td><td>(empty)</td><td>ankit@example.com</td><td>Ankit</td><td>organizer</td><td>friend</td><td>no</td><td>pending</td></tr>
 </tbody></table></div>
 <p class="note">Row m4 is Ankit, pending. When he signs in with that email, the app fills in his user_id and sets status to active in one step. Unique: (wedding_id, email) and (wedding_id, user_id). A database check keeps status and user_id in step: pending needs an empty user_id, active needs a filled one.</p>
 </article>
