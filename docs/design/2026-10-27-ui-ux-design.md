@@ -1,9 +1,9 @@
 # ShaadiDesk: UI and UX Design
 
 Date: 2026-10-27
-Status: Draft 1. The owner reviews it. Then the Stitch prompt (Section 11) and the API design document follow.
+Status: Draft 2 (2026-10-29). The colours are now plum, not jade. The screens follow the 60-page design from Claude Design (`docs/design/ShaadiDesk.pdf`). The API design document follows.
 Language: simple English, in the same style as the PRD.
-Sources: PRD Section 10 (screens, flows and states), PRD Section 9.6 (accessibility), architecture document, and the design brainstorm of 2026-10-26 and 2026-10-27.
+Sources: PRD Section 10 (screens, flows and states), PRD Section 9.6 (accessibility), architecture document, the design brainstorm of 2026-10-26 and 2026-10-27, and the Claude Design canvas.
 
 **Labels:** `[Confirmed]` = the owner decided this in the brainstorm. `[Proposed]` = the writer suggests it and the owner has not decided yet.
 
@@ -36,39 +36,54 @@ This document says how ShaadiDesk looks and how it feels to use. It does not say
 |---|---|
 | **Name** | ShaadiDesk `[Confirmed]` |
 | **Tagline** | **Plan the shaadi, not the chaos.** `[Confirmed]` Used on the sign-in page, in the browser tab description and in the team-side link preview. The guest link preview stays neutral: only the couple's names and the month (PRD FR-38). |
-| **Wordmark** | "ShaadiDesk" in Fraunces. "Shaadi" in ink and "Desk" in jade. No drawn logo. `[Confirmed]` |
-| **App icon** | A rounded jade square with a white serif **S**. `[Confirmed]` |
-| **Why no symbol** | A clean wordmark looks modern. Rings and flowers look like a card shop. |
+| **Wordmark** | "ShaadiDesk" in Fraunces. "Shaadi" in ink and "Desk" in plum. `[Confirmed]` |
+| **App icon** | A rounded plum square with a small white diamond mark. `[Confirmed]` |
+| **Why a diamond** | A simple diamond looks modern and calm. Rings and flowers look like a card shop. |
 
 ## 4. Visual style
 
-### 4.1 Colours: Jade and Stone `[Confirmed]`
+### 4.1 Colours: Plum and Stone `[Confirmed]`
+
+The first draft used jade. The owner changed the direction to plum on 2026-10-28.
 
 | Role | Name | Value | Used for |
 |---|---|---|---|
-| Main | **Jade** | `#1F5F5B` | Main buttons, links, the active tab |
-| Main, soft | **Soft jade** | `#E3F0EE` | Selected rows, quiet highlights, chips |
+| Main | **Plum** | `#5B2A55` | Main buttons, links, the active tab |
+| Main, hover | **Deep plum** | `#45203F` | Button when pressed or hovered |
+| Main, soft | **Soft plum** | `#F3EBF2` | Selected rows, quiet highlights |
 | Page | **Page** | `#FAFAF8` | Page background. A very light warm grey, not cream. |
 | Surface | **White** | `#FFFFFF` | Cards and fields |
 | Line | **Stone** | `#E7E5E0` | Dividers and card borders |
 | Field border | **Field line** | `#7D8A88` | Borders of input fields and toggles |
-| Text | **Ink** | `#14201F` | All main text. Near-black with a hint of green. |
+| Text | **Ink** | `#14201F` | All main text. Near-black. |
 | Secondary text | **Muted** | `#5B6B69` | Secondary text. Never lighter than this. |
 
 **Contrast, calculated** (the PRD asks for strong contrast, NFR-22):
 
 | Pair | Ratio | Result |
 |---|---|---|
-| White on jade (button text) | 7.4 : 1 | Passes |
-| Jade on page | 7.1 : 1 | Passes |
-| Jade on soft jade | 6.3 : 1 | Passes |
+| White on plum (button text) | 11.0 : 1 | Passes |
+| White on deep plum | 13.7 : 1 | Passes |
+| Plum on page | 10.5 : 1 | Passes |
+| Plum on soft plum | 9.4 : 1 | Passes |
 | Ink on page | 16.0 : 1 | Passes |
 | Muted on page | 5.4 : 1 | Passes |
 | Muted on white | 5.6 : 1 | Passes |
 | Field line on page | 3.4 : 1 | Passes (needs 3 : 1 for field edges) |
+| Muted on soft plum | 4.8 : 1 | Passes |
 | Muted on stone | 4.45 : 1 | **Do not use.** Use ink on stone. |
 
-**The couple's colour:** on the guest page, the couple's chosen colour replaces jade for the main button and small accents. The rest stays neutral. The app must check that the chosen colour is dark enough for white button text (at least 4.5 : 1). If it is not, the app uses a darker version and shows a warning in the settings. `[Proposed]`
+**The couple's colour:** each wedding has one theme colour. On the guest page it replaces plum for the main button and small accents. The rest stays neutral. `[Confirmed]` The couple picks one of five colours. Each has a soft tint and passes with white button text:
+
+| Colour | Value | Soft tint | White text on it |
+|---|---|---|---|
+| Plum (default) | `#5B2A55` | `#F3EBF2` | 11.0 : 1 |
+| Rose | `#8E3B5F` | `#F8ECF1` | 7.1 : 1 |
+| Indigo | `#4B3A78` | `#EEEBF6` | 9.7 : 1 |
+| Slate blue | `#4A5D73` | `#EBEFF3` | 6.8 : 1 |
+| Charcoal | `#3A4342` | `#ECEEED` | 10.2 : 1 |
+
+Because the choice is limited to these five, no contrast check is needed in the settings. `[Confirmed]`
 
 **Event colours:** small markers only (a dot or a thin bar), never text and never big areas. `[Confirmed]` Values are `[Proposed]`.
 
@@ -76,24 +91,23 @@ This document says how ShaadiDesk looks and how it feels to use. It does not say
 |---|---|---|
 | Haldi | Soft turmeric | `#C99A2E` |
 | Mehendi | Leaf green | `#5B8C5A` |
-| Sangeet | Indigo | `#4B4AA8` |
-| Mata ki Chowki | Clay | `#A0673A` |
-| Wedding | Jade | `#1F5F5B` |
+| Sangeet | Blue | `#3B5BA9` |
+| Wedding | Plum | `#5B2A55` |
 | Reception | Slate | `#4A5D73` |
-| Other | Stone grey | `#7A8583` |
+| Mata ki Chowki, Other | Clay `#A0673A`, stone grey `#7A8583` | `[Proposed]` |
 
 **Status chips** (small, always a word plus a colour): `[Proposed]`
 
 | Status | Text | Chip background | Ratio |
 |---|---|---|---|
-| Good (sent, replied, active) | Jade `#1F5F5B` | Soft jade `#E3F0EE` | 6.3 : 1 |
+| Good (sent, replied, active) | Teal `#1F5F5B` | `#E3F0EE` | 6.3 : 1 |
 | Needs a look (pending, no number) | `#7A5200` | `#FBF1DA` | 6.2 : 1 |
 | Problem (error, incorrect number) | `#A32620` | `#FBE9E7` | 6.3 : 1 |
 | Neutral (not sent, no reply) | Ink | Stone `#E7E5E0` | high |
 
 Amber and red appear only inside these small chips and in error messages. They are never used for buttons, backgrounds or headings. `[Confirmed]` (the owner asked not to overuse pink, red and yellow)
 
-**Dark mode:** not in Wave 1. `[Proposed]`
+**Dark mode:** not in Wave 1. `[Confirmed]`
 
 ### 4.2 Type `[Confirmed]`
 
@@ -119,16 +133,16 @@ Line height 1.5 for body text. Lines are no longer than about 65 characters.
 | Corners | Cards 16 px. Buttons and fields 12 px. Chips fully round. |
 | Depth | Almost no shadows. Thin stone borders and white cards on the page colour. |
 | Spacing | 24 px between sections on phones. 40 px or more on a laptop. 16 px page margin on phones. |
-| Tap targets | At least **44 px** high (NFR-23). Main buttons are **48 px** high and full width on phones. |
+| Tap targets | At least **44 px** high (NFR-23). Main buttons are **48 px** high on team screens and **56 px** on guest screens, full width on phones. |
 | Icons | One set of thin line icons (for example Lucide) in one style. Always with a text label next to important actions. |
 | Motion | Very little. A gentle tick when a reply is saved. Soft fades. Nothing bounces. Respect "reduce motion". |
-| Focus | A 3 px jade outline with a 2 px gap. |
+| Focus | A 3 px plum outline with a 2 px gap. |
 
 ### 4.4 The faint pattern `[Confirmed]`
 A very faint geometric line pattern, inspired by lattice work (jali), sits behind the couple's names on the guest page header.
 - Only the guest page header. Never on team screens. Never behind text that people must read in small sizes.
 - One colour: the couple's colour at 4 to 6 percent opacity. Thin lines.
-- If it does not look right in the first mockup, remove it. Nothing else depends on it.
+- In the Claude Design canvas it works. Nothing else depends on it, so it can be removed at any time.
 
 ## 5. Voice `[Confirmed]`
 
@@ -139,10 +153,11 @@ Warm and plain everywhere. A little personality only in happy moments (the thank
 | Guest greeting | "Namaste, Sharma family. You're invited to 2 events." |
 | Reply saved (happy moment) | "Thank you. Your reply is saved. We can't wait to see you." |
 | Empty families list | "No families yet. Import your guest list to begin." |
-| Too many wrong tries | "Too many tries. Please wait 15 minutes, or ask for access." |
+| Too many wrong tries | "Too many tries. Please wait 15 minutes, then try again, or ask the person who sent you the card." |
 | Import has errors | "38 rows need fixing before you can save." |
 | After "Mark as sent" | "Marked as sent. Undo" |
 | Setup finished (happy moment) | "Your wedding is ready. Time to send the cards." |
+| Reply last date (guest page) | "Please reply by 31 December." |
 
 The other texts (not found, device limit, closed, request sent, request rejected) come from PRD Section 10.4.
 
@@ -174,17 +189,19 @@ PRD FR-27 to FR-31, FR-38.
 │  family's phone number      │
 │  ┌──┐ ┌──┐ ┌──┐ ┌──┐        │  four separate boxes
 │  └──┘ └──┘ └──┘ └──┘        │
-│  [   See my invitation    ] │  solid button
+│  [   See my invitation    ] │  solid button, 56 px
 │                             │
 │  Don't know the number?     │
-│  Request access             │  quiet text link
+│  Ask the person who sent    │  help text, no phone numbers
+│  you the card.              │
 └─────────────────────────────┘
 ```
 - **The photo is on top and the names are below it on a plain background.** Never put text on the photo, because the photo is unknown and the text may be unreadable. `[Confirmed]`
-- The four digit boxes open the number keypad on phones, and move to the next box by themselves.
+- The four digit boxes are separate boxes. They open the number keypad on phones, and move to the next box by themselves.
 - Matches show the family name and the contact name or city, so two "Sharma" families can be told apart. They appear only after 3 letters (FR-28).
-- "Request access" is a quiet link (Wave 2 feature, FR-39). Until it exists, the text "Ask <organizer name> for help" shows instead. `[Proposed]`
-- The faint pattern sits behind the names.
+- **No "Request access" in Wave 1.** The help text says "Ask the person who sent you the card". It shows no phone numbers of team members. `[Confirmed]` Request access comes in a later release (FR-39).
+- The faint pattern sits behind the names, at 4 to 6 percent.
+- A **TEST ribbon** shows on the guest pages of a test wedding. `[Confirmed]`
 
 **States** (texts in PRD Section 10.4): start, fewer than 3 letters, no match, wrong digits, too many tries, device limit, loading. Each message is plain and tells the person what to do.
 
@@ -216,7 +233,10 @@ PRD FR-32 to FR-37, FR-42.
 └─────────────────────────────┘
 ```
 - **All events are cards on one page.** The button is fixed at the bottom. `[Confirmed]`
+- **Nothing is pre-selected.** The guest must choose Yes or No for each event. "Review and submit" stays locked until every event has an answer. `[Confirmed]`
+- The page shows "Please reply by 31 December."
 - Choosing "No" folds the "how many" part away.
+- The event cards show date, time, place and a map link. They show no dress code. The event "Note" is for the team only for now. `[Confirmed]`
 - "Review and submit" opens a summary with the warning "You cannot change this reply later. Do you want to submit?" and two buttons: "Go back" and "Yes, submit".
 - After the server confirms, the page shows the reply as read-only with "Replied by Meena, 5 Dec" and "To change your reply, contact Rohan" (with a WhatsApp button). A gentle tick appears once.
 
@@ -226,12 +246,12 @@ PRD FR-32 to FR-37, FR-42.
 PRD FR-38. Shows only the couple's banner, "Priya & Rahul's Wedding" and the month. Never family names or events. `[Confirmed]`
 
 ### 6.4 Sign-in `[Proposed]`
-A calm page: the wordmark, the tagline "Plan the shaadi, not the chaos.", and one large button "Continue with Google". Nothing else. PRD FR-1.
+A calm page: the wordmark, the tagline "Plan the shaadi, not the chaos.", and one large button "Continue with Google". Nothing else. PRD FR-1. The design also has a screen for a person whose invitation is not yet accepted. `[Confirmed]`
 
 ### 6.5 My weddings and Make a wedding `[Confirmed]`
 PRD FR-2, FR-3.
 - **My weddings:** a list of cards, each with the couple's names, the date and a TEST badge if needed. A button "Make a wedding".
-- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens.
+- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens. "Delete wedding" for real weddings is a later release.
 
 ### 6.6 The guided home (dashboard) `[Confirmed]`
 PRD FR-24, FR-43, FR-44.
@@ -240,7 +260,7 @@ PRD FR-24, FR-43, FR-44.
 ┌─────────────────────────────┐
 │ Priya & Rahul     [TEST]  ⚙ │
 │ 15 Jan 2027 · 80 days to go │
-│ Today ─ Cards out ─ Replies close 31 Dec ─ Wedding │   timeline strip
+│ Today ─ Replies close 31 Dec ─ Wedding │   timeline strip
 │ ┌─────────────────────────┐ │
 │ │ NEXT STEP               │ │  the big next-step card
 │ │ Add your team           │ │
@@ -261,7 +281,7 @@ PRD FR-24, FR-43, FR-44.
 │  Events: ● Haldi  142 yes   │
 │  By organizer: Rohan 80/120 │
 ├─────────────────────────────┤
-│ Home Families Money Tasks More │  bottom bar
+│ Home  Families  Events  More │  bottom bar
 └─────────────────────────────┘
 ```
 - **During setup** the home shows the next-step card and a short, collapsed checklist. **After setup** it shows the summary strip, then "Needs attention", then the details. `[Confirmed]`
@@ -269,11 +289,12 @@ PRD FR-24, FR-43, FR-44.
 - **Checklist steps:** 1 Make the wedding, 2 Invite your helpers, 3 Add events, 4 Set the reply dates, 5 Import your guest list (locked until events and team exist, with a note), 6 Copy your RSVP link. Steps show who did them ("Events added by Dad"). `[Confirmed]`
 - **Invite your helpers comes early.** Each person gets a ready WhatsApp message to join (FR-9). Then setup can run in parallel. `[Confirmed]`
 - **See it as a guest sees it:** once the names, photo and colour are set, a button opens the real RSVP page with the couple's photo and colour. It catches a bad photo before the cards are printed. `[Confirmed]`
-- **Timeline strip:** Today, Cards out, Replies close, Wedding, with the real dates. `[Confirmed]`
+- **Timeline strip:** Today, Replies close, Wedding, with the real dates. There is no "Cards go out" date. `[Confirmed]`
+- **Needs attention** stays in Wave 1 with three rows: families not replied, families with no phone number, invitations not sent. Event colour dots also stay. `[Confirmed]`
 - The home page changes with the stage (setup, invitations, replies, headcount). **Later, not in Wave 1.** `[Confirmed]`
 - On a laptop the same content sits in the main area next to the sidebar, in two columns.
 
-### 6.7 My families (organizer) `[Confirmed]`
+### 6.7 My families (organizer) and Families (admin) `[Confirmed]`
 PRD FR-23, FR-25.
 
 ```
@@ -295,7 +316,8 @@ PRD FR-23, FR-25.
 └─────────────────────────────┘
 ```
 - **"Mark as sent" is on the list itself.** One tap, then a message at the bottom for a few seconds: "Marked as sent. Undo". `[Confirmed]`
-- For a family that was sent and has not replied, the button becomes **"Send reminder"**, which opens a WhatsApp chat with a ready message (Wave 2, FR-25).
+- Admins see the same list under the name **Families**. Organizers see **My families**.
+- Reminders and WhatsApp buttons are a later release. In Wave 1 a family that was sent shows only the status chip.
 - Buttons are at least 44 px high, to avoid taps on the wrong family.
 
 ### 6.8 Families and the family page `[Proposed]`
@@ -303,6 +325,7 @@ PRD FR-15, FR-19, FR-20, FR-41.
 - **Families:** a searchable list with filter chips (side, event, organizer, no reply, no number). On a laptop it becomes a table with the same columns.
 - **Family page:** the family's details at the top, then phone numbers (primary and secondary, with "swap" and "mark as incorrect"), the events on the invitation, the reply and who changed it ("Updated by Rohan"), and the assigned organizer.
 - A duplicate number shows a clear message that names the family that has it.
+- **Make admin** is switched off for a friend, with the text "Only family can be admins". `[Confirmed]`
 
 ### 6.9 Import `[Confirmed]`
 PRD FR-16, FR-17. Three screens.
@@ -336,19 +359,19 @@ PRD FR-16, FR-17. Three screens.
 ### 6.10 Setup screens: settings, events, team `[Proposed]`
 PRD FR-4 to FR-13.
 - **Settings:** banner (with a crop preview), greeting, one theme colour (with the contrast check), reply last date and stay last date, the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
-- **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has a type list, name, date and time, venue, map link, note, budget (admins and people with money access) and "hosted by".
-- **Team:** a list with role, relation and status chips (Active, Pending, Removed), the money switch for each organizer, and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people.
+- **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has a type list, name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
+- **Team:** a list with role, relation and status chips (Active, Pending, Removed) and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
 
 ## 7. Navigation and layout `[Confirmed]`
 
 | Screen size | Navigation |
 |---|---|
-| **Phone** | A bottom bar with five items: Home, Families, Money, Tasks, More. "More" holds the rest. Organizers without money access see "Money" as "My expenses". |
-| **Laptop** | A left sidebar with labels, in groups: **Home**, **Events**; **Guests** (Families, Import, Requests); **Money** (Expenses, Budget); **Team**, **Settings**. The content is never wider than about 1100 px. |
+| **Phone** | A bottom bar with four items: **Home, Families, Events, More**. Organizers see "My families" instead of "Families". "More" holds the rest (Import, Team, Settings). |
+| **Laptop** | A left sidebar with labels, in groups: **Home**, **Events**; **Guests** (Families, Import); **Team**, **Settings**. The content is never wider than about 1100 px. |
 
 - The wedding's name and the TEST badge are in the top bar of every page of a test wedding.
 - Guest pages have no navigation at all.
-- Sections that do not exist yet (Money, Tasks, Requests in Wave 1) are hidden, not greyed out.
+- Sections that do not exist yet (Money, Tasks, Requests in Wave 1) are hidden, not greyed out. They join the bar when they are built.
 
 ## 8. Accessibility `[Confirmed]`
 
@@ -364,7 +387,7 @@ Simple accessibility (PRD Section 9.6, decision D-11), not the full WCAG standar
 
 ## 9. What to avoid `[Confirmed]`
 
-- Pink, red or yellow as main colours. They appear only as tiny event dots and status chips.
+- Pink, red or yellow as main colours (rose is only one of five optional couple colours). They appear only as tiny event dots and status chips.
 - Cream and terracotta "wedding" colours, gold foil, floral borders, ornate frames, and clip-art rings.
 - Text written on top of the couple's photo.
 - Thin or tiny text, pale grey text, and icons without a label for important actions.
@@ -379,26 +402,21 @@ Simple accessibility (PRD Section 9.6, decision D-11), not the full WCAG standar
 - Dark mode. `[Proposed]`
 - Screens for expenses, tasks, stay and gifts. Same style and rules apply.
 
-## 11. Notes for the Stitch prompt
+## 11. The Claude Design canvas
 
-These stay the same in every prompt, so the screens look like one product.
+The screens were designed in Claude Design in prompts 4a to 4f. The result is `docs/design/ShaadiDesk.pdf` (60 pages). It is the visual reference for the build. If the PDF and this document disagree, this document wins, and the PDF is fixed.
 
-**Fixed inputs**
+**Fixed inputs used in every prompt**
 - Product: ShaadiDesk, a web app to manage an Indian wedding. Tagline "Plan the shaadi, not the chaos."
-- Style: modern, calm, elegant, not traditional. Lots of space, thin borders, almost no shadows.
-- Colours: jade `#1F5F5B`, soft jade `#E3F0EE`, page `#FAFAF8`, white, stone `#E7E5E0`, ink `#14201F`, muted `#5B6B69`.
-- Fonts: Fraunces for the couple's names and titles. DM Sans for everything else.
-- Shape: cards 16 px, buttons and fields 12 px. Buttons 48 px high. Tap targets at least 44 px. Body text 16 to 18 px.
-- Forbidden: pink, red or yellow as main colours, cream and terracotta, gold, floral ornaments, text on photos, emojis, shadows for decoration.
-- Content: use real sample content, never lorem ipsum. People: Priya and Rahul (the couple), Meena (guest, Sharma family, Jaipur), Rohan and Ankit (organizers), Dad (admin). Events: Haldi, Mehendi, Sangeet, Wedding, Reception.
-- Size: phone first (390 px wide), then a laptop version (1280 px wide) of the team screens.
+- Colours and fonts: Section 4. Plum `#5B2A55`, Fraunces and DM Sans.
+- Shape: cards 16 px, buttons and fields 12 px. Tap targets at least 44 px.
+- Forbidden: Section 9.
+- Content: real sample content, never lorem ipsum. People: Priya and Rahul (the couple), Meena (Sharma family, Jaipur), Rohan and Ankit (organizers), Dad (admin).
+- Size: phone first (390 px wide), then a laptop version of the team screens.
 
-**Order of screens to ask for**
-1. Guest Screen 1 and Screen 2, plus its closed and replied states (highest polish)
-2. Guided home on a phone and on a laptop
-3. My families
-4. Import results
-5. Make a wedding, settings, events, team
+**Two fixes still to send to Claude Design**
+1. The organizer's "Edit event" form must say "Note", with the hint "Only the team sees this for now". It must not say "Note for guests" or show a dress code.
+2. In the admin guest preview, "See my invitation" must use the locked style until a family is chosen.
 
 ## 12. Open items
-None are blocking. The values marked `[Proposed]` (event colours, status chip colours, the crop and contrast checks, dark mode off) stay open for the owner to confirm or change.
+None are blocking. Still open for the owner: dark mode stays off, and the colours for "Mata ki Chowki" and "Other" events are proposals.
