@@ -218,8 +218,8 @@ The owner accepted these metrics on 2026-10-16 and changed M4. There is no earli
 ### 6.1 MoSCoW
 
 **Build order (changed on 2026-10-24)** `[Confirmed]`: There are no fixed dates now. The Must Have items are built in two waves:
-- **Wave 1 (first):** weddings and team (roles, money switch, Google sign-in), guest list and Excel import, RSVP page (family search, 4-digit check, one-time reply, last date, link preview, privacy note), organizers enter replies, "My families" and "Invitation sent" with progress, guest count dashboard, server access rules, CSV export and daily database copy.
-- **Wave 2 (after Wave 1, the owner decides):** request access and approval, reminder list and "Send reminder", fast expense form, event type icons and colors, "needs attention" list.
+- **Wave 1 (first):** weddings and team (roles, money switch, Google sign-in), guest list and Excel import, RSVP page (family search, 4-digit check, one-time reply, last date, link preview, privacy note), organizers enter replies, "My families" and "Invitation sent" with progress, guest count dashboard with a "needs attention" list (three rows: no reply, no phone number, invitation not sent), event colour dots, server access rules, CSV export (three files) and daily database copy. `[Confirmed]` 2026-10-29
+- **Wave 2 (after Wave 1, the owner decides):** request access and approval, reminder list and "Send reminder" (with WhatsApp buttons), fast expense form, event type icons, the "open access requests" row in "needs attention".
 - Then the Should Have items, in the order of the table. Could Have items only if the owner asks.
 
 The dates in the table are from the original plan for the real wedding. They show the order, not deadlines.
@@ -227,16 +227,16 @@ The dates in the table are from the original plan for the real wedding. They sho
 | Priority | Item | Date |
 |---|---|---|
 | **Must Have** | Weddings and events (also test weddings) | 10 Nov |
-| | Event type list (Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other) with an icon and color for each type `[Proposed]` | 10 Nov |
+| | Event type list (Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other) with a color for each type (icons come in Wave 2) `[Proposed]` | 10 Nov |
 | | Team, roles, Google sign-in and the money access switch | 10 Nov |
 | | Guest list and Excel import (primary and secondary number, events of each family, assigned organizer) | 10 Nov |
 | | Invitation tracking: RSVP link, "My families", "Invitation sent", progress of each organizer | 10 Nov |
-| | Reminder list and "Send reminder" button | 10 Nov |
+| | Reminder list and "Send reminder" button (Wave 2) | 10 Nov |
 | | RSVP page: family search, 4-digit check, one-time reply, last date, link preview, privacy note | 10 Nov |
-| | Request access and approval | 10 Nov |
+| | Request access and approval (Wave 2) | 10 Nov |
 | | Organizers enter and change replies | 10 Nov |
 | | Fast expense form (amount, event or whole wedding, description) | 10 Nov |
-| | Dashboard: guest counts and "needs attention" | 10 Nov |
+| | Dashboard: guest counts and "needs attention" (three rows in Wave 1) | 10 Nov |
 | | Server access rules, CSV export, daily database copy | 10 Nov |
 | **Should Have (November)** | Full expenses: payments, money due, repayments, charged-to side, category, vendor, bill photo | 30 Nov |
 | | Edit history and soft delete for expenses | 30 Nov |
@@ -408,16 +408,16 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | ID | Flow | What occurs |
 |---|---|---|
 | AF-1 | Guest types fewer than 3 letters | The app shows no matches. It shows "Type at least 3 letters." |
-| AF-2 | Guest does not find the family | The guest pushes "Request access" and types their name and family name. |
-| AF-3 | Guest types incorrect digits | The app shows "The number does not match. You can request access." After some incorrect attempts, the app stops attempts on that device for a period. |
-| AF-4 | Guest does not know the family numbers | The guest uses "Request access" (US-18). An organizer approves it. |
+| AF-2 | Guest does not find the family | The app shows "No family found. Check the spelling, or ask the person who sent you the card." (Request access comes in Wave 2.) |
+| AF-3 | Guest types incorrect digits | The app shows "The number does not match. Check the last 4 digits and try again." After 5 incorrect attempts, the app stops attempts on that device for a period. |
+| AF-4 | Guest does not know the family numbers | The app shows "Ask the person who sent you the card." In Wave 2 the guest can use "Request access" (US-18) and an organizer approves it. |
 | AF-5 | Family already replied | The app shows the reply as read-only, with "To change your reply, contact <organizer>". |
 | AF-6 | Two family members submit at the same time | The app keeps the first reply. The second person sees the first reply. |
 | AF-7 | Guest opens the link after the RSVP last date | The app shows "Replies are closed. Contact <organizer>." |
-| AF-8 | Family reached the device limit | The app shows "Too many devices. Contact <organizer>." An organizer resets the devices. |
+| AF-8 | Family reached the device limit | The app shows "Too many devices. Ask the person who sent you the card." An organizer resets the devices. |
 | AF-9 | Import file has errors (duplicate numbers, missing family name, no event) | The preview shows each error. The admin downloads the error list, corrects the file and uploads it again. Save is possible only with 0 errors. |
 | AF-16 | A second import has families that are already in the app | The app skips them with the note "already in the app". It adds only the new families. |
-| AF-10 | Family has no phone number | The app flags the family. Guests of this family use "Request access". Organizers can enter the reply. |
+| AF-10 | Family has no phone number | The app flags the family. Guests of this family ask the person who sent the card (Wave 2: "Request access"). Organizers can enter the reply. |
 | AF-11 | Admin removes an organizer | The app asks the admin to give the families and open tasks to a different person first. |
 | AF-12 | Admin deletes an event | The app shows the linked families, replies, expenses and tasks, and asks for confirmation. Replies for that event are removed. Expenses and tasks move to "whole wedding". |
 | AF-13 | Organizer removes an event from a family | The app removes the reply of that family for that event. |
@@ -438,14 +438,14 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | ID | Requirement | Priority | User Story | Dependencies |
 |---|---|---|---|---|
 | FR-1 | Admins and organizers must sign in with Google. Guests do not sign in. | Must | US-1, US-5 | — |
-| FR-2 | A signed-in person can make a wedding. The person selects their relation: bride, groom, parent or sibling. This person becomes the admin. A real wedding must have the names of the bride and groom, and a wedding date in the future. | Must | US-1 | FR-1 |
-| FR-3 | An admin can make a test wedding. A test wedding can have any date and false guests. All pages show the label "test". An admin can delete a test wedding in one step. | Must | US-4 | FR-2 |
+| FR-2 | A signed-in person can make a wedding. The person selects their relation: bride, groom, parent or sibling. Team members also have a relation from one list: bride, groom, parent, sibling, relative, friend or other ("cousin" is shown as "Relative"). Only family can be admins: "Make admin" is off for a friend. This person becomes the admin. A real wedding must have the names of the bride and groom, and a wedding date in the future. | Must | US-1 | FR-1 |
+| FR-3 | An admin can make a test wedding. A test wedding can have any date and false guests. All team pages show a "TEST" badge, and the guest pages show a "TEST" ribbon. An admin can delete a test wedding in one step. | Must | US-4 | FR-2 |
 | FR-4 | An admin can set the banner photo, greeting, colors, RSVP last date and stay last date. The stay last date must be earlier than the RSVP last date. | Must | US-3 | FR-2 |
-| FR-5 | An event has: type, date and start time, venue name, map link, dress code or note, budget and "hosted by" (bride side, groom side or both). The type comes from a list: Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other. For "Other", the admin types the name. All types use the same form. The type list is `[Proposed]`. | Must | US-2, US-35 | FR-2 |
-| FR-6 | Each event type has an icon and a color. The RSVP page and the dashboard show them. `[Proposed]` | Must | US-35 | FR-5 |
+| FR-5 | An event has: type, date and start time, venue name, map link, a note (only the team sees it for now), budget and "hosted by" (bride side, groom side or both). The type comes from a list: Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other. For "Other", the admin types the name. All types use the same form. The type list is `[Proposed]`. | Must | US-2, US-35 | FR-2 |
+| FR-6 | Each event type has a color, shown as a small dot on the RSVP page and the dashboard. Icons for the types come in Wave 2. `[Proposed]` | Must | US-35 | FR-5 |
 | FR-7 | Only admins can add or delete an event. Organizers can edit the event details. Organizers can edit the budget only with money access. | Must | US-2 | FR-5, FR-10 |
 | FR-8 | Before an admin deletes an event, the app shows the number of linked families, replies, expenses and tasks, and asks for confirmation. The app removes the replies for that event. Expenses and tasks move to "whole wedding". | Must | US-2 | FR-5 |
-| FR-9 | An admin can invite an organizer by email. The app shows pending invitations. An admin can send a pending invitation again, and can change the email. The app does not send email: it shows "Invite on WhatsApp" and "Copy invite message" with the sign-in link and the email to use. "Send again" shows these buttons again. `[Confirmed]` | Must | US-5 | FR-1, FR-2 |
+| FR-9 | An admin can invite an organizer by name and email. The invitation goes by WhatsApp message, never by email. The app shows pending invitations. An admin can send a pending invitation again, and can change the email. The app does not send email: it shows "Invite on WhatsApp" and "Copy invite message" with the sign-in link and the email to use. "Send again" shows these buttons again. `[Confirmed]` | Must | US-5 | FR-1, FR-2 |
 | FR-10 | Each organizer has a "can see money" switch. The default is off. Only admins can change it. | Must | US-6 | FR-9 |
 | FR-11 | An admin can make a parent or sibling an admin. Only bride, groom, parent and sibling can be admin. | Must | US-7 | FR-2, FR-9 |
 | FR-12 | Nobody can remove or demote the last admin. After the bride or groom signs in, only they can remove their own admin role. Before that, the admin that made the wedding can edit their entry. | Must | US-7 | FR-11 |
@@ -456,7 +456,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 
 | ID | Requirement | Priority | User Story | Dependencies |
 |---|---|---|---|---|
-| FR-15 | A family has: family name, contact name, city, primary number, secondary number (optional), side (bride, groom or both), assigned organizer, events on the invitation, "Invitation sent" with date, and notes. | Must | US-10 | FR-2 |
+| FR-15 | A phone number without "+" is an Indian number (+91). A number with "+" can be from any country. Any real mobile or landline number is valid. Otherwise the app shows "This is not a valid phone number". `[Confirmed]` A family has: family name, contact name, city, primary number, secondary number (optional), side (bride, groom or both), assigned organizer, events on the invitation, "Invitation sent" with date, and notes. | Must | US-10 | FR-2 |
 | FR-16 | An admin can import families from an Excel or CSV file. The app gives a template file to download. Columns: family name, contact name, city, primary number, secondary number, side, one column for each event (yes or no), assigned organizer (email or name), notes. Only family name and one event are required. | Must | US-9 | FR-5, FR-15 |
 | FR-17 | The import shows a preview before the save. The preview flags: the same number in two families, a number that is already in the list, a missing family name, a family with no event, and a family with no phone number. Save is possible only when there are 0 errors: the admin corrects the file and uploads it again. Warnings (for example, no phone number) do not stop the save. A family that is already in the app (same family name and same number) is skipped, with the note "already in the app". A number that a different family uses is an error. `[Confirmed]` | Must | US-9 | FR-16, FR-18 |
 | FR-18 | The app keeps phone numbers in one standard format. It removes the differences of "+91", a "0" at the start, spaces and dashes. A number cannot be in two families of the same wedding. | Must | US-9, US-10 | FR-15 |
@@ -473,13 +473,13 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 
 | ID | Requirement | Priority | User Story | Dependencies |
 |---|---|---|---|---|
-| FR-27 | Screen 1 of the RSVP page shows the banner, the names of the couple, a family search box, a box for 4 digits and a "Request access" button. | Must | US-16 | FR-4, FR-22 |
+| FR-27 | Screen 1 of the RSVP page shows the banner, the names of the couple, a family search box, four separate boxes for 4 digits, and the help text "Ask the person who sent you the card" (no phone numbers of team members). The "Request access" button comes in Wave 2 (FR-39). | Must | US-16 | FR-4, FR-22 |
 | FR-28 | The search shows matches only after 3 letters. Each match shows the family name and the contact name or city. The app never shows the full list of families. | Must | US-16 | FR-15 |
 | FR-29 | The guest gets access if the 4 digits are equal to the last 4 digits of the primary or secondary number of the selected family. | Must | US-16 | FR-18, FR-28 |
-| FR-30 | The app remembers a device with access. On that device, the link opens Screen 2 directly. Each family can have a limited number of devices (10 to 15, the builder selects). An organizer can reset the device list of a family. | Must | US-16 | FR-29, FR-39 |
-| FR-31 | The app limits incorrect attempts for one family on one device, and the total attempts from one device. After the limit, the app stops attempts for a period. The builder selects the numbers (Section 15). | Must | US-16 | FR-29 |
-| FR-32 | Screen 2 shows: a greeting with the family name, one card for each event on the invitation of the family (name, date, time, venue, map link, note), and the privacy note. The app does not show other events. | Must | US-16, US-17 | FR-20, FR-30 |
-| FR-33 | For each event, the guest selects "Yes" or "No". For "Yes", the guest types the number of persons. There is no maximum. | Must | US-17 | FR-32 |
+| FR-30 | The app remembers a device with access. On that device, the link opens Screen 2 directly. Each family can have 12 devices. An organizer can reset the device list of a family. | Must | US-16 | FR-29, FR-39 |
+| FR-31 | The app limits incorrect attempts for one family on one device, and the total attempts from one device. After 5 incorrect attempts for one family on one device, the app stops attempts for 15 minutes. One device can make 20 attempts in one hour. `[Confirmed]` (Section 15, Q-1 and Q-2) | Must | US-16 | FR-29 |
+| FR-32 | Screen 2 shows: a greeting with the family name, one card for each event on the invitation of the family (name, date, time, venue, map link), the text "Please reply by <last date>", and the privacy note. The event note is for the team only. The app does not show other events. | Must | US-16, US-17 | FR-20, FR-30 |
+| FR-33 | For each event, the guest selects "Yes" or "No". For "Yes", the guest types the number of persons. There is no maximum. Nothing is selected at the start, and "Review and submit" stays locked until every event has an answer. For the whole-wedding count, a family counts once, with its largest headcount across its events. `[Confirmed]` | Must | US-17 | FR-32 |
 | FR-34 | Before the submit, the app shows a summary and the warning "You cannot change this reply later. Do you want to submit?". After the submit, the reply is read-only, with "Replied by <name>, <date>". | Must | US-17 | FR-33 |
 | FR-35 | Each family has one reply for each event. If two persons submit at the same time, the app keeps the first reply. The second person sees the first reply. | Must | US-17 | FR-33 |
 | FR-36 | Guests cannot change a submitted reply. The page shows "To change your reply, contact <organizer name>". | Must | US-17 | FR-21, FR-34 |
@@ -490,7 +490,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | FR-41 | The team can enter or change the reply, headcount and stay data of any family at any time, also after the last dates. The app shows "updated by <name>". | Must | US-20 | FR-33 |
 | FR-42 | If the submit fails (for example, no network), the app shows "Not sent. Try again." The app shows a reply as sent only after the server confirms it. `[Proposed]` | Must | US-17 | FR-34 |
 | FR-43 | The dashboard shows, for each event and for the full wedding: invited, replied yes (persons), replied no, and no reply. It shows these counts for bride side, groom side, both, and total. | Must | US-21 | FR-33, FR-41 |
-| FR-44 | The dashboard shows a "needs attention" list: families with no reply, open access requests, money due soon (only with money access), and open tasks. Money and task items come when those features are ready. | Must | US-21 | FR-43, FR-39 |
+| FR-44 | The dashboard shows a "needs attention" list. In Wave 1 it has three rows: families with no reply, families with no phone number, and invitations not sent. Later it adds: open access requests, money due soon (only with money access), and open tasks. Money and task items come when those features are ready. | Must | US-21 | FR-43, FR-39 |
 
 ### 8.4 Money
 
@@ -536,7 +536,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | ID | Requirement | Priority | User Story | Dependencies |
 |---|---|---|---|---|
 | FR-64 | The server checks each request. A guest gets only the data of their family and their events. A team member gets only the data of their weddings. Money and all gifts go only to users with money access. | Must | US-6, US-16 | FR-1, FR-10, FR-30 |
-| FR-65 | An admin can export guests, replies, stay, expenses, tasks and gifts to CSV. | Must | US-33 | FR-15, FR-33 |
+| FR-65 | An admin can export to CSV. In Wave 1 the export is three files: families with their phone numbers, replies, and the team. Stay, expenses, tasks and gifts are added when those features are built. `[Confirmed]` | Must | US-33 | FR-15, FR-33 |
 | FR-66 | The system makes a copy of the database (`pg_dump`) each day and keeps it on a different host. | Must | US-33 | — |
 | FR-67 | 6 months after the wedding date, the app deletes guest phone numbers, stay data, access requests and guest devices. Before this, the app warns the admins and they can download a full CSV export. The app keeps expenses, payments and totals. | Should (Dec) | US-34 | FR-65 |
 | FR-68 | Only the bride or the groom can delete all data of a wedding, at any time. Other admins cannot. `[Confirmed]` | Should (Dec) | US-34 | FR-2, FR-12 |

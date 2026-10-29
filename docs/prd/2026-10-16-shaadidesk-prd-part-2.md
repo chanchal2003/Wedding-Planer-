@@ -62,7 +62,7 @@ The owner selected a simple version, not the full WCAG 2.2 AA standard. `[Confir
 | NFR-21 | Large text. | Body text at least 16 px on phones | Rule `[Confirmed]`, number `[Proposed]` |
 | NFR-22 | Strong contrast between text and background. | Text is easy to read in daylight on a phone | `[Confirmed]` |
 | NFR-23 | Big tap targets for buttons and fields. | At least 44 × 44 px | Rule `[Confirmed]`, number `[Proposed]` |
-| NFR-24 | Clear error messages in simple words. Each message tells the person what to do next. For example: "The number does not match. You can request access." | — | `[Confirmed]` |
+| NFR-24 | Clear error messages in simple words. Each message tells the person what to do next. For example: "The number does not match. Check the last 4 digits and try again." | — | `[Confirmed]` |
 
 ### 9.7 Devices and browsers
 
@@ -110,7 +110,7 @@ This section gives the screens, the flows between them and the states of each sc
 
 | Screen | Purpose | FR |
 |---|---|---|
-| RSVP Screen 1: Find your family | Search, 4 digits, request access | FR-27 to FR-31, FR-39 |
+| RSVP Screen 1: Find your family | Search, 4 digits, help text (request access in Wave 2) | FR-27 to FR-31, FR-39 |
 | RSVP Screen 2: Your invitation | Event cards, reply, stay, privacy note | FR-32 to FR-37, FR-60 |
 
 **Team screens (Google sign-in)**
@@ -120,7 +120,7 @@ This section gives the screens, the flows between them and the states of each sc
 | Sign in | Google sign-in | Team | FR-1 |
 | My weddings | List of the weddings of the user. "Make a wedding" button. | Team | FR-2, FR-3 |
 | Wedding dashboard | Events, guest counts, organizer progress, "needs attention", tasks due soon, budget summary (money access) | Team | FR-24, FR-43, FR-44, FR-51, FR-57 |
-| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy", delete wedding | Admin | FR-4, FR-22, FR-68 |
+| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy". "Delete wedding" for real weddings comes in a later release (test weddings: Wave 1) | Admin | FR-4, FR-22, FR-68 |
 | Events and event page | Event list with type, icon and "hosted by". Event page with details, guest counts, tasks and money (money access). | Team | FR-5 to FR-8 |
 | Team | Admins, organizers, pending invitations, money switch, remove organizer | Admin | FR-9 to FR-13 |
 | Families | Full guest list with search and filters (side, event, organizer, no reply, no number) | Team | FR-15, FR-19, FR-20 |
@@ -153,12 +153,12 @@ Guest opens the RSVP link
           │
           Types 3 or more letters ──► Matches (family name + contact name or city)
           │
-          ├─ Family not in the list ──► "Request access"
+          ├─ Family not in the list ──► "No family found" + "Ask the person who sent you the card"
           │
           Selects family ──► Types last 4 digits
           │
           ├─ Match ──► device gets access ──► Screen 2
-          ├─ No match ──► error + "Request access"
+          ├─ No match ──► error + "Check the last 4 digits and try again"
           └─ Too many attempts ──► locked state
 
 Screen 2
@@ -194,12 +194,12 @@ Organizer opens Requests ──► Approve or Reject
 |---|---|
 | Start | Banner, names of the couple, search box: "Type your family name". |
 | Fewer than 3 letters | "Type at least 3 letters." |
-| No matches | "No family found. Check the spelling, or request access." `[Proposed]` |
-| Incorrect digits | "The number does not match. You can request access." |
-| Too many attempts | "Too many attempts. Try again later, or request access." `[Proposed]` |
-| Device limit | "Too many devices. Contact <organizer name>." |
-| Request sent | "Your request is sent. <organizer name> will approve it." `[Proposed]` |
-| Request rejected | "Your request was not approved. Contact <organizer name>." `[Proposed]` |
+| No matches | "No family found. Check the spelling, or ask the person who sent you the card." `[Proposed]` |
+| Incorrect digits | "The number does not match. Check the last 4 digits and try again." |
+| Too many attempts | "Too many tries. Please wait 15 minutes, then try again, or ask the person who sent you the card." `[Confirmed]` |
+| Device limit | "Too many devices. Ask the person who sent you the card." |
+| Request sent (Wave 2) | "Your request is sent. <organizer name> will approve it." `[Proposed]` |
+| Request rejected (Wave 2) | "Your request was not approved. Contact <organizer name>." `[Proposed]` |
 | Loading | "Loading…" text. The page opens in approximately 1 second (NFR-1). |
 
 **RSVP Screen 2**
@@ -222,7 +222,7 @@ Organizer opens Requests ──► Approve or Reject
 | Screen | Empty state | Other states |
 |---|---|---|
 | My weddings | "You have no weddings. Make a wedding." | Pending invitation: "<name> added you to <wedding>." |
-| Wedding dashboard | "Add your first event." | Test wedding: "TEST" label on all pages. |
+| Wedding dashboard | "Add your first event." | Test wedding: "TEST" badge on team pages and "TEST" ribbon on guest pages. |
 | Families | "Import your guest list." with "Download template". | Flags: no number, incorrect number, duplicate. |
 | Import | — | Preview with the errors of each row and "Download error list". The admin corrects the file and uploads it again. "Save" is available only with 0 errors. `[Confirmed]` |
 | My families | "No families are assigned to you. Ask an admin." | All sent: "All invitations sent." |
@@ -313,15 +313,15 @@ Organizer opens Requests ──► Approve or Reject
 
 | ID | Given | When | Then |
 |---|---|---|---|
-| AC-27.1 | The device has no access | Meena opens the RSVP link | She sees Screen 1 with the banner, couple names, search box, 4-digit box and "Request access" |
+| AC-27.1 | The device has no access | Meena opens the RSVP link | She sees Screen 1 with the banner, couple names, search box, four digit boxes and the help text "Ask the person who sent you the card" |
 | AC-28.1 | Meena is on Screen 1 | She types "Sh" | The app shows no matches and "Type at least 3 letters." |
 | AC-28.2 | Meena is on Screen 1 | She types "Sha" | The app shows "Sharma family (Meena, Jaipur)" and other matches. It does not show the full list |
 | AC-29.1 | The Sharma family has the primary number 98765 11111 and the secondary number 98765 22222 | A guest types "1111" or "2222" | The guest gets access to the Sharma invitation |
-| AC-29.2 | The Sharma family is selected | A guest types "5555" | The app shows "The number does not match. You can request access." |
+| AC-29.2 | The Sharma family is selected | A guest types "5555" | The app shows "The number does not match. Check the last 4 digits and try again." |
 | AC-30.1 | Meena got access on her phone | She opens the link again on the same phone | Screen 2 opens directly |
-| AC-30.2 | The Sharma family has the maximum number of devices | A new device types the correct digits | The app shows "Too many devices. Contact <organizer name>." |
+| AC-30.2 | The Sharma family has the maximum number of devices | A new device types the correct digits | The app shows "Too many devices. Ask the person who sent you the card." |
 | AC-30.3 | The Sharma family has the maximum number of devices | Rohan resets the device list | A new device can get access |
-| AC-31.1 | A device typed incorrect digits for the Sharma family up to the limit | It types digits again for the Sharma family | The app does not check them and shows "Too many attempts. Try again later, or request access." |
+| AC-31.1 | A device typed incorrect digits for the Sharma family up to the limit | It types digits again for the Sharma family | The app does not check them and shows "Too many tries. Please wait 15 minutes, then try again, or ask the person who sent you the card." |
 | AC-31.2 | A device reached the total attempt limit | It tries a different family | The app does not check the digits |
 | AC-32.1 | The Sharma family is invited to Haldi and Wedding only | Meena opens Screen 2 | She sees 2 event cards: Haldi and Wedding. She does not see other events. She sees the privacy note |
 | AC-33.1 | Meena is on Screen 2 | She selects "Yes" for the Wedding and types 12 persons | The app accepts 12. There is no maximum |
@@ -339,7 +339,7 @@ Organizer opens Requests ──► Approve or Reject
 | AC-41.1 | Uncle Verma calls Rohan | Rohan enters "Wedding: yes, 5 persons" | The reply is saved and shows "Updated by Rohan" |
 | AC-42.1 | Meena pushes "Yes, submit" and the network fails | The server does not confirm | The page shows "Not sent. Try again." Her reply stays on the page. The page does not show "Replied" `[Proposed]` |
 | AC-43.1 | 300 families are invited to the Wedding. 200 replied yes (650 persons), 40 replied no | Priya opens the dashboard | She sees for the Wedding: invited 300, yes 650 persons, no 40, no reply 60. She also sees these counts for each side |
-| AC-44.1 | There are 2 open access requests and 60 families with no reply | Priya opens the dashboard | "Needs attention" shows both items |
+| AC-44.1 | There are 2 open access requests and 60 families with no reply | Priya opens the dashboard | In Wave 1, "Needs attention" shows the 60 families with no reply (the access request row comes in Wave 2) |
 
 ### 11.4 Money
 
@@ -399,7 +399,7 @@ Organizer opens Requests ──► Approve or Reject
 |---|---|---|---|
 | AC-64.1 | Meena has access to the Sharma family | Her device sends a request for the Verma family data | The server refuses the request |
 | AC-64.2 | Rohan is an organizer in wedding A only | He sends a request for wedding B | The server refuses the request |
-| AC-65.1 | Priya opens Export | She pushes "Export CSV" | She gets CSV files of guests, replies, stay, expenses, tasks and gifts |
+| AC-65.1 | Priya opens Export | She pushes "Export CSV" | She gets three CSV files: families with phone numbers, replies, and the team |
 | AC-66.1 | A day passed | The owner checks the backup host | There is a new database copy for that day |
 | AC-67.1 | The wedding date is 15 Jan 2027 | It is approximately 15 Jul 2027 | The app deleted the phone numbers, stay data, access requests and guest devices. Expenses and totals stay |
 | AC-67.2 | The automatic delete is near | Priya opens the app | She sees a warning and a "Download full export" button |
@@ -448,7 +448,7 @@ This section is high level. The design document (Section 8.1) gives the tables a
 | Guest list import | In | Excel or CSV, from the template. The builder selects the formats. | FR-16, FR-17 |
 | Banner photo | In | Image upload | FR-4 |
 | Bill or receipt photo | In | Image upload | FR-47 |
-| CSV export | Out | CSV files for guests, replies, stay, expenses, tasks and gifts | FR-65 |
+| CSV export | Out | Wave 1: three CSV files (families with phone numbers, replies, team). Later: stay, expenses, tasks and gifts | FR-65 |
 | Database copy | Out | `pg_dump` file each day, on a different host | FR-66 |
 | QR code of the RSVP link | Out | Image download `[Proposed]` | FR-26 |
 
