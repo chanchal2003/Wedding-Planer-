@@ -356,23 +356,33 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 
   <section class="col">
     <h2>Where the code lives</h2>
-    <p class="hint">Only <code>app/</code> and <code>public/</code> mean something special to Next.js. The other folder names are our own choice.</p>
+    <p class="hint">Decided on 2026-10-30. A folder inside <code>app/</code> is an address. <code>[brackets]</code> mean "any value". <code>(round brackets)</code> group pages without changing the address. A folder that starts with <code>_</code> is never an address.</p>
 <pre class="tree">shaadidesk/
-  <span class="s">app/</span>                 <span class="c">pages; each folder is an address</span>
-    [couple]/          <span class="c">RSVP page, e.g. /priya-rahul</span>
-    w/[weddingId]/     <span class="c">team pages</span>
-  components/          <span class="c">React components</span>
+  <span class="s">app/</span>                   <span class="c">only pages and routes</span>
+    <span class="s">(guest)/</span>[couple]/   <span class="c">/priya-rahul: Screen 1 or 2</span>
+      _components/       <span class="c">digit boxes, event card</span>
+    (auth)/sign-in/      <span class="c">/sign-in</span>
+    <span class="s">(team)/</span>              <span class="c">sidebar and bottom bar</span>
+      weddings/          <span class="c">My weddings, new</span>
+      w/[weddingId]/     <span class="c">layout calls requireMember</span>
+        families/  my-families/  import/
+        events/  team/  settings/
+        preview/  more/  export/[file]/
+    api/auth/            <span class="c">Google sign-in (Auth.js)</span>
+  components/
+    ui/  layout/  shared/  <span class="c">shadcn, menus, chips</span>
   lib/
-    <span class="s">access/</span>            <span class="c">the security guard</span>
-    db/                <span class="c">Prisma client (db)</span>
-    import/            <span class="c">the three import steps</span>
-    money/             <span class="c">paise ↔ ₹, Indian format</span>
-    phone/             <span class="c">one phone format</span>
-    storage/           <span class="c">R2 upload links</span>
-  prisma/              <span class="c">schema, migrations</span>
-  scripts/             <span class="c">fake families, backup</span>
-  tests/               <span class="c">small Vitest tests</span>
-  .github/workflows/   <span class="c">checks, nightly jobs</span></pre>
+    <span class="s">access/</span>              <span class="c">the security guard</span>
+    auth/  db/
+    weddings/ events/ team/ families/
+    import/ rsvp/ tracking/ dashboard/
+    export/              <span class="c">each: queries, actions, schemas</span>
+    phone/ time/ limits.ts storage/
+    result.ts            <span class="c">Result type, error codes</span>
+  prisma/schema/  prisma/migrations/
+  scripts/  samples/
+  tests/access/  tests/import/
+  .github/workflows/     <span class="c">nightly backup</span></pre>
   </section>
 
   <section class="col">
@@ -394,6 +404,9 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
           <tr><td>Money</td><td>Whole paise, shown as ₹1,50,000</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Look</td><td>Tailwind CSS and shadcn/ui</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Tests</td><td>Small Vitest tests for access rules and the import only. No Playwright, no CI.</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Folders</td><td>Server code in <code>lib/&lt;area&gt;/</code>, <code>app/</code> only for pages. One-page pieces in <code>_components/</code>, shared ones in <code>components/</code>.</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Addresses</td><td>Team: <span class="mono">/w/&lt;wedding id&gt;</span>. Guests: <span class="mono">/&lt;couple&gt;</span>, one page for both screens. Top-level folder names are reserved.</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Server functions</td><td>Read functions, actions and routes, listed in the API design document</td><td><span class="pill c">Confirmed</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -412,7 +425,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
     </div>
   </section>
 
-  <footer class="col">Source: <span class="mono">docs/architecture/2026-10-24-shaadidesk-architecture.md</span> in the ShaadiDesk repo, based on the PRD and design document.</footer>
+  <footer class="col">Source: <span class="mono">docs/architecture/2026-10-24-shaadidesk-architecture.md</span> and <span class="mono">2026-10-29-shaadidesk-api-design.md</span> in the ShaadiDesk repo, based on the PRD and design document.</footer>
 </div>
 
 <script>

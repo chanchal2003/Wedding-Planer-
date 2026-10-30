@@ -10,6 +10,7 @@ Read these before you change behaviour. If the code and these documents do not a
 
 - PRD: `docs/prd/2026-10-16-shaadidesk-prd.md` (Sections 1–8: stories, FR-n) and `docs/prd/2026-10-16-shaadidesk-prd-part-2.md` (NFR-n, UX, AC-n, data, risks, decisions)
 - Architecture: `docs/architecture/2026-10-24-shaadidesk-architecture.md`
+- API design: `docs/architecture/2026-10-29-shaadidesk-api-design.md` (every server function: who, input, output, errors)
 - Design details: `docs/superpowers/specs/2026-10-16-wedding-management-design.md`
 
 Refer to requirements by ID (FR-29, AC-35.1, NFR-21) in code comments, tests and commits where it helps.
@@ -52,21 +53,66 @@ Build Wave 1 first, then decide on Wave 2. Do not start Should or Could items un
 - **Wave 2:** request access, reminders, fast expense form, event type icons and colours, "needs attention" list.
 - Later tiers and the full list: PRD Section 6.1 (the source of truth for the waves).
 
-## Folder layout (planned)
+## Folder layout (decided 2026-10-30)
+
+Full tree and reasons: architecture document, Section 4. In short:
 
 ```
-app/[couple]/        RSVP page (guests)
-app/w/[weddingId]/   team pages
-components/          React components
-lib/access/          the security guard
-lib/db/              Prisma client (the `db` object)
-lib/import/          validateImportFile, validateImportAgainstDb, saveImport
-lib/money/  lib/phone/  lib/time/  lib/limits.ts  lib/storage/   (each is made inside the first feature that needs it)
-prisma/schema/       the schema files (base, enums, team, events, guests)
-prisma/migrations/   migration files
-scripts/             sample file generator, backup
-tests/               small Vitest tests (access rules, import)
+app/
+  layout.tsx                     outer frame of every page: fonts, colours
+  page.tsx                       "/": signed in -> /weddings, else -> /sign-in
+  globals.css
+  (guest)/                       guest pages: no menu, the couple's colour
+    [couple]/
+      page.tsx                   /priya-rahul: Screen 1 (find family) or Screen 2 (reply)
+      _components/               pieces used only on this page (digit boxes, event card)
+  (auth)/
+    sign-in/page.tsx             /sign-in: "Continue with Google"
+  (team)/                        team pages: sidebar on a laptop, bottom bar on a phone
+    weddings/
+      page.tsx                   /weddings: My weddings
+      new/page.tsx               /weddings/new: Make a wedding
+    w/[weddingId]/
+      layout.tsx                 frame with the menu; calls requireMember first
+      page.tsx                   Home (dashboard)
+      families/                  page.tsx (list), new/page.tsx, [familyId]/page.tsx
+      my-families/page.tsx       My families (organizers)
+      import/                    page.tsx, template/route.ts (Excel template)
+      events/                    page.tsx, new/page.tsx, [eventId]/page.tsx
+      team/page.tsx
+      settings/page.tsx          settings and the RSVP link
+      preview/page.tsx           "See it as a guest sees it"
+      more/page.tsx              the "More" tab on phones
+      export/[file]/route.ts     families.csv, replies.csv, team.csv
+  api/auth/[...nextauth]/route.ts  Google sign-in addresses (Auth.js)
+
+components/
+  ui/                            shadcn pieces (button, input, card)
+  layout/                        sidebar, bottom bar, top bar, TEST badge
+  shared/                        status chip, event dot, empty state, page shell
+
+lib/
+  access/                        the security guard (FR-64)
+  auth/                          Auth.js setup (Google)
+  db/                            Prisma client (the `db` object)
+  weddings/ events/ team/ families/ import/ rsvp/ tracking/ dashboard/ export/
+                                 each: queries.ts (read), actions.ts ("use server"), schemas.ts (Zod)
+  phone/ time/ limits.ts storage/  helpers, each made inside the first feature that needs it
+  result.ts                      the Result type and the error codes
+  env.ts  utils.ts
+
+prisma/schema/                   schema files (base, enums, team, events, guests)
+prisma/migrations/               migration files
+scripts/                         sample file generator, backup
+samples/                         sample Excel files with fake families
+tests/access/  tests/import/     small Vitest tests
+.github/workflows/               nightly backup and cleanup
 ```
+
+- `app/` is only pages and routes. Server code goes in `lib/<area>/{queries,actions,schemas}.ts` (see the API design document).
+- One-page components go in that page's `_components/`; shared ones go in `components/shared/`.
+- Never put security in `proxy.ts`; every page and action calls `lib/access`.
+- Make a folder only when its feature is built.
 
 ## Working style
 

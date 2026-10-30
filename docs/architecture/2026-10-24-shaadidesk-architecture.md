@@ -167,28 +167,68 @@ sequenceDiagram
 
 ## 4. Folder structure
 
-`app/` and `public/` are special folders in Next.js. The other folders are only names.
+Decided by the owner on 2026-10-30. `[Confirmed]` It follows the Next.js 16 project structure guide (`node_modules/next/dist/docs/01-app/01-getting-started/02-project-structure.md`) and the API design (`docs/architecture/2026-10-29-shaadidesk-api-design.md`).
 
 ```
-shaadidesk/
-  app/                  pages; each folder is an address
-    [couple]/           RSVP page, e.g. /priya-rahul
-    w/[weddingId]/      team pages: dashboard, families, money, tasks...
-  components/           React components
-  lib/
-    access/             the security guard (FR-64)
-    db/                 Prisma client (the `db` object)
-    import/             validateImportFile, validateImportAgainstDb, saveImport
-    money/              paise <-> ₹, Indian number format
-    phone/              one standard phone format (libphonenumber-js)
-    storage/            R2 upload links
-  prisma/schema/        the schema files, one for each area
-  prisma/migrations/    migration files
-  scripts/              sample guest file generator, backup script
-  samples/              sample Excel files with fake families
-  tests/                small Vitest tests (access, import)
-  .github/workflows/    deploy checks, nightly backup and cleanup
+app/
+  layout.tsx                     outer frame of every page: fonts, colours
+  page.tsx                       "/": signed in -> /weddings, else -> /sign-in
+  globals.css
+  (guest)/                       guest pages: no menu, the couple's colour
+    [couple]/
+      page.tsx                   /priya-rahul: Screen 1 (find family) or Screen 2 (reply)
+      _components/               pieces used only on this page (digit boxes, event card)
+  (auth)/
+    sign-in/page.tsx             /sign-in: "Continue with Google"
+  (team)/                        team pages: sidebar on a laptop, bottom bar on a phone
+    weddings/
+      page.tsx                   /weddings: My weddings
+      new/page.tsx               /weddings/new: Make a wedding
+    w/[weddingId]/
+      layout.tsx                 frame with the menu; calls requireMember first
+      page.tsx                   Home (dashboard)
+      families/                  page.tsx (list), new/page.tsx, [familyId]/page.tsx
+      my-families/page.tsx       My families (organizers)
+      import/                    page.tsx, template/route.ts (Excel template)
+      events/                    page.tsx, new/page.tsx, [eventId]/page.tsx
+      team/page.tsx
+      settings/page.tsx          settings and the RSVP link
+      preview/page.tsx           "See it as a guest sees it"
+      more/page.tsx              the "More" tab on phones
+      export/[file]/route.ts     families.csv, replies.csv, team.csv
+  api/auth/[...nextauth]/route.ts  Google sign-in addresses (Auth.js)
+
+components/
+  ui/                            shadcn pieces (button, input, card)
+  layout/                        sidebar, bottom bar, top bar, TEST badge
+  shared/                        status chip, event dot, empty state, page shell
+
+lib/
+  access/                        the security guard (FR-64)
+  auth/                          Auth.js setup (Google)
+  db/                            Prisma client (the `db` object)
+  weddings/ events/ team/ families/ import/ rsvp/ tracking/ dashboard/ export/
+                                 each: queries.ts (read), actions.ts ("use server"), schemas.ts (Zod)
+  phone/ time/ limits.ts storage/  helpers, each made inside the first feature that needs it
+  result.ts                      the Result type and the error codes
+  env.ts  utils.ts
+
+prisma/schema/                   schema files (base, enums, team, events, guests)
+prisma/migrations/               migration files
+scripts/                         sample file generator, backup
+samples/                         sample Excel files with fake families
+tests/access/  tests/import/     small Vitest tests
+.github/workflows/               nightly backup and cleanup
 ```
+
+**Rules:**
+- `app/` holds only pages and routes. Server code is in `lib/<area>/`. One area (for example families) has its read functions, actions and Zod schemas in one folder.
+- `(guest)`, `(auth)` and `(team)` are route groups. The name in round brackets is not part of the address. Each group has its own frame (layout).
+- A component that only one page uses is in the `_components/` folder of that page. The underscore tells Next.js that the folder is not an address. When a second page needs the component, it moves to `components/shared/`.
+- Team addresses are `/w/<wedding id>/...`. The guest address is `/<couple>`. Screen 1 and Screen 2 are one page: the server reads the family cookie and shows the correct screen.
+- No `src/` folder. `proxy.ts` is not used for security: all checks are in `lib/access`.
+- Reserved link names: because the guest page is `/<couple>`, a couple cannot use a top-level name (`weddings`, `w`, `sign-in`, `api` and the other folders in `app/`) as the RSVP link name.
+- Folders are made when their feature is built, not before.
 
 ## 5. Environments
 
