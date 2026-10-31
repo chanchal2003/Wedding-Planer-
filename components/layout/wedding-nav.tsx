@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { CalendarDays, Home, MoreHorizontal, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// The menu of one wedding (UI design, Section 7): a bar at the bottom on phones, a sidebar on
+// laptops. A section that does not exist yet is not in the list (it is hidden, not greyed out).
+// Each later step adds its item here: Families (step 6), Team and Import (steps 5.5 and 6).
+
+type Item = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  // true when this item should be shown as the current one for this address
+  active: (path: string, base: string) => boolean;
+};
+
+const phoneItems = (base: string): Item[] => [
+  { href: base, label: "Home", icon: Home, active: (path) => path === base },
+  { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
+  // "More" holds the rest (Settings for admins, My weddings). Settings counts as More on a phone.
+  {
+    href: `${base}/more`,
+    label: "More",
+    icon: MoreHorizontal,
+    active: (path) => path.startsWith(`${base}/more`) || path.startsWith(`${base}/settings`),
+  },
+];
+
+const sideItems = (base: string, isAdmin: boolean): Item[] => [
+  { href: base, label: "Home", icon: Home, active: (path) => path === base },
+  { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
+  ...(isAdmin
+    ? [{ href: `${base}/settings`, label: "Settings", icon: Settings, active: (path: string) => path.startsWith(`${base}/settings`) }]
+    : []),
+];
+
+export function WeddingNav({
+  weddingId,
+  isAdmin,
+  variant,
+}: {
+  weddingId: string;
+  isAdmin: boolean;
+  variant: "bottom" | "side";
+}) {
+  const path = usePathname();
+  const base = `/w/${weddingId}`;
+
+  if (variant === "bottom") {
+    return (
+      <nav
+        aria-label="Wedding menu"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
+      >
+        <ul className="mx-auto grid max-w-xl grid-cols-3">
+          {phoneItems(base).map((item) => {
+            const active = item.active(path, base);
+            return (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-16 flex-col items-center justify-center gap-1 text-sm",
+                    active ? "font-semibold text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  <item.icon className="size-6" aria-hidden />
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    );
+  }
+
+  return (
+    <aside className="hidden w-56 shrink-0 border-r border-border bg-card md:block">
+      <nav aria-label="Wedding menu" className="sticky top-0 p-3">
+        <ul className="flex flex-col gap-1">
+          {sideItems(base, isAdmin).map((item) => {
+            const active = item.active(path, base);
+            return (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-11 items-center gap-3 rounded-lg px-3 text-base",
+                    active ? "bg-secondary font-semibold text-primary" : "text-foreground hover:bg-secondary",
+                  )}
+                >
+                  <item.icon className="size-5" aria-hidden />
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </aside>
+  );
+}
