@@ -63,14 +63,14 @@ These are `[Proposed]` in the PRD. Claude Code asks for a yes before the step th
 
 ## Phase 0: Laptop and accounts
 
-### 0.1 Install Node.js LTS 👤
+### 0.1 Install Node.js LTS ✅ done 👤
 1. Install `nvm` (instructions on the nvm GitHub page).
 2. Check Vercel's list of supported Node.js versions. Install the newest LTS version from that list with `nvm install <version>`.
 3. Node 25 stays installed for other projects.
 
 **Done when:** `node -v` in the project folder shows the LTS version.
 
-### 0.2 Private GitHub repository 🤖 + 👤
+### 0.2 Private GitHub repository ✅ done 🤖 + 👤
 1. 🤖 Create the repository with `gh repo create shaadidesk --private --source . --push`. The owner approves the command.
 2. 👤 Open the repository on GitHub and check that the `docs/` folder and `CLAUDE.md` are there.
 
@@ -109,7 +109,7 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 
 ## Phase 1: Project skeleton
 
-### 1.1 Make the Next.js project 🤖
+### 1.1 Make the Next.js project ✅ done 🤖
 - Make the project with `create-next-app` in the repository folder: latest stable Next.js, TypeScript, ESLint, Tailwind, App Router, no `src/` folder.
 - Add `.nvmrc` and the `engines` field in `package.json`.
 - Turn on TypeScript strict mode.
@@ -170,7 +170,7 @@ No Docker. The local PostgreSQL from step 0.3 is the development database. To st
 
 **Done when:** `npm run db:check` prints "Database OK" for the local database.
 
-### 2.2 Wave 1 tables 🤖
+### 2.2 Wave 1 tables ✅ done 🤖
 Tables from design document Section 8.1, only the ones Wave 1 needs:
 
 | Table | Main rules |
@@ -191,7 +191,7 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 **Done when:** Claude Code shows the generated SQL migration and explains each table. The owner agrees.
 **Commit:** `feat: add wave 1 database schema`
 
-### 2.3 Run the migration 🤖 + 👤
+### 2.3 Run the migration ✅ done 🤖 + 👤
 - 🤖 Run the migration on the **local** database (`npx prisma migrate dev`).
 - 👤 After Neon exists (step 0.4), run the same migration on **production** with the documented command. The owner always runs production migrations, before the code that needs them is merged.
 
@@ -259,7 +259,7 @@ Tests for each role:
 
 ## Phase 5: Weddings, events and team
 
-### 5.1 Make a wedding 🤖
+### 5.1 Make a wedding ✅ done 🤖
 "My weddings" page and "Make a wedding" form. Relation: bride, groom, parent or sibling. The person becomes admin. A wedding, real or test, needs both names and a date that is not before today (India time). The app suggests the RSVP link name and checks that it is unique.
 **Done when:** AC-2.1 and AC-2.2 pass.
 **Commit:** `feat: make a wedding with suggested rsvp link`
@@ -301,7 +301,8 @@ Event list and event form: type list (or "Other" with a typed name), date and ti
 
 ## Phase 6: Guest list and import
 
-### 6.1 Families 🤖
+### 6.1 Families ✅ built (waiting for the owner's test) 🤖
+**Built 2026-10-31:** (1) `lib/phone` (`normalizePhone`, `lastFourDigits`, `displayPhone`, `phoneSchema`, `optionalPhoneSchema`) with `libphonenumber-js`; a number with an extension is refused; 10 tests. (2) The Families list `/w/<id>/families`: search (name, contact, city), filters as plain links (show: no number, incorrect, not sent, no reply; side; event; organizer), 50 per page; tested with 500 fake families. (3) The family page, Add family and Delete family (admins): numbers optional (a second number needs a main one), a number used by another family is refused and names that family, taking an event off the invitation deletes its reply (with a warning), only admins set the organizer. A new test: a family is never found through another wedding. Families joins the menu (4 items on a phone). Older text of this step follows.
 Families list with search and filters (side, event, organizer, no reply, no number). Family page: add and edit, two numbers, swap primary and secondary, events on the invitation, mark a number as incorrect. A duplicate number shows the family that has it.
 **Also in this step: the phone helper** (`lib/phone`, `libphonenumber-js`). `normalizePhone` gives the standard number (+919876511111) or the error "This is not a valid phone number". A number with no `+` is treated as Indian. `lastFourDigits` gives the digits for the RSVP check. A Zod rule (`phoneSchema`) is reused by the family form and the import. A short check shows `+91 98765-11111`, `09876511111` and `98765 11111` giving the same number (AC-18.1), and `98765 1111` and `hello` being rejected.
 

@@ -322,7 +322,7 @@ PRD FR-23, FR-25.
 
 ### 6.8 Families and the family page `[Proposed]`
 PRD FR-15, FR-19, FR-20, FR-41.
-- **Families:** a searchable list with filter chips (side, event, organizer, no reply, no number). On a laptop it becomes a table with the same columns.
+- **Families:** a searchable list with filter chips (side, event, organizer, no reply, no number, incorrect number, not sent). The chips are plain links in a "Filters" box that opens by itself when a filter is on (not dropdowns). 50 families a page. On a laptop it becomes a table with the same columns.
 - **Family page:** the family's details at the top, then phone numbers (primary and secondary, with "swap" and "mark as incorrect"), the events on the invitation, the reply and who changed it ("Updated by Rohan"), and the assigned organizer.
 - A duplicate number shows a clear message that names the family that has it.
 - **Make admin** is switched off for a friend, with the text "Only family can be admins". `[Confirmed]`

@@ -207,6 +207,7 @@ These functions are the first line of every read function and action. Small Vite
 | `setPhoneIncorrect(weddingId, phoneId, incorrect)` | Action | Member | `true` or `false` | The phone | `NOT_FOUND` |
 | `deleteFamily(weddingId, familyId)` | Action | Admin | — | — | `NOT_FOUND` |
 
+- **The list** (built 2026-10-31): the search and the filters (`q`, `side`, `event`, `organizer` or `none`, `status`: `no-number`, `incorrect`, `not-sent`, `no-reply`, `page`) are in the address of the page. A wrong value in the address is ignored. 50 families a page. **Numbers** are optional (FR-19); a second number needs a main number; the two numbers must differ; a number with an extension is refused. Saving a family with its numbers and events is one transaction. `getFamily` returns "no access" for a family of another wedding.
 - **Delete a family** (decided 2026-10-30): only an admin. The confirm box says "Delete the Verma family? Its phone numbers, invitations and replies are deleted too." The database removes the phones, devices, invitations and replies (cascade).
 - **Removing an event from a family** deletes the reply for that event, in the same transaction (FR-20). The form warns first: "The Sharma family replied for Haldi. This reply is deleted too."
 - **Phone check:** `lib/phone` normalises. An invalid number gives the field message "This is not a valid phone number". The unique rule in the database gives `CONFLICT`; the message names the other family.
