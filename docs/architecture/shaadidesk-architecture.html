@@ -170,7 +170,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
     <div class="chip"><span class="k">Files</span><span class="v">Cloudflare R2</span><span class="w">S3 API. Photos and 30 days of backups.</span></div>
     <div class="chip"><span class="k">Hosting</span><span class="v">Vercel free plan</span><span class="w"><span class="mono">name.vercel.app/priya-rahul</span></span></div>
     <div class="chip"><span class="k">Code and jobs</span><span class="v">Private GitHub repo</span><span class="w">Deploy on push. Nightly backup job.</span></div>
-    <div class="chip"><span class="k">Team sign-in</span><span class="v">Google via Auth.js</span><span class="w">Guests never sign in.</span></div>
+    <div class="chip"><span class="k">Team sign-in</span><span class="v">Google via Better Auth</span><span class="w">Guests never sign in.</span></div>
   </section>
 
   <section style="display:grid; gap:16px;">
@@ -368,7 +368,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
         families/  my-families/  import/
         events/  team/  settings/
         preview/  more/  export/[file]/
-    api/auth/            <span class="c">Google sign-in (Auth.js)</span>
+    api/auth/            <span class="c">Google sign-in (Better Auth)</span>
   components/
     ui/  layout/  shared/  <span class="c">shadcn, menus, chips</span>
   lib/
@@ -400,7 +400,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
           <tr><td>Import</td><td>File check, database check, save in one transaction, 0 errors before save</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Second import</td><td>Families already in the app are skipped with a note. The same number on a different family is an error.</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Environments</td><td>Production (Neon) and development (local). No preview deployments.</td><td><span class="pill c">Confirmed</span></td></tr>
-          <tr><td>Team sign-in</td><td>Auth.js with Google, sessions in PostgreSQL</td><td><span class="pill c">Confirmed</span></td></tr>
+          <tr><td>Team sign-in</td><td>Better Auth with Google, sessions in PostgreSQL (changed from Auth.js on 2026-10-30)</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Money</td><td>Whole paise, shown as ₹1,50,000</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Look</td><td>Tailwind CSS and shadcn/ui</td><td><span class="pill c">Confirmed</span></td></tr>
           <tr><td>Tests</td><td>Small Vitest tests for access rules and the import only. No Playwright, no CI.</td><td><span class="pill c">Confirmed</span></td></tr>

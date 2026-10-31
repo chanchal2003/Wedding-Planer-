@@ -11,7 +11,7 @@ Sources: PRD Section 6.1 (Wave 1 scope), PRD Sections 8 and 11 (FR-n, AC-n), arc
 - Each step ends with **Done when**: something the owner can see or test. Then Claude Code explains what was built and the owner says "commit".
 - Do the steps in order. A step depends on the steps before it.
 - **Feature-wise (owner decision, 2026-10-26):** each feature is built from screen to database. A helper (phone, time, money, limits) is made inside the first feature that needs it. Before each feature, Claude Code discusses it with the owner.
-- **Secrets never go into the chat or the code.** The owner pastes them into `.env.local`, Vercel and GitHub Secrets.
+- **Secrets never go into the chat or the code.** The owner pastes them into `.env`, Vercel and GitHub Secrets. (One file: Next.js, Prisma and the scripts all read `.env`. Decided 2026-10-30.)
 - **Dummy data only.** All data is fake. There is no seed script. The wedding, events and team are created in the app by hand. The families come from sample Excel files (step 6.2) through the import feature.
 
 ## Wave 1 scope
@@ -23,10 +23,10 @@ From PRD Section 6.1:
 | Weddings, events, team | FR-1 to FR-5, FR-7 to FR-13 (event type list without icons and colors) |
 | Guest list and import | FR-15 to FR-21 |
 | RSVP page | FR-22, FR-27 to FR-38, FR-41, FR-42 |
-| Tracking and dashboard | FR-23, FR-24, FR-43 |
+| Tracking and dashboard | FR-23, FR-24, FR-43, FR-44 (3 rows: no reply, no phone number, not sent), FR-6 (colour dots only) |
 | Data safety | FR-64, FR-65, FR-66 |
 
-Not in Wave 1: request access (FR-39), reminders (FR-25), expenses, event icons and colors (FR-6), "needs attention" (FR-44), tasks, stay, gifts. Tables for these come in their own wave.
+Not in Wave 1: request access (FR-39), reminders (FR-25), event icons, the money switch screen (FR-10), event budget, expenses, tasks, stay, gifts. Tables for these come in their own wave.
 
 ## Decisions from the planning questions (2026-10-24)
 
@@ -81,7 +81,7 @@ The development database is a normal PostgreSQL 17 on the laptop (Homebrew), wit
 
 **Done when:** `npm run db:check` prints "Database OK".
 
-### 0.4 Neon production database 👤 (do this at step 1.5, not before)
+### 0.4 Neon production database 👤 (moved: do this together with step 1.5, after Phase 8 and before step 9.2. Decided 2026-10-30.)
 Neon is only for the deployed app on Vercel and the nightly backup. The app does not need it on the laptop.
 1. Sign up at neon.tech with GitHub.
 2. Make a project named `shaadidesk`. Select the region nearest to India (for example Singapore, if it is available). Select PostgreSQL 17, the same major version as the local database.
@@ -90,10 +90,11 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
    - **pooled** (the host name has `-pooler`): the app uses this one
    - **direct**: migrations and backups use this one
 5. Read the current free plan limits (storage, compute hours). Tell Claude Code if a limit looks too small.
+6. 🤖 `prisma.config.ts` must use the **direct** string for migrations on production (a `DIRECT_URL` variable), and the app uses the pooled `DATABASE_URL`.
 
 **Done when:** you have 2 connection strings saved, and none of them is in the chat.
 
-### 0.5 Cloudflare R2 👤
+### 0.5 Cloudflare R2 👤 (do this before step 5.3, because the banner photo uploads to R2. Decided 2026-10-30.)
 1. Sign up at cloudflare.com.
 2. Open R2 and turn it on. Cloudflare can ask for a payment card, also for the free plan. Read the free limits on that page before you continue.
 3. Make two **private** buckets: `shaadidesk-photos` and `shaadidesk-backups`.
@@ -127,20 +128,21 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 
 ### 1.3 Environment variables with Zod ✅ done 🤖 + 👤
 - 🤖 `lib/env.ts` checks all environment variables with Zod when the app starts. `.env.example` lists the names with no values. `.gitignore` excludes `.env*` files (except the example).
-- 👤 Make `.env.local` and paste the **development** values: `DATABASE_URL` set to the local database address (already in `.env`), and the R2 values.
+- 👤 Paste the **development** values into `.env`: `DATABASE_URL` (already there) and the R2 values.
 
 **Done when:** the app starts with all values. If you remove one value, the app stops with a clear message that names it.
 **Commit:** `chore: validate environment variables with zod`
 
-### 1.4 Vitest (small) 🤖
+### 1.4 Vitest (small) 🤖 (not done yet: do it before step 4.3)
 - Install Vitest. Add `npm test`.
 - **No Playwright. No GitHub Actions / CI.** Add CI later only if the owner asks.
 - Tests are written only for the access rules (step 4.3) and the import (steps 6.3 and 6.4).
+- **A separate test database** `shadidesk_test` on the same laptop PostgreSQL (one `createdb` command, shown to the owner before it runs). The tests use it through `DATABASE_URL` in a `.env.test` file (git-ignored), apply the migrations to it, and empty it between tests. They never touch `shadidesk_local`. Decided 2026-10-30.
 
 **Done when:** one sample test passes with `npm test`.
 **Commit:** `chore: add vitest`
 
-### 1.5 First deploy to Vercel 👤 + 🤖
+### 1.5 First deploy to Vercel 👤 + 🤖 (moved: do this after Phase 8 and before step 9.2, together with step 0.4. Until then everything runs on the laptop. Decided 2026-10-30.)
 1. 👤 Sign up at vercel.com with GitHub. Import the `shaadidesk` repository.
 2. 👤 Try the project name `shaadidesk`. If the name is taken, select a near name. **This name is in the RSVP link.**
 3. 👤 Set the Node.js version to the same LTS as `.nvmrc`.
@@ -173,7 +175,7 @@ Tables from design document Section 8.1, only the ones Wave 1 needs:
 
 | Table | Main rules |
 |---|---|
-| `users`, `accounts`, `sessions`, `verification_tokens` | Auth.js tables |
+| `users`, `accounts`, `sessions`, `verifications` | Better Auth tables (step 4.2) |
 | `weddings` | Unique RSVP link name. Test flag. Couple names, wedding date, last dates, greeting, colors, banner file key, link-locked flag |
 | `wedding_members` | Role (admin or organizer), relation, money access (default off), pending email. One row per person per wedding |
 | `events` | Type (Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other) and name, date and time, venue, map link, note, budget in paise (`bigint`), hosted by |
@@ -206,7 +208,7 @@ The separate helper phase is removed (owner decision, 2026-10-26). Its work move
 | Helper | Built in | Details |
 |---|---|---|
 | India time (`lib/time`): show dates in India time, and "is it after the last date?" at 23:59 India time | **5.3** Wedding settings | First place a last date is saved. Also used in 7.4. |
-| Money (`lib/money`): ₹ text to paise and back, Indian format (₹1,50,000) | **5.4** Events | The event budget is the first money field. |
+| Money (`lib/money`): ₹ text to paise and back, Indian format (₹1,50,000) | **Money release** | The event budget and expenses are the first money fields. Not in Wave 1. |
 | Phone numbers (`lib/phone`, `libphonenumber-js`): one standard form, rejects invalid numbers, last 4 digits | **6.1** Families | First place a number is typed. The import (6.3, 6.4) and the 4-digit check (7.3) reuse it. |
 | Limit settings (`lib/limits.ts`): 12 devices, 5 wrong tries, 15 minutes, 20 tries per hour | **7.3** 4-digit check and device access | The only place these numbers are used. |
 
@@ -219,27 +221,33 @@ The separate helper phase is removed (owner decision, 2026-10-26). Its work move
 2. Set up the OAuth consent screen: External, app name "ShaadiDesk", your email.
 3. Make an OAuth Client ID (Web application) with these redirect addresses:
    - `http://localhost:3000/api/auth/callback/google`
-   - `https://<name>.vercel.app/api/auth/callback/google`
-4. Put the Client ID and Client Secret into `.env.local` and into Vercel (Production and Preview).
+   - `http://localhost:3001/api/auth/callback/google` (on this laptop port 3000 is used by another program, so `npm run dev` uses 3001)
+   - `https://<name>.vercel.app/api/auth/callback/google` (add this when step 1.5 is done)
+4. Put the Client ID and Client Secret into `.env`. When step 1.5 is done, also into Vercel (Production only, because preview deployments are off).
 5. While the app is in "Testing", add your test Google accounts as test users. Before other people sign in, publish the app. Check if Google asks for a review (we use only name and email).
 
-**Note:** Vercel preview links change their address, so Google sign-in does not operate there. Test the team pages on the laptop and on production. The guest RSVP page operates on preview links.
+**Note:** preview deployments are off (step 1.5), so sign-in is tested on the laptop, and on production after step 1.5.
 
-**Done when:** the Client ID and Secret are saved in both places.
+**Done when:** the Client ID and Secret are saved in `.env` (and in Vercel after step 1.5).
 
-### 4.2 Sign-in with Auth.js 🤖
-- Auth.js with Google, the Prisma adapter and **database sessions**.
-- Sign-in page and sign-out.
+### 4.2 Sign-in with Better Auth 🤖
+- Read the Better Auth docs for Next.js and Prisma first, and the Next.js guide `authentication-with-cache-components.md` (CLAUDE.md rule 13: no `"use cache"`).
+- Better Auth with Google, its Prisma adapter and **database sessions** (no cookie cache, so a removed person is refused at the next click).
+- A migration adds the Better Auth columns and tables (`email_verified`, `image`, `sessions`, `accounts`, `verifications`), with UUID ids and snake_case names. The same migration adds the check `email = lower(email)` on `users` and `wedding_members`.
+- Sign-in page and sign-out. Replace the demo start page `app/page.tsx` (it still has a "Request access" button): `/` sends a signed-in person to `/weddings` and everybody else to `/sign-in`.
 - **No middleware.** Each team page and Server Action checks the sign-in through `lib/access` (Node.js runtime only).
-- When a person signs in, pending team invitations with the same email link to that person (AC-9.2).
+- When a person signs in, and each time "My weddings" opens, pending team invitations with the same verified email link to that person (AC-9.2).
 
-**Done when:** you sign in with Google on the laptop and on production, and a team page with no sign-in sends you to sign in (AC-1.1).
+**Done when:** you sign in with Google on the laptop (and on production after step 1.5), and a team page with no sign-in sends you to sign in (AC-1.1).
 **Commit:** `feat: add google sign-in with database sessions`
 
 ### 4.3 The security guard 🤖
-`lib/access` with `getCurrentUser`, `requireMember`, `requireAdmin`, `requireMoneyAccess` and `requireGuestFamily`.
+`lib/access` with `getSessionUser`, `requireUser`, `requireMember`, `requireAdmin`, `requireMoneyAccess`, `getGuestFamily` and `requireGuestFamily` (names as in the API design, Section 3).
+Each guard has two parts: a small outer part that reads the session or the guest cookie, and an inner part that checks the rules with plain inputs (for example `checkMember(userId, weddingId)`). The tests call the inner part, so they need no browser and no sign-in. Decided 2026-10-30.
 Tests for each role:
-- An organizer without money access cannot change a budget (AC-7.2).
+- An active organizer passes `requireMember` but not `requireAdmin`.
+- A pending or removed team member does not pass `requireMember`.
+- An organizer without money access does not pass `requireMoneyAccess`; one with the switch on, and every admin, passes. (No budget screen exists in Wave 1, so AC-7.2 is tested with the Money release.)
 - A guest device for the Sharma family cannot read the Verma family (AC-64.1).
 - A member of wedding A cannot read wedding B (AC-64.2).
 
@@ -256,32 +264,32 @@ Tests for each role:
 **Commit:** `feat: make a wedding with suggested rsvp link`
 
 ### 5.2 Test weddings 🤖
-Test flag, a "TEST" label on all pages, delete in one step with confirmation (FR-3).
+Test flag, a "TEST" badge on team pages and a "TEST" ribbon on guest pages, delete in one step with confirmation (FR-3).
+**Check in this step:** the delete must work when families are assigned to team members, and when invitations were marked sent. The links `families.assigned_member_id`, `invitation_sent_by` and `replies.updated_by` use RESTRICT, and the delete order of the wedding cascade must not trip over them. If it does, a new migration changes the rule.
 **Done when:** AC-3.1 and AC-3.2 pass.
 **Commit:** `feat: add test weddings`
 
 ### 5.3 Wedding settings 🤖
-Greeting, colors, RSVP last date and stay last date (stay must be earlier: AC-4.1). Edit the link name until it locks. Banner photo: the browser makes it smaller (approximately 300 KB), uploads it to the private photos bucket with a short-time upload link, and the app shows it through its own address.
+Greeting, colors, RSVP last date and stay last date (stay must be earlier: AC-4.1). Edit the link name until it locks. Banner photo: the browser makes it smaller (approximately 300 KB), uploads it to the photos bucket with a short-time upload link. The banner is public (architecture rule 5), so the guest page and the WhatsApp preview can show it.
 **Also in this step: the India time helper** (`lib/time`). It shows dates in India time and answers "is it after the last date?" (the last date closes at 23:59 India time). A short check shows the right result at 23:59 and 00:01 on the last date.
 
 **Done when:** AC-4.1 passes, the banner shows on the settings page, and the time check is right.
 **Commit:** `feat: add wedding settings, banner upload and india time helper`
 
 ### 5.4 Events 🤖
-Event list and event form: type list (or "Other" with a typed name), date and time, venue, map link, note, budget, hosted by. Only admins add or delete. Organizers edit details, and the budget only with money access. Delete shows the linked counts and asks for confirmation.
-**Also in this step: the money helper** (`lib/money`). The budget is typed as ₹ and saved as paise (`budget_amount_paise`, currency `INR`), and shown in the Indian format (₹1,50,000). A short check shows ₹1,50,000 converting to paise and back.
+Event list and event form: type list (or "Other" with a typed name), date and time, venue, map link, note (team only), hosted by, and the event colour dot. Only admins add or delete. Organizers edit details. Delete shows the linked counts and asks for confirmation. The budget field and `lib/money` come with the Money release.
 
-**Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass, and the money check is right.
-**Commit:** `feat: add events with type list, permissions and money helper`
+**Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass.
+**Commit:** `feat: add events with type list, permissions and colour dots`
 
 ### 5.5 Team 🤖
 - Add an organizer by email: pending, "Invite on WhatsApp", "Copy invite message", change email (FR-9).
-- Money switch, default off (FR-10).
 - Make a parent or sibling admin (FR-11).
-- Protect the last admin and the signed-in bride and groom (FR-12).
+- Protect the last admin and the signed-in bride and groom (FR-12). Each of these checks runs in one transaction that locks the wedding's team rows (`SELECT ... FOR UPDATE`), so two admins cannot demote each other at the same moment.
+- The money switch (FR-10, AC-10.1) comes with the Money release. The column `can_see_money` stays off (false) for everyone.
 - Remove an organizer only after their families have a new owner (FR-13; the tasks part comes with tasks).
 
-**Done when:** AC-9.1, AC-10.1, AC-11.1, AC-12.1, AC-12.2 and AC-13.1 (families part) pass.
+**Done when:** AC-9.1, AC-11.1, AC-12.1, AC-12.2 and AC-13.1 (families part) pass.
 **Commit:** `feat: add team management with invite message`
 
 ---
@@ -320,7 +328,7 @@ The events in the files must match the events created in the app (Haldi, Mehendi
 **Commit:** `feat: add import database validation and transactional save`
 
 ### 6.5 Import screens 🤖
-Upload → results (OK, errors, warnings, already in the app) → "Download error list" → upload again → confirm → done, or "Nothing was saved. Check again." The server does not keep the file.
+Upload → results (OK, errors, warnings, already in the app) → "Download error list" → upload again → confirm → done, or "Nothing was saved. Check again." The server does not keep the file. A file over 2 MB or 2,000 rows shows "This file is too big. Use a file under 2 MB with at most 2,000 families." Next.js refuses actions over 1 MB by default, so this step sets `serverActions: { bodySizeLimit: '3mb' }` in `next.config.ts` (3 MB leaves room for the form overhead). The 2 MB check stays in the Zod schema.
 **Done when:** you import `guests-messy.xlsx`, see all its errors, correct the file, and save it. Then you import `guests-clean-500.xlsx`, and the families list shows about 500 families.
 **Commit:** `feat: add import screens`
 
@@ -339,13 +347,13 @@ The `/[couple]` page: banner, couple names, search box, 4-digit box. Open Graph 
 **Commit:** `feat: add rsvp screen 1 and safe link preview`
 
 ### 7.2 Family search 🤖
-Matches only after 3 letters. Each match shows the family name and the contact name or city. Never the full list. Limited by the attempt rules.
+Matches only after 3 letters. Each match shows the family name and the contact name or city. Never the full list. At most 10 matches. No search-count limit: the owner accepts this risk (NFR-11, R-6; decided 2026-10-30).
 **Done when:** AC-28.1 and AC-28.2 pass.
 **Commit:** `feat: add rsvp family search`
 
 ### 7.3 4-digit check and device access 🤖
-Check the last 4 digits against the primary or secondary number. On success: a random device code in an `httpOnly` cookie, stored hashed in `guest_devices`. Limits from `lib/limits`. Device limit message. Organizer resets the devices of a family.
-**Also in this step: the limit settings** (`lib/limits.ts`): 12 devices for each family, 5 wrong tries then a 15-minute wait, 20 tries for each device each hour. One file, one place to change.
+Check the last 4 digits against the primary or secondary number. The 15-minute stop is a sliding window: the last 5 wrong tries must all be inside the last 15 minutes. Rows of `access_attempts` older than 30 days are deleted by the nightly job (step 9.2). On success: a random device code in an `httpOnly` cookie, stored hashed in `guest_devices`. The cookie name includes the wedding (`guest-<slug>`), and the guard checks that the family belongs to the wedding of the address. Limits from `lib/limits`. Device limit message. Organizer resets the devices of a family.
+**Also in this step: the limit settings** (`lib/limits.ts`): 12 devices for each family, 5 wrong tries then a 15-minute wait, 20 tries for each device each hour, 30 wrong tries for each family each day, 30 wrong tries for each internet address each hour. One file, one place to change. A new migration adds `access_attempts.ip_hash` and the indexes. The 12-device check locks the family row (`SELECT ... FOR UPDATE`) so parallel taps cannot go past 12.
 
 **Done when:** AC-29.1, AC-29.2, AC-30.1 to AC-30.3, AC-31.1 and AC-31.2 pass.
 **Commit:** `feat: add 4-digit check, device cookie, attempt limits and limit settings`
@@ -374,7 +382,10 @@ An organizer or admin enters or changes the reply of a family at any time, also 
 
 ### 8.3 Dashboard 🤖
 - Progress of each organizer: families, sent, replied (FR-24).
-- Guest counts for each event and the full wedding: invited, yes (persons), no, no reply, for each side and the total (FR-43).
+- Guest counts for each event and the full wedding: invited, yes (persons), no, no reply, for each side and the total (FR-43), with the mixed-answer rule of the API design (Section 13).
+- The setup checklist and the timeline strip (Today, Replies close, Wedding). The checklist does not show who did each step.
+- The "needs attention" list with 3 rows: no reply, no phone number, invitation not sent (FR-44).
+- Event colour dots (FR-6).
 
 **Done when:** AC-24.1 and AC-43.1 pass with the dummy data.
 **Commit:** `feat: add wedding dashboard with organizer progress and guest counts`
@@ -384,11 +395,11 @@ An organizer or admin enters or changes the reply of a family at any time, also 
 ## Phase 9: Data safety
 
 ### 9.1 CSV export 🤖
-Admins export the Wave 1 data (families, events, replies) to CSV. Later waves add their tables.
-**Done when:** AC-65.1 passes for the Wave 1 tables.
+Admins export three CSV files: families with their phone numbers, replies, and the team (FR-65). Later waves add their tables. Each route handler calls `requireAdmin`. A cell that starts with `=`, `+`, `-` or `@` gets a `'` in front, so Excel does not run it as a formula (a family name like `=HYPERLINK(...)` is text, not a formula). The files are UTF-8 with a BOM.
+**Done when:** AC-65.1 passes for the three files.
 **Commit:** `feat: add csv export`
 
-### 9.2 Nightly backup 🤖 + 👤
+### 9.2 Nightly backup 🤖 + 👤 (needs steps 0.4 and 1.5 first)
 - 🤖 GitHub Actions workflow, each night: `pg_dump` of production (with the same PostgreSQL major version as Neon), compress, upload to `shaadidesk-backups` with the date in the name, delete copies older than 30 days (needs a yes on Q-5).
 - 👤 Add GitHub Secrets: Neon production **direct** URL and the R2 values.
 - 👤 Run the workflow one time by hand.

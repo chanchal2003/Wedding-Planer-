@@ -20,7 +20,7 @@ Source documents: PRD (`docs/prd/2026-10-16-shaadidesk-prd.md`, `docs/prd/2026-1
 | Files and backups | Cloudflare R2, with the S3 API | 10 GB free with no time limit. The same code operates with AWS S3 later. | `[Confirmed]` |
 | Hosting | Vercel (free plan), at `<name>.vercel.app/<couple>` | Serverless functions start fast. Preview link for each branch. The free plan is for non-commercial use. | `[Confirmed]` |
 | Code and jobs | Private GitHub repository and GitHub Actions | Automatic deploy to Vercel. Nightly backup and cleanup jobs. | `[Confirmed]` |
-| Team sign-in | Auth.js with Google, sessions in PostgreSQL | A removed organizer or a changed money switch applies at the next click. | `[Confirmed]` |
+| Team sign-in | Better Auth with Google, sessions in PostgreSQL (through its Prisma adapter) | A removed organizer or a changed money switch applies at the next click. Changed from Auth.js on 2026-10-30: Auth.js v5 is still a beta, and its Prisma adapter supports only up to Prisma 6. Better Auth is stable (1.7) and supports Next.js 16 and Prisma 7. | `[Confirmed]` |
 | User interface | Tailwind CSS and shadcn/ui | Large text, strong contrast and big tap targets are easy (NFR-21 to NFR-24). | `[Confirmed]` |
 | Tests | Small Vitest tests, only for the access rules and the import rules. No Playwright. No CI for now. | The parts with the highest risk get tests. The rest is checked by hand. Owner decision, 2026-10-25. | `[Confirmed]` |
 | Error log | Vercel logs. Sentry free plan only if necessary. | No setup. | `[Confirmed]` |
@@ -120,7 +120,7 @@ sequenceDiagram
   participant D as Production DB
 
   K->>P: Opens /money
-  P->>A: requireMember(wedding)
+  P->>A: requireMoneyAccess(wedding)
   A->>D: Is Ankit in this team? Money access?
   D-->>A: Member: yes. Money access: no
   A-->>P: Refused
@@ -185,7 +185,7 @@ app/
       page.tsx                   /weddings: My weddings
       new/page.tsx               /weddings/new: Make a wedding
     w/[weddingId]/
-      layout.tsx                 frame with the menu; calls requireMember first
+      layout.tsx                 frame with the menu; may call requireMember for the menu, but a layout does not protect its pages (every page and action calls lib/access itself)
       page.tsx                   Home (dashboard)
       families/                  page.tsx (list), new/page.tsx, [familyId]/page.tsx
       my-families/page.tsx       My families (organizers)
@@ -196,7 +196,7 @@ app/
       preview/page.tsx           "See it as a guest sees it"
       more/page.tsx              the "More" tab on phones
       export/[file]/route.ts     families.csv, replies.csv, team.csv
-  api/auth/[...nextauth]/route.ts  Google sign-in addresses (Auth.js)
+  api/auth/[...all]/route.ts     Google sign-in addresses (Better Auth)
 
 components/
   ui/                            shadcn pieces (button, input, card)
@@ -205,7 +205,7 @@ components/
 
 lib/
   access/                        the security guard (FR-64)
-  auth/                          Auth.js setup (Google)
+  auth/                          Better Auth setup (Google)
   db/                            Prisma client (the `db` object)
   weddings/ events/ team/ families/ import/ rsvp/ tracking/ dashboard/ export/
                                  each: queries.ts (read), actions.ts ("use server"), schemas.ts (Zod)
