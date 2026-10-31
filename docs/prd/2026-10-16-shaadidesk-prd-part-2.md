@@ -120,7 +120,7 @@ This section gives the screens, the flows between them and the states of each sc
 | Sign in | Google sign-in | Team | FR-1 |
 | My weddings | List of the weddings of the user. "Make a wedding" button. | Team | FR-2, FR-3 |
 | Wedding dashboard | Events, guest counts, organizer progress, "needs attention", tasks due soon, budget summary (money access) | Team | FR-24, FR-43, FR-44, FR-51, FR-57 |
-| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy". "Delete wedding" for real weddings comes in a later release (test weddings: Wave 1) | Admin | FR-4, FR-22, FR-68 |
+| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy". "Delete wedding" (FR-68; in Wave 1 it is a section at the bottom of the wedding page, and moves into the settings page at step 5.3) | Admin | FR-4, FR-22, FR-68 |
 | Events and event page | Event list with type, icon and "hosted by". Event page with details, guest counts, tasks and money (money access). | Team | FR-5 to FR-8 |
 | Team | Admins, organizers, pending invitations, money switch, remove organizer | Admin | FR-9 to FR-13 |
 | Families | Full guest list with search and filters (side, event, organizer, no reply, no number) | Team | FR-15, FR-19, FR-20 |
@@ -268,9 +268,9 @@ Organizer opens Requests ──► Approve or Reject
 | AC-1.1 | A person is not signed in | They open a team page | The app shows the Google sign-in page |
 | AC-1.2 | A guest opens the RSVP link | The page opens | The app does not ask for a sign-in |
 | AC-2.1 | Priya is signed in | She makes a wedding and selects "Bride" | The wedding is made and Priya is its admin |
-| AC-2.2 | Priya makes a real wedding | She types a wedding date in the past, or leaves a couple name empty | The app does not save it and shows the error |
+| AC-2.2 | Priya makes a wedding, real or test | She types a wedding date before today (India time), or leaves a couple name empty | The app does not save it and shows the error. A date of today is allowed. |
 | AC-3.1 | Priya makes a test wedding | She opens any page of it | The page shows the "TEST" label |
-| AC-3.2 | A test wedding exists | An admin pushes "Delete test wedding" and confirms | All data of the test wedding is deleted |
+| AC-3.2 | A test wedding exists | Any admin types the name of the wedding and pushes "Delete wedding" | All data of the test wedding is deleted, and no other wedding is changed |
 | AC-4.1 | Priya edits the wedding settings | She sets the stay last date later than the RSVP last date | The app does not save it and shows the error |
 | AC-5.1 | Priya adds an event | She selects "Haldi" and fills the date, venue and "hosted by" | The event is saved with the type "Haldi" |
 | AC-5.2 | Priya adds an event | She selects "Other" and types "Mata ki Jagran" | The event is saved with the name "Mata ki Jagran" |
@@ -405,8 +405,8 @@ Organizer opens Requests ──► Approve or Reject
 | AC-66.1 | A day passed | The owner checks the backup host | There is a new database copy for that day |
 | AC-67.1 | The wedding date is 15 Jan 2027 | It is approximately 15 Jul 2027 | The app deleted the phone numbers, stay data, access requests and guest devices. Expenses and totals stay |
 | AC-67.2 | The automatic delete is near | Priya opens the app | She sees a warning and a "Download full export" button |
-| AC-68.1 | Dad is an admin, not the bride or groom | He opens the wedding settings | He does not see "Delete wedding" |
-| AC-68.2 | Priya (bride) pushes "Delete wedding" | She types the wedding name and confirms | All data of the wedding is deleted |
+| AC-68.1 | Dad is an admin, not the bride or groom, and the wedding is real | He opens the wedding page | He does not see "Delete wedding", and the server refuses if he tries |
+| AC-68.2 | Priya (bride, admin) pushes "Delete wedding" on a real wedding | She types the wedding name and confirms | All data of the wedding is deleted. The accounts of the people stay. |
 
 ## 12. Data and Integrations
 

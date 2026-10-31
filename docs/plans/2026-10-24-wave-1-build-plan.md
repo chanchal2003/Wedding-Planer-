@@ -260,13 +260,14 @@ Tests for each role:
 ## Phase 5: Weddings, events and team
 
 ### 5.1 Make a wedding 🤖
-"My weddings" page and "Make a wedding" form. Relation: bride, groom, parent or sibling. The person becomes admin. A real wedding needs both names and a future date. The app suggests the RSVP link name and checks that it is unique.
+"My weddings" page and "Make a wedding" form. Relation: bride, groom, parent or sibling. The person becomes admin. A wedding, real or test, needs both names and a date that is not before today (India time). The app suggests the RSVP link name and checks that it is unique.
 **Done when:** AC-2.1 and AC-2.2 pass.
 **Commit:** `feat: make a wedding with suggested rsvp link`
 
 ### 5.2 Test weddings 🤖
 Test flag, a "TEST" badge on team pages and a "TEST" ribbon on guest pages, delete in one step with confirmation (FR-3).
-**Check in this step:** the delete must work when families are assigned to team members, and when invitations were marked sent. The links `families.assigned_member_id`, `invitation_sent_by` and `replies.updated_by` use RESTRICT, and the delete order of the wedding cascade must not trip over them. If it does, a new migration changes the rule.
+**Delete a wedding (FR-68), done 2026-10-31:** any admin deletes a test wedding; only a bride or groom admin deletes a real wedding. Type the name to confirm. A section on the wedding page (it moves into Settings at 5.3). Built: `checkDeleteWedding` (with tests), `deleteWeddingData` (ordered delete in one transaction), `deleteWedding`, `countWeddingData`. A plain delete of the wedding fails because of the links to team members, so the delete runs in order: attempt logs, families, wedding. The migration `20261031062628_members_no_action_for_wedding_delete` changes those three links to `NO ACTION` (the same protection, checked at the end of the statement). It was not enough alone, but it is harmless and stays.
+**Still to do in this step:** the TEST badge on every team page and the TEST ribbon on guest pages (FR-3).
 **Done when:** AC-3.1 and AC-3.2 pass.
 **Commit:** `feat: add test weddings`
 

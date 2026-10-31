@@ -134,14 +134,17 @@ These functions are the first line of every read function and action. Small Vite
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
 | `listMyWeddings()` | Read | Signed-in user | — | First calls `linkPendingInvitations` (Section 4). Then the weddings where the user is active: id, bride and groom names, date, `isTest`, the user's role | — |
-| `createWedding(input)` | Action | Signed-in user | `brideName`, `groomName`, `weddingDate`, `relation` (bride, groom, parent or sibling), `isTest` | `{ weddingId }` | `INVALID_INPUT` (a real wedding needs a future date) |
+| `createWedding(input)` | Action | Signed-in user | `brideName`, `groomName`, `weddingDate`, `relation` (bride, groom, parent or sibling), `isTest` | `{ weddingId }` | `INVALID_INPUT` (a name is empty, or the date is before today in India: "The wedding date cannot be before today." This applies to test weddings too.) |
 | `getWeddingSettings(weddingId)` | Read | Member | — | Names, date, greeting, theme colour, banner address, last dates, slug, `slugLocked`, `isTest` | — |
 | `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` ("The stay last date must be before the reply last date.") |
 | `checkSlug(weddingId, slug)` | Read | Admin | A link name | `{ available: boolean, suggestion }` | — |
 | `updateSlug(weddingId, slug)` | Action | Admin | A link name: lowercase letters, numbers and dashes | The new slug | `CONFLICT` (name taken or reserved: "This link name is not available."), `NOT_ALLOWED_NOW` ("The link is locked, because invitations were sent.") |
 | `createBannerUploadUrl(weddingId, fileType)` | Action | Admin | `image/jpeg` or `image/webp` | A short-life R2 upload address and the file key | `INVALID_INPUT` |
 | `saveBanner(weddingId, fileKey)` | Action | Admin | The file key from the upload | The banner address | `NOT_FOUND` (no file at that key) |
-| `deleteTestWedding(weddingId, typedName)` | Action | Admin | The wedding name, typed again | — | `NOT_ALLOWED_NOW` (not a test wedding), `INVALID_INPUT` (name does not match) |
+| `getWeddingDeleteInfo` (`countWeddingData`) | Read | Admin who may delete | — | The numbers for the warning: events, families, replies, team members | — |
+| `deleteWedding(weddingId, typedName)` | Action | Test wedding: any admin. Real wedding: an admin who is the bride or the groom (`requireDeleteWedding`) | The wedding name, typed again (capital letters, extra spaces and "and" for "&" are ignored) | — | `NO_ACCESS`, `INVALID_INPUT` (name does not match) |
+
+**`deleteWedding` in detail** (decided 2026-10-31): the data is deleted in one transaction, in this order: guest-attempt logs of its families, then its families (their phones, invitations, replies and devices go with them), then the wedding (its events and team go with it). A plain "delete the wedding" fails, because the database removes the team members before the families that point to them. The accounts (`users`) are never deleted. Every code that deletes a wedding, also the 6-month clean-up job, calls the same function, `deleteWeddingData`.
 
 **`createWedding` in detail** (one transaction):
 1. Make the slug from the names: "Priya" and "Rahul" give `priya-rahul`. If it is taken, use `priya-rahul-2`, then `-3`.

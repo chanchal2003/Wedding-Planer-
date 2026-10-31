@@ -251,7 +251,7 @@ A calm page: the wordmark, the tagline "Plan the shaadi, not the chaos.", and on
 ### 6.5 My weddings and Make a wedding `[Confirmed]`
 PRD FR-2, FR-3.
 - **My weddings:** a list of cards, each with the couple's names, the date and a TEST badge if needed. A button "Make a wedding".
-- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens. "Delete wedding" for real weddings is a later release.
+- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens. **Delete wedding** (FR-68): a section at the bottom of the wedding page, shown only to an admin who may delete (any admin for a test wedding; for a real wedding only an admin who is the bride or the groom). It says what will be deleted ("3 events, 500 families, 12 replies and 4 team members. This cannot be undone."), asks the person to type the wedding name, and the button stays off until the name matches. It is an outlined button, not a red one (Section 9). It moves into Settings at step 5.3. `[Confirmed]` 2026-10-31
 
 ### 6.6 The guided home (dashboard) `[Confirmed]`
 PRD FR-24, FR-43, FR-44.

@@ -246,7 +246,7 @@ The dates in the table are from the original plan for the real wedding. They sho
 | | Starter tasks for each event type `[Proposed]` | December |
 | | Stay: request, room assignment, lists | December |
 | | Gifts and shagun | December |
-| | Automatic delete of guest data 6 months after the wedding, and delete of a full wedding | December |
+| | Automatic delete of guest data 6 months after the wedding (the delete of a full wedding is in Wave 1, FR-68) | December |
 | **Could Have** `[Proposed]` | QR code image of the RSVP link to download | If time permits |
 | | WhatsApp help button to the organizer on the RSVP page | If time permits |
 | | WhatsApp button to tell a person about a task | If time permits |
@@ -438,8 +438,8 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | ID | Requirement | Priority | User Story | Dependencies |
 |---|---|---|---|---|
 | FR-1 | Admins and organizers must sign in with Google. Guests do not sign in. | Must | US-1, US-5 | — |
-| FR-2 | A signed-in person can make a wedding. The person selects their relation: bride, groom, parent or sibling. Team members also have a relation from one list: bride, groom, parent, sibling, relative, friend or other ("cousin" is shown as "Relative"). Only family can be admins: "Make admin" is off for a friend. This person becomes the admin. A real wedding must have the names of the bride and groom, and a wedding date in the future. | Must | US-1 | FR-1 |
-| FR-3 | An admin can make a test wedding. A test wedding can have any date and false guests. All team pages show a "TEST" badge, and the guest pages show a "TEST" ribbon. An admin can delete a test wedding in one step. | Must | US-4 | FR-2 |
+| FR-2 | A signed-in person can make a wedding. The person selects their relation: bride, groom, parent or sibling. Team members also have a relation from one list: bride, groom, parent, sibling, relative, friend or other ("cousin" is shown as "Relative"). Only family can be admins: "Make admin" is off for a friend. This person becomes the admin. A wedding must have the names of the bride and groom, and a wedding date that is not before today (India time). This applies to test weddings too. `[Confirmed]` 2026-10-31 | Must | US-1 | FR-1 |
+| FR-3 | An admin can make a test wedding. A test wedding has false guests (its date follows the same rule as a real wedding: not before today). All team pages show a "TEST" badge, and the guest pages show a "TEST" ribbon. An admin can delete a test wedding in one step (see FR-68). | Must | US-4 | FR-2 |
 | FR-4 | An admin can set the banner photo, greeting, colors, RSVP last date and stay last date. The stay last date must be earlier than the RSVP last date. | Must | US-3 | FR-2 |
 | FR-5 | An event has: type, date and start time, venue name, map link, a note (only the team sees it for now), budget and "hosted by" (bride side, groom side or both). The type comes from a list: Haldi, Mehendi, Sangeet, Mata ki Chowki, Wedding, Reception, Other. For "Other", the admin types the name. All types use the same form. The type list is `[Proposed]`. | Must | US-2, US-35 | FR-2 |
 | FR-6 | Each event type has a color, shown as a small dot on the RSVP page and the dashboard. Icons for the types come in Wave 2. `[Proposed]` | Must | US-35 | FR-5 |
@@ -539,7 +539,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 | FR-65 | An admin can export to CSV. In Wave 1 the export is three files: families with their phone numbers, replies, and the team. Stay, expenses, tasks and gifts are added when those features are built. `[Confirmed]` | Must | US-33 | FR-15, FR-33 |
 | FR-66 | The system makes a copy of the database (`pg_dump`) each day and keeps it on a different host. | Must | US-33 | — |
 | FR-67 | 6 months after the wedding date, the app deletes guest phone numbers, stay data, access requests and guest devices. Before this, the app warns the admins and they can download a full CSV export. The app keeps expenses, payments and totals. | Should (Dec) | US-34 | FR-65 |
-| FR-68 | Only the bride or the groom can delete all data of a wedding, at any time. Other admins cannot. `[Confirmed]` | Should (Dec) | US-34 | FR-2, FR-12 |
+| FR-68 | An admin can delete all data of a wedding, at any time. For a **test wedding**, any admin can. For a **real wedding**, only an admin who is the bride or the groom can; other admins cannot and do not see the button. The person must type the name of the wedding. The app first shows what will be deleted (events, families, replies, team members) and says that it cannot be undone. Moved into Wave 1 on 2026-10-31. `[Confirmed]` | Must | US-34 | FR-2, FR-12 |
 
 ---
 

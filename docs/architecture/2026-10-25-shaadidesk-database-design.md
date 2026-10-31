@@ -158,7 +158,7 @@ One row per wedding. The couple's names do not have to be unique. Only the id an
 | `slug_locked` | boolean |  | Default false. Turns true at the first "Invitation sent", so printed links never break. |
 | `bride_name` | text |  | Required |
 | `groom_name` | text |  | Required |
-| `wedding_date` | date |  | Required. A real wedding needs a future date. A test wedding can have any date. |
+| `wedding_date` | date |  | Required. The app refuses a date before today (India time), for real and test weddings. Today is allowed. |
 | `is_test` | boolean |  | Default false. A practice wedding with fake data. |
 | `greeting` | text |  | Optional welcome text for guests |
 | `theme_color` | text |  | Optional. The name of one of 5 colours: `plum` (the default when empty), `rose`, `indigo`, `slate`, `charcoal`. The app keeps the hex codes and soft tints in one list (UI design, Section 4.1). Decided 2026-10-30. |
@@ -388,7 +388,7 @@ A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wr
 - Delete a wedding: everything inside it goes too.
 - A pending team member has no signed-in user, and an active one has a signed-in user. (a check written in the migration)
 - Emails in `users` and `wedding_members` have no capital letters. (a check `email = lower(email)`, added in the step 4.2 migration, decided 2026-10-30)
-- A team row cannot be deleted while families point to it. (a restrict rule on the link)
+- A team row cannot be deleted while families or replies point to it. (a `NO ACTION` rule on the three links `families.assigned_member_id`, `families.invitation_sent_by` and `replies.updated_by`; it was RESTRICT until the migration of 2026-10-31). Because of this rule, deleting a whole wedding must delete the families first: see `deleteWeddingData`.
 
 ### The app code checks
 
