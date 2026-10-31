@@ -79,7 +79,7 @@ Read functions that fail because of access do not return a result. They stop the
 | `INVALID_INPUT` | The Zod check failed | Field messages in `fields` |
 | `CONFLICT` | A unique rule stopped the save | "This number is already used by the Verma family." |
 | `NOT_ALLOWED_NOW` | The rule does not allow it in this state | "Move Rohan's 80 families to someone else first." |
-| `CLOSED` | Guest reply after the last date | "Replies are closed. Contact the person who sent you the card." |
+| `CLOSED` | Guest reply after the last date | "Replies are closed. Contact Rohan." The name is the first name of the assigned organizer. With no organizer: "Replies are closed. Contact the person who sent you the card." (PRD, rule for the name in guest messages) |
 | `TOO_MANY_TRIES` | A guest limit was reached | "Too many tries. Please wait 15 minutes, then try again, or ask the person who sent you the card." |
 | `ALREADY_REPLIED` | Another family member replied first | "Your family has already replied." (the page then shows the saved reply) |
 | `SERVER_ERROR` | Anything not expected | "Something went wrong. Try again." |
@@ -89,8 +89,10 @@ Read functions that fail because of access do not return a result. They stop the
 - **IDs** are UUIDs. Every input ID is checked to belong to the `weddingId` of the request. An ID from a different wedding gives `NOT_FOUND`, never the data.
 - **Phone numbers** go through `lib/phone` before a save or a compare (CLAUDE.md rule 6). No `+` means India (+91). Output format: `+919876511111`.
 - **Dates and times** come in and go out as India time in the forms, and are saved in UTC (`lib/time`). A last date closes at 23:59 India time.
+- **No caching** (decided 2026-10-30): `cacheComponents` stays on, but no function or page uses `"use cache"` in Wave 1. Parts of a page that read the session or a cookie are inside `<Suspense>` (CLAUDE.md rule 13).
 - **Lists of families** are never sent all at once. Search and filters run on the server, 50 rows for each page.
 - **Text fields** are trimmed. Empty text is saved as empty (`null`).
+- **Emails** are changed to lowercase in every Zod schema before a save or a compare (`Ankit@Gmail.com` becomes `ankit@gmail.com`). A database check refuses capital letters as a safety net. `[Confirmed]` 2026-10-30
 
 ## 3. The security guard: `lib/access` (build plan 4.3)
 
@@ -98,7 +100,7 @@ These functions are the first line of every read function and action. Small Vite
 
 | Function | Returns | Stops with | Rule |
 |---|---|---|---|
-| `getSessionUser()` | The signed-in user, or `null` | — | Reads the Auth.js session |
+| `getSessionUser()` | The signed-in user, or `null` | — | Reads the Better Auth session |
 | `requireUser()` | `{ user }` | `NOT_SIGNED_IN` | Any signed-in person |
 | `requireMember(weddingId)` | `{ user, member, wedding }` | `NOT_SIGNED_IN`, `NO_ACCESS` | The user has an **active** row in `wedding_members` for this wedding. Pending and removed rows do not count. |
 | `requireAdmin(weddingId)` | same | same | `requireMember` and `role = admin` |
@@ -108,29 +110,33 @@ These functions are the first line of every read function and action. Small Vite
 
 **Why the check runs on every click:** sessions are kept in PostgreSQL (architecture, Section 1). If an admin removes Ankit, his next click fails at `requireMember`, because his row is now `removed`.
 
+**Two parts for each guard** (decided 2026-10-30): an outer part reads the session or the cookie; an inner part (for example `checkMember(userId, weddingId)`) checks the rules with plain inputs. The Vitest tests call the inner part, against a separate test database `shadidesk_test`.
+
 **Tests (examples):** an active organizer passes `requireMember` but not `requireAdmin`; a pending row does not pass; a removed row does not pass; a member of wedding A does not pass for wedding B; a guest cookie of the Sharma family does not give the Verma family.
 
 ## 4. Sign-in (build plan 4.2) — FR-1, FR-9
 
 | Function | Kind | Who | What it does |
 |---|---|---|---|
-| `/api/auth/*` | Route (Auth.js) | Anyone | Google sign-in and sign-out. Auth.js makes these addresses. |
-| Sign-in step "link invitations" | Inside Auth.js | The person who signs in | In one transaction: find every `wedding_members` row with `status = pending` and the same email (lowercase). Set `user_id` and `status = active`. This runs at every sign-in, not only the first. It links only when Google says the email is verified. `[Proposed]` |
+| `/api/auth/*` | Route (Better Auth) | Anyone | Google sign-in and sign-out. Better Auth makes these addresses. |
+| `linkPendingInvitations(user)` | Called by the Better Auth hook (after the user row is made, and at each new session) **and** by `listMyWeddings()` | The person who signs in | In one transaction: find every `wedding_members` row with `status = pending` and the same email (lowercase). Set `user_id` and `status = active`. It runs at every sign-in and each time "My weddings" opens, so a person who is already signed in also gets new invitations. If nothing is pending, it does nothing. It links only when Google says the email is verified. `[Confirmed]` 2026-10-30 |
 | `signOutAction()` | Action | Signed-in user | Ends the session |
 
+- Example (already signed in): Rohan signed in on Monday for his cousin's wedding. On Wednesday Priya invites him. On Thursday he opens "My weddings" and Priya's wedding is there, without a new sign-in.
 - Example: Ankit was invited as `ankit@example.com`. He signs in with that Google account. His pending row in the Priya and Rahul wedding becomes active. He sees the wedding in "My weddings".
 - If Google says the email is not verified, no invitation is linked. The person sees "Your Google email is not verified."
 - A person with no invitation can sign in. They see "My weddings" with only "Make a wedding".
-- The other Auth.js tables (accounts, sessions, verification tokens) come in a new migration at step 4.2.
+- **Sign-in tool:** Better Auth (decided 2026-10-30, instead of Auth.js). The hook runs after the `users` row exists, so `user_id` can be set. The exact hook names are taken from the Better Auth docs at step 4.2.
+- The other Better Auth tables (accounts, sessions, verifications) and the columns `email_verified` and `image` come in a new migration at step 4.2.
 
 ## 5. Weddings (build plan 5.1 to 5.3) — FR-2, FR-3, FR-4, FR-22
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `listMyWeddings()` | Read | Signed-in user | — | Weddings where the user is active: id, bride and groom names, date, `isTest`, the user's role | — |
+| `listMyWeddings()` | Read | Signed-in user | — | First calls `linkPendingInvitations` (Section 4). Then the weddings where the user is active: id, bride and groom names, date, `isTest`, the user's role | — |
 | `createWedding(input)` | Action | Signed-in user | `brideName`, `groomName`, `weddingDate`, `relation` (bride, groom, parent or sibling), `isTest` | `{ weddingId }` | `INVALID_INPUT` (a real wedding needs a future date) |
 | `getWeddingSettings(weddingId)` | Read | Member | — | Names, date, greeting, theme colour, banner address, last dates, slug, `slugLocked`, `isTest` | — |
-| `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (one of the 5 colours), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` ("The stay last date must be before the reply last date.") |
+| `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` ("The stay last date must be before the reply last date.") |
 | `checkSlug(weddingId, slug)` | Read | Admin | A link name | `{ available: boolean, suggestion }` | — |
 | `updateSlug(weddingId, slug)` | Action | Admin | A link name: lowercase letters, numbers and dashes | The new slug | `CONFLICT` (name taken or reserved: "This link name is not available."), `NOT_ALLOWED_NOW` ("The link is locked, because invitations were sent.") |
 | `createBannerUploadUrl(weddingId, fileType)` | Action | Admin | `image/jpeg` or `image/webp` | A short-life R2 upload address and the file key | `INVALID_INPUT` |
@@ -174,7 +180,7 @@ These functions are the first line of every read function and action. Small Vite
 | `removeMember(weddingId, memberId)` | Action | Admin | — | — | `NOT_ALLOWED_NOW` |
 | `restoreMember(weddingId, memberId)` | Action | Admin | — | The row, active again (or pending, if the person never signed in) | — |
 
-**Rules that the server checks** (database design, "The app code checks"):
+**Rules that the server checks** (database design, "The app code checks"). The checks for the last admin and for removing a member run in one transaction that locks the wedding's team rows (`SELECT ... FOR UPDATE`), so two admins cannot demote each other at the same moment:
 - Only bride, groom, parent and sibling can be admin. "Make admin" for a friend gives `INVALID_INPUT` "Only family can be admins" (FR-11).
 - The last active admin cannot be removed or made organizer (FR-12).
 - After the bride or groom signs in, only they can remove their own admin role (FR-12).
@@ -198,6 +204,7 @@ These functions are the first line of every read function and action. Small Vite
 - **Delete a family** (decided 2026-10-30): only an admin. The confirm box says "Delete the Verma family? Its phone numbers, invitations and replies are deleted too." The database removes the phones, devices, invitations and replies (cascade).
 - **Removing an event from a family** deletes the reply for that event, in the same transaction (FR-20). The form warns first: "The Sharma family replied for Haldi. This reply is deleted too."
 - **Phone check:** `lib/phone` normalises. An invalid number gives the field message "This is not a valid phone number". The unique rule in the database gives `CONFLICT`; the message names the other family.
+- **Only admins can set or change the organizer of a family** (FR-21; decided 2026-10-30). `createFamily` and `updateFamily` ignore `organizerId` from an organizer: for a new family it stays empty, for an existing family it does not change. The form shows the field disabled for organizers, with "Only admins can change this." Admins use the form or `assignFamilies`.
 - **Organizers can see all families** of the wedding, with their own first (FR-25 wording), so they can help each other. "My families" shows only their own. `[Confirmed]` 2026-10-30
 
 ## 9. Import (build plan 6.2 to 6.6) — FR-16, FR-17, FR-21
@@ -211,7 +218,7 @@ These functions are the first line of every read function and action. Small Vite
 
 **The three steps** (CLAUDE.md rule 7, architecture flow 3.3) are three functions in `lib/import`:
 1. `validateImportFile(rows)` — no database. Family name, at least one event, phone format, the same number twice in the file.
-2. `validateImportAgainstDb(weddingId, rows)` — read only. Number already in the app on a different family (error), same name and same number (skip, "already in the app"), organizer not in the team, events exist.
+2. `validateImportAgainstDb(weddingId, rows)` — read only. Number already in the app on a different family (error), same name and same number (skip, "already in the app"), organizer not in the team (the file must have the organizer's email; a name gives the error "Organizer not in the team. Use their email."; decided 2026-10-30), events exist.
 3. `saveImport(weddingId, rows)` — one transaction. It runs steps 1 and 2 again first. It saves only with 0 errors.
 
 **The report** of `checkImport`:
@@ -244,6 +251,7 @@ These functions are the first line of every read function and action. Small Vite
 - `markInvitationSent` sets `invitation_sent_at` and `invitation_sent_by`. If the slug is not locked, it locks it in the same transaction.
 - `undoInvitationSent` clears both columns. Any team member can undo it, not only the person who marked it. `[Confirmed]` 2026-10-30. The slug stays locked, because a card may already be out.
 - For admins, "Families" uses `listFamilies`. For organizers, "My families" uses `listMyFamilies`.
+- **One list with a switch** (decided 2026-10-30): the organizer's screen has two chips at the top, **My families** (the default, `listMyFamilies`) and **All families** (`listFamilies`, with the organizer's own families sorted first). Organizers use "All families" to help a guest of another organizer. There is no extra tab.
 
 ## 11. RSVP page for guests (build plan 7.1 to 7.4) — FR-27 to FR-38, FR-42
 
@@ -256,29 +264,31 @@ Guests never sign in. The guest functions take the `slug` from the address (`/pr
 | Anonymous device cookie | A random code. The database keeps only its hash. | `verifyFamilyDigits`, if the device has none | Counts wrong tries for each device (`access_attempts`) |
 | Guest family cookie | A random code. `guest_devices` keeps only its hash. | `verifyFamilyDigits`, after correct digits | Gives this device access to one family of one wedding |
 
+**One cookie for each wedding** (decided 2026-10-30): the name of the guest family cookie includes the wedding, for example `guest-priya-rahul`. A guest who is invited to two weddings keeps access to both, and does not use extra device slots. `requireGuestFamily` and `getGuestFamily` also check that the family in the cookie belongs to the wedding of the address. A test covers it (NFR-9).
+
 Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In Next.js a cookie can be set only in an action or a route, not while a page loads. For this reason they are set in `verifyFamilyDigits`.
 
 ### 11.2 Functions
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `getRsvpLanding(slug)` | Read | Anyone | — | Bride and groom names, date, city, banner, greeting, theme colour, `isTest`, `isClosed`, `rsvpLastDate` | Not found page |
+| `getRsvpLanding(slug)` | Read | Anyone (the team's "See it as a guest sees it" button also opens this page; Wave 1 has no family preview) | — | Bride and groom names, date (no wedding city; each event has its own venue), banner, greeting, theme colour, `isTest`, `isClosed`, `rsvpLastDate` | Not found page |
 | `generateMetadata` for `/[couple]` | Read | Anyone (WhatsApp) | — | Title "Priya & Rahul's Wedding", the month and year, the banner. Nothing else (FR-38). | — |
-| `searchFamilies(slug, text)` | Action | Anyone | At least 3 letters | At most 10 matches: id, family name, contact name or city | `INVALID_INPUT` ("Type at least 3 letters.") |
+| `searchFamilies(slug, text)` | Action | Anyone | At least 3 letters | At most 10 matches: id, family name, contact name or city. There is no limit on the number of searches: the owner accepts this risk (NFR-11, R-6; decided 2026-10-30). | `INVALID_INPUT` ("Type at least 3 letters.") |
 | `verifyFamilyDigits(slug, familyId, digits)` | Action | Anyone | 4 digits | `{ ok: true }` and the family cookie | `INVALID_INPUT` ("The number does not match. Check the last 4 digits and try again."), `TOO_MANY_TRIES`, `NOT_ALLOWED_NOW` ("Too many devices. Ask the person who sent you the card.") |
 | `getGuestInvitation(slug)` | Read | Guest with the family cookie | — | Family name, the invited events only (name, type colour, date, time, venue, map link), the replies if any, "Replied by Meena, 5 Dec", organizer's first name, `isClosed` | Screen 1 (no cookie) |
-| `submitReplies(slug, input)` | Action | Guest with the family cookie | `repliedByName`, and for each invited event: `attending`, `persons` (at least 1 for yes) | The saved replies | `CLOSED`, `ALREADY_REPLIED`, `INVALID_INPUT` (an event is missing or not on the invitation) |
+| `submitReplies(slug, input)` | Action | Guest with the family cookie | `repliedByName`, and for each invited event **that has no reply yet**: `attending`, `persons` (at least 1 for yes) | The saved replies | `CLOSED`, `ALREADY_REPLIED` (every event already has a reply), `INVALID_INPUT` (an open event is missing, or an event is not on the invitation) |
 
 **`verifyFamilyDigits` in detail:**
 1. Set the anonymous device cookie if it is missing.
-2. Check the limits in `lib/limits.ts`: 5 wrong tries for this family on this device in the last 15 minutes, or 20 tries from this device in the last hour, gives `TOO_MANY_TRIES`. The digits are not checked.
+2. Check the limits in `lib/limits.ts`: 5 wrong tries for this family on this device in the last 15 minutes, or 20 tries from this device in the last hour, gives `TOO_MANY_TRIES`. Two more limits do not use the cookie: 30 wrong tries for this family in 24 hours (all devices), and 30 wrong tries in one hour from this internet address (a hash, read from the request headers). The digits are not checked when any limit is reached. A request with no cookie counts as a new device, so the cookie-free limits are what stop a script. `[Confirmed]` 2026-10-30
 3. Compare the digits with the last 4 digits of the primary and secondary numbers (FR-29). Write one `access_attempts` row.
 4. If they match: if the family has 12 devices, refuse. Otherwise insert a `guest_devices` row and set the family cookie.
 
 **`submitReplies` in detail** (one transaction):
 1. `requireGuestFamily`. Check the last date: after 23:59 India time on `rsvp_last_date` gives `CLOSED`.
-2. The input must have one answer for **every** invited event and no other event (UI design: nothing is pre-selected).
-3. Insert one `replies` row for each event, with `source = guest`. If any row exists already (unique rule), nothing is saved and the result is `ALREADY_REPLIED`. The page then shows the reply that was saved first (FR-35).
+2. The input must have one answer for **every invited event that has no reply yet**, and no other event (UI design: nothing is pre-selected). Events that already have a reply are not in the input. Decided 2026-10-30: each event is treated on its own, so a family with a partial reply (for example entered by Rohan by phone, or an event added later) can answer the open events.
+3. Insert one `replies` row for each open event, with `source = guest`. A reply that exists already is never changed (unique rule, first reply wins). If another person saved a row for one of these events in the meantime, nothing is saved and the result is `ALREADY_REPLIED`. The page then shows the replies that were saved first (FR-35).
 4. The page shows "Thank you" only after `ok: true` (FR-42). If the network fails, it shows "Not sent. Try again." and the answers stay on the page.
 
 **Privacy:** the guest functions never return phone numbers, notes, other families, events that are not on the invitation, or team emails (FR-64).
@@ -291,7 +301,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 | `resetFamilyDevices(weddingId, familyId)` | Action | Member | — | `{ removed }` | — |
 
 - The team is not limited by the last dates (FR-37).
-- `setFamilyReply` makes or changes the row, with `source = team` and `updated_by` = the member.
+- `setFamilyReply` makes or changes the row, with `source = team` and `updated_by` = the member. `source` shows who made the latest version: a guest reply that the team changes later counts as a team reply (decided 2026-10-30; no extra column).
 - The team can change a reply, but not clear it. A guest never replies twice. `[Confirmed]` 2026-10-30
 
 ## 13. Dashboard (build plan 8.3) — FR-24, FR-43, FR-44
@@ -300,8 +310,9 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 |---|---|---|---|
 | `getDashboard(weddingId)` | Read | Member | All of the items below in one call |
 
-- **Setup checklist:** each step done or not, and who did it ("Events added by Dad").
+- **Setup checklist:** each step done or not. It does not show who did it, because the database does not record the creator of an event or a family (decided 2026-10-30).
 - **Counts** for each event and for the whole wedding, for bride side, groom side, both and total: invited, replied yes (persons), replied no, no reply (FR-43).
+- **Families with mixed answers** (decided 2026-10-30): the whole-wedding "yes" counts a family that said yes to **any** event. The whole-wedding "no" counts a family only if it answered at least one event and said no to all answered events. "No reply" counts a family with no answer for any event. A family with some open events shows as "partly replied" on the team side.
 - **Whole-wedding "yes" rule:** each family counts once, with its largest headcount across its events. Example: the Sharma family says Haldi 2 and Wedding 4. The whole-wedding count adds 4, not 6.
 - **Organizer progress:** for each organizer, families, sent and replied (FR-24).
 - **Needs attention** (three rows): families with no reply, families with no phone number, invitations not sent (FR-44, Wave 1 part).
@@ -317,6 +328,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 
 - Dates in the files are India time. The file names have the date, for example `priya-rahul-families-2026-12-05.csv`.
 - The files open in Excel without broken Hindi names (UTF-8 with a BOM). `[Proposed]`
+- **Formula safety:** a cell whose text starts with `=`, `+`, `-` or `@` gets a `'` in front, so Excel shows it as text. Each route handler calls `requireAdmin` itself.
 
 The nightly database copy (FR-66, build plan 9.2) is a GitHub Actions script, not an app function.
 

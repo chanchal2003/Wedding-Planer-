@@ -1,7 +1,7 @@
 # ShaadiDesk: Database Design (Wave 1)
 
 Date: 2026-10-25  
-Status: **Draft 5 (display_name added 2026-10-28). All open points are decided. the schema folder `prisma/schema/` is written from this design; no migration exists yet.**  
+Status: **Draft 6 (2026-10-30). All open points are decided. The schema folder `prisma/schema/` is written from this design. Two migrations are applied to the local database. Still to come: the sign-in tables, the lowercase email checks (step 4.2) and `access_attempts.ip_hash` (step 7.3).**  
 Sources: PRD Sections 8 and 12, design document Section 8.1, build plan step 2.2.
 
 Nothing in this document is built yet. A visual version of this document, with the same diagram, is on the Database Design page: https://claude.ai/artifact/CJiwX1Y1DWcPP2Yzu3agwr
@@ -161,7 +161,7 @@ One row per wedding. The couple's names do not have to be unique. Only the id an
 | `wedding_date` | date |  | Required. A real wedding needs a future date. A test wedding can have any date. |
 | `is_test` | boolean |  | Default false. A practice wedding with fake data. |
 | `greeting` | text |  | Optional welcome text for guests |
-| `theme_color` | text |  | Optional. One hex color, like #9A3B3B. |
+| `theme_color` | text |  | Optional. The name of one of 5 colours: `plum` (the default when empty), `rose`, `indigo`, `slate`, `charcoal`. The app keeps the hex codes and soft tints in one list (UI design, Section 4.1). Decided 2026-10-30. |
 | `banner_key` | text |  | Optional. Where the banner photo is stored in R2. |
 | `rsvp_last_date` | date |  | Optional. Guests can reply until 23:59 India time on this day. |
 | `stay_last_date` | date |  | Optional. Must be earlier than rsvp_last_date. |
@@ -354,7 +354,7 @@ The limit of 12 devices for each family is checked in the app code.
 
 ### `access_attempts`
 
-A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wrong tries then a 15-minute stop, and 20 tries for each device each hour.
+A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wrong tries then a 15-minute stop, 20 tries for each device each hour, 30 wrong tries for each family each day (all devices together) and 30 wrong tries for each internet address each hour. The last two do not depend on the cookie, so a script that drops its cookie is still stopped.
 
 | Column | Type | Key | Meaning |
 |---|---|---|---|
@@ -362,7 +362,8 @@ A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wr
 | `device_hash` | text |  | Hash of an anonymous device code (a cookie) that the guest's phone receives on the first visit, before access is granted |
 | `family_id` | uuid | FK | families.id. Optional. |
 | `succeeded` | boolean |  |  |
-| `attempted_at` | timestamptz |  | Index with device_hash. Old rows are deleted later. |
+| `ip_hash` | text |  | Hash of the internet address of the request (never the address itself). Added by a new migration at step 7.3. |
+| `attempted_at` | timestamptz |  | Index with device_hash, index with family_id, index with ip_hash. Old rows are deleted later. |
 
 **Sample rows**
 
@@ -386,21 +387,22 @@ A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wr
 - Delete a family: its phones, devices and family_events rows go too.
 - Delete a wedding: everything inside it goes too.
 - A pending team member has no signed-in user, and an active one has a signed-in user. (a check written in the migration)
+- Emails in `users` and `wedding_members` have no capital letters. (a check `email = lower(email)`, added in the step 4.2 migration, decided 2026-10-30)
 - A team row cannot be deleted while families point to it. (a restrict rule on the link)
 
 ### The app code checks
 
-- stay_last_date is earlier than rsvp_last_date (Prisma cannot write this rule in the schema).
+- stay_last_date is earlier than rsvp_last_date (Prisma cannot write this rule in the schema; also a database check in the first migration).
 - A family has at most 12 devices, and the attempt limits (5 wrong tries then 15 minutes, 20 tries each hour for one device).
 - Admins must be bride, groom, parent or sibling. Friends can only be organizers.
-- persons is at least 1 when attending is yes.
+- persons is at least 1 when attending is yes (also a database check in the first migration).
 - The last admin cannot be removed. The bride and groom are protected after they sign in.
 - A team member cannot be set to removed while families or open tasks are assigned to them. The same row can be made active again if they come back.
 - Every query filters by wedding_id, and every request goes through lib/access.
 
 ## Left out of Wave 1
 
-- **Sign-in tables (accounts, sessions, verification tokens)**: added at step 4.2, from the sign-in tool's own documentation
+- **Sign-in tables (accounts, sessions, verifications) and the columns `users.email_verified` and `users.image`**: added at step 4.2, from the Better Auth documentation
 - **access_requests**: Wave 2 ("Request access")
 - **expenses, payments, history**: Should Have, after Wave 1
 - **tasks, stay, gifts**: Should Have (December tier)
