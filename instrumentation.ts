@@ -6,6 +6,7 @@ export async function register() {
 
   // Stops the server with a clear message if an environment variable is missing.
   await import("@/lib/env");
+  await import("@/lib/auth/env");
   console.log("✅ Environment variables are valid");
 
   const { db } = await import("@/lib/db");
