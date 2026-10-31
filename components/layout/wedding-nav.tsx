@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, MoreHorizontal, Settings, UsersRound, Users } from "lucide-react";
+import { CalendarDays, FileUp, Home, MoreHorizontal, Settings, UsersRound, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // The menu of one wedding (UI design, Section 7): a bar at the bottom on phones, a sidebar on
@@ -26,13 +26,16 @@ const phoneItems = (base: string): Item[] => [
     href: `${base}/more`,
     label: "More",
     icon: MoreHorizontal,
-    active: (path) => path.startsWith(`${base}/more`) || path.startsWith(`${base}/team`) || path.startsWith(`${base}/settings`),
+    active: (path) => path.startsWith(`${base}/more`) || path.startsWith(`${base}/team`) || path.startsWith(`${base}/import`) || path.startsWith(`${base}/settings`),
   },
 ];
 
 const sideItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
   { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) },
+  ...(isAdmin
+    ? [{ href: `${base}/import`, label: "Import", icon: FileUp, active: (path: string) => path.startsWith(`${base}/import`) }]
+    : []),
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
   { href: `${base}/team`, label: "Team", icon: Users, active: (path) => path.startsWith(`${base}/team`) },
   ...(isAdmin

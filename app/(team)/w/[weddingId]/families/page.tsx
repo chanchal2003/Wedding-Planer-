@@ -45,7 +45,7 @@ async function FamilyList({
 }) {
   const { weddingId } = await params;
   const filters = parseFilters(await searchParams);
-  const { total, pages, families, events, organizers } = forPage(await listFamilies(weddingId, filters));
+  const { member, total, pages, families, events, organizers } = forPage(await listFamilies(weddingId, filters));
 
   const filtering = filters.side || filters.event || filters.organizer || filters.status;
   const group = (label: string, children: React.ReactNode) => (
@@ -141,6 +141,10 @@ async function FamilyList({
       )}
 
       <Button size="lg" render={<Link href={`/w/${weddingId}/families/new`} />}>Add family</Button>
+      {/* Only admins import a guest list (the import page checks it again). */}
+      {member.role === "admin" && (
+        <Button variant="outline" size="lg" render={<Link href={`/w/${weddingId}/import`} />}>Import from Excel</Button>
+      )}
     </>
   );
 }

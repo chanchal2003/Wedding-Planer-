@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ChevronRight, Home, Settings, Users } from "lucide-react";
+import { ChevronRight, FileUp, Home, Settings, Users } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { requireMember } from "@/lib/access/guards";
 import { forPage } from "@/lib/access/respond";
@@ -8,7 +8,7 @@ import { forPage } from "@/lib/access/respond";
 export const metadata = { title: "More | ShaadiDesk" };
 
 // The "More" tab of the phone menu: everything that does not fit in the bar. Settings is for
-// admins only. Import joins this list at step 6.
+// admins only. Import is for admins only too.
 export default function MorePage({ params }: PageProps<"/w/[weddingId]/more">) {
   return (
     <PageShell>
@@ -26,7 +26,12 @@ async function MoreLinks({ params }: { params: PageProps<"/w/[weddingId]/more">[
 
   const links = [
     { href: `/w/${weddingId}/team`, label: "Team", icon: Users },
-    ...(member.role === "admin" ? [{ href: `/w/${weddingId}/settings`, label: "Settings", icon: Settings }] : []),
+    ...(member.role === "admin"
+      ? [
+          { href: `/w/${weddingId}/import`, label: "Import guest list", icon: FileUp },
+          { href: `/w/${weddingId}/settings`, label: "Settings", icon: Settings },
+        ]
+      : []),
     { href: "/weddings", label: "My weddings", icon: Home },
   ];
 
