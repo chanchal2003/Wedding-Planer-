@@ -119,14 +119,14 @@ These functions are the first line of every read function and action. Small Vite
 | Function | Kind | Who | What it does |
 |---|---|---|---|
 | `/api/auth/*` | Route (Better Auth) | Anyone | Google sign-in and sign-out. Better Auth makes these addresses. |
-| `linkPendingInvitations(user)` | Called by the Better Auth hook (after the user row is made, and at each new session) **and** by `listMyWeddings()` | The person who signs in | In one transaction: find every `wedding_members` row with `status = pending` and the same email (lowercase). Set `user_id` and `status = active`. It runs at every sign-in and each time "My weddings" opens, so a person who is already signed in also gets new invitations. If nothing is pending, it does nothing. It links only when Google says the email is verified. `[Confirmed]` 2026-10-30 |
+| `linkPendingInvitations(user)` | Called by the Better Auth hook (`databaseHooks.user.create.after`, after a new user row is made) **and** by `listMyWeddings()`. Every sign-in lands on "My weddings", so every sign-in links | The person who signs in | In one transaction: find every `wedding_members` row with `status = pending` and the same email (lowercase). Set `user_id` and `status = active`. It runs at every sign-in and each time "My weddings" opens, so a person who is already signed in also gets new invitations. If nothing is pending, it does nothing. It links only when Google says the email is verified. `[Confirmed]` 2026-10-30 |
 | `signOutAction()` | Action | Signed-in user | Ends the session |
 
 - Example (already signed in): Rohan signed in on Monday for his cousin's wedding. On Wednesday Priya invites him. On Thursday he opens "My weddings" and Priya's wedding is there, without a new sign-in.
 - Example: Ankit was invited as `ankit@example.com`. He signs in with that Google account. His pending row in the Priya and Rahul wedding becomes active. He sees the wedding in "My weddings".
 - If Google says the email is not verified, no invitation is linked. The person sees "Your Google email is not verified."
 - A person with no invitation can sign in. They see "My weddings" with only "Make a wedding".
-- **Sign-in tool:** Better Auth (decided 2026-10-30, instead of Auth.js). The hook runs after the `users` row exists, so `user_id` can be set. The exact hook names are taken from the Better Auth docs at step 4.2.
+- **Sign-in tool:** Better Auth (decided 2026-10-30, instead of Auth.js). The hook runs after the `users` row exists, so `user_id` can be set. Better Auth copies Google's own `email_verified` value into `users.email_verified` (checked in its source code, 2026-10-31).
 - The other Better Auth tables (accounts, sessions, verifications) and the columns `email_verified` and `image` come in a new migration at step 4.2.
 
 ## 5. Weddings (build plan 5.1 to 5.3) — FR-2, FR-3, FR-4, FR-22

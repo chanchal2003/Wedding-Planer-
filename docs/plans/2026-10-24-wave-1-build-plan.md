@@ -216,7 +216,7 @@ The separate helper phase is removed (owner decision, 2026-10-26). Its work move
 
 ## Phase 4: Sign-in and the security guard
 
-### 4.1 Google sign-in key 👤
+### 4.1 Google sign-in key ✅ done 👤
 1. Open console.cloud.google.com. Make a project named `shaadidesk`.
 2. Set up the OAuth consent screen: External, app name "ShaadiDesk", your email.
 3. Make an OAuth Client ID (Web application) with these redirect addresses:
