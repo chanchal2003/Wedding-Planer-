@@ -41,6 +41,8 @@
   --color-event-sangeet: var(--event-sangeet);
   --color-event-wedding: var(--event-wedding);
   --color-event-reception: var(--event-reception);
+  --color-event-mata-ki-chowki: var(--event-mata-ki-chowki);
+  --color-event-other: var(--event-other);
   --color-chip-good: var(--chip-good);
   --color-chip-good-bg: var(--chip-good-bg);
   --color-chip-warn: var(--chip-warn);
@@ -103,6 +105,8 @@
   --event-sangeet: #3b5ba9;
   --event-wedding: #5b2a55;
   --event-reception: #4a5d73;
+  --event-mata-ki-chowki: #a0673a; /* clay */
+  --event-other: #7a8583; /* stone grey */
 
   /* Status chips: always a word plus a colour. */
   --chip-good: #1f5f5b;

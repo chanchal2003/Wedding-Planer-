@@ -46,3 +46,32 @@ export function addDays(day: string, days: number): string {
 export function formatDay(day: string): string {
   return formatDate(new Date(`${day}T00:00:00Z`));
 }
+
+// ---- A date and a time typed in India time (for example an event) ----
+
+// "2027-01-12" and "10:00" typed in India become the exact moment (saved in UTC, rule 9).
+export function parseIndiaDateTime(day: string, time: string): Date {
+  return new Date(`${day}T${time}:00+05:30`);
+}
+
+// The moment as the two values of the form fields: { day: "2027-01-12", time: "10:00" } in India time.
+export function indiaParts(date: Date): { day: string; time: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: INDIA,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return { day: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
+}
+
+// "12 January 2027, 10:00 am" in India time.
+export function formatDateTime(date: Date): string {
+  const day = new Intl.DateTimeFormat("en-IN", { timeZone: INDIA, day: "numeric", month: "long", year: "numeric" }).format(date);
+  const time = new Intl.DateTimeFormat("en-IN", { timeZone: INDIA, hour: "numeric", minute: "2-digit", hour12: true }).format(date);
+  return `${day}, ${time}`;
+}
