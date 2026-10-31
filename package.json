@@ -14,7 +14,10 @@
     "db:migrate:create": "prisma migrate dev --create-only",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:test:migrate": "node --env-file=.env.test ./node_modules/prisma/build/index.js migrate deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -25,6 +28,7 @@
     "dotenv": "^18.0.9",
     "lucide-react": "^1.61.0",
     "next": "16.4.3",
+    "next-auth": "^4.24.15",
     "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -43,7 +47,8 @@
     "prisma": "^7.10.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.12"
   },
   "engines": {
     "node": ">=24 <25"
