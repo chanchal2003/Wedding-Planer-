@@ -28,7 +28,7 @@ This project uses a new Next.js version (see `package.json`) with changes from o
 - PostgreSQL through **Prisma 7** (schema in the folder `prisma/schema/` with one file for each area: base, enums, team, events, guests; migrations in `prisma/migrations`, config in `prisma.config.ts`, generated client in `app/generated/prisma`, which is git-ignored). Use the client only through `import { db } from "@/lib/db"`. Run `npm run db:generate` after each schema change and `npm run db:check` to test the connection. **Development: normal PostgreSQL on the laptop** (Homebrew, PostgreSQL 17, database `shadidesk_local`). **Production: Neon** (one `main` branch, same major version). Prisma 7 does not allow `url` inside `schema.prisma`; the URL is in `prisma.config.ts`.
 - Cloudflare R2 through the S3 API (`lib/storage`) for photos and backups.
 - Better Auth with Google for the team, sessions in PostgreSQL (switched from Auth.js on 2026-10-30: Auth.js v5 is still beta and its Prisma adapter does not support Prisma 7). Guests never sign in.
-- Tailwind CSS + shadcn/ui. Vitest only, for the access rules and the import rules. No Playwright, no CI for now.
+- Tailwind CSS + shadcn/ui. Vitest only, for the access rules and the import rules. `npm test` runs on the separate database `shadidesk_test` (address in `.env.test`, git-ignored). After each new migration run `npm run db:test:migrate`. Tests never use `shadidesk_local`. No Playwright, no CI for now.
 - Hosting: Vercel (free plan). Nightly jobs: GitHub Actions.
 - Everything must stay on free plans (₹0).
 

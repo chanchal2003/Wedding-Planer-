@@ -133,13 +133,13 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 **Done when:** the app starts with all values. If you remove one value, the app stops with a clear message that names it.
 **Commit:** `chore: validate environment variables with zod`
 
-### 1.4 Vitest (small) 🤖 (not done yet: do it before step 4.3)
+### 1.4 Vitest (small) ✅ done 🤖
 - Install Vitest. Add `npm test`.
 - **No Playwright. No GitHub Actions / CI.** Add CI later only if the owner asks.
 - Tests are written only for the access rules (step 4.3) and the import (steps 6.3 and 6.4).
 - **A separate test database** `shadidesk_test` on the same laptop PostgreSQL (one `createdb` command, shown to the owner before it runs). The tests use it through `DATABASE_URL` in a `.env.test` file (git-ignored), apply the migrations to it, and empty it between tests. They never touch `shadidesk_local`. Decided 2026-10-30.
 
-**Done when:** one sample test passes with `npm test`.
+**Done when:** one sample test passes with `npm test`. Done: `tests/database.test.ts` passes on `shadidesk_test`. Setup file `tests/setup.ts` stops every run that does not use `shadidesk_test`. `npm run db:test:migrate` applies the migrations to the test database after each new migration.
 **Commit:** `chore: add vitest`
 
 ### 1.5 First deploy to Vercel 👤 + 🤖 (moved: do this after Phase 8 and before step 9.2, together with step 0.4. Until then everything runs on the laptop. Decided 2026-10-30.)
