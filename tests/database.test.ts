@@ -1,7 +1,10 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
+import { resetDatabase } from "./helpers";
 
 describe("test database", () => {
+  // Start from an empty database, so a test that ran before and left rows cannot make this one fail.
+  beforeAll(resetDatabase);
   afterAll(() => db.$disconnect());
 
   it("is shadidesk_test, not the local development database", async () => {
