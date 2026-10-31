@@ -38,11 +38,11 @@ type OrganizerChoice = { value: string | null | undefined; error?: undefined } |
 async function organizerFor(tx: Prisma.TransactionClient, access: Access, weddingId: string, organizerId: string | null): Promise<OrganizerChoice> {
   if (access.member.role !== "admin") return { value: undefined };
   if (organizerId === null) return { value: null };
-  const member = await tx.weddingMember.findFirst({
-    where: { id: organizerId, weddingId, status: { not: "removed" } },
-    select: { id: true },
-  });
-  return member ? { value: member.id } : { error: "Choose a person from the team." };
+  // FOR SHARE: this person cannot be removed while the family is saved (changeTeam locks FOR UPDATE and
+  // then counts the families), so a family is never assigned to a removed person (FR-13).
+  const members = await tx.$queryRaw<{ id: string }[]>`
+    SELECT id FROM wedding_members WHERE id = ${organizerId}::uuid AND wedding_id = ${weddingId}::uuid AND status <> 'removed' FOR SHARE`;
+  return members.length > 0 ? { value: members[0].id } : { error: "Choose a person from the team." };
 }
 
 export async function createFamily(weddingId: string, input: unknown): Promise<Result<{ familyId: string }>> {
