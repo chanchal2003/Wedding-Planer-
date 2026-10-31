@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, MoreHorizontal, Settings } from "lucide-react";
+import { CalendarDays, Home, MoreHorizontal, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // The menu of one wedding (UI design, Section 7): a bar at the bottom on phones, a sidebar on
 // laptops. A section that does not exist yet is not in the list (it is hidden, not greyed out).
-// Each later step adds its item here: Families (step 6), Team and Import (steps 5.5 and 6).
+// Each later step adds its item here: Families and Import (step 6). Team is in More on a phone.
 
 type Item = {
   href: string;
@@ -25,13 +25,14 @@ const phoneItems = (base: string): Item[] => [
     href: `${base}/more`,
     label: "More",
     icon: MoreHorizontal,
-    active: (path) => path.startsWith(`${base}/more`) || path.startsWith(`${base}/settings`),
+    active: (path) => path.startsWith(`${base}/more`) || path.startsWith(`${base}/team`) || path.startsWith(`${base}/settings`),
   },
 ];
 
 const sideItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
+  { href: `${base}/team`, label: "Team", icon: Users, active: (path) => path.startsWith(`${base}/team`) },
   ...(isAdmin
     ? [{ href: `${base}/settings`, label: "Settings", icon: Settings, active: (path: string) => path.startsWith(`${base}/settings`) }]
     : []),
