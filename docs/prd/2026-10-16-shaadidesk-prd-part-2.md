@@ -188,6 +188,8 @@ Organizer opens Requests ──► Approve or Reject
 
 ### 10.4 States of each screen
 
+**Rule for the name in guest messages** `[Confirmed]` 2026-10-30: where a text says `<organizer name>`, the page shows the first name of the organizer assigned to the family (for example "Rohan"). If the family has no organizer, the text says "the person who sent you the card" instead (for example: "Replies are closed. Contact the person who sent you the card."). The page never shows a phone number of a team member.
+
 **RSVP Screen 1**
 
 | State | What the guest sees |
@@ -272,7 +274,7 @@ Organizer opens Requests ──► Approve or Reject
 | AC-4.1 | Priya edits the wedding settings | She sets the stay last date later than the RSVP last date | The app does not save it and shows the error |
 | AC-5.1 | Priya adds an event | She selects "Haldi" and fills the date, venue and "hosted by" | The event is saved with the type "Haldi" |
 | AC-5.2 | Priya adds an event | She selects "Other" and types "Mata ki Jagran" | The event is saved with the name "Mata ki Jagran" |
-| AC-6.1 | The wedding has a Haldi event | Meena opens Screen 2 | The Haldi card shows the Haldi icon and color `[Proposed]` |
+| AC-6.1 | The wedding has a Haldi event | Meena opens Screen 2 | The Haldi card shows the Haldi color dot. Icons come in Wave 2. `[Proposed]` |
 | AC-7.1 | Ankit is an organizer | He opens an event | He can edit the time, venue and note. He cannot see the "Delete" button |
 | AC-7.2 | Ankit has no money access | He sends a request to change the budget | The server refuses the request |
 | AC-8.1 | The Sangeet has 120 families, 85 replies, 6 expenses and 4 tasks | Priya deletes the Sangeet and confirms | The 85 replies are deleted. The 6 expenses and 4 tasks show "whole wedding" |
@@ -330,7 +332,7 @@ Organizer opens Requests ──► Approve or Reject
 | AC-35.1 | Meena and Rohan (her son) open Screen 2 at the same time | Both submit | The server keeps the first reply. The second person sees the first reply |
 | AC-36.1 | The Sharma family replied | Meena opens the link again | The reply is read-only, with "To change your reply, contact <organizer name>" |
 | AC-36.2 | The Sharma family replied | A request to change the reply comes from a guest device | The server refuses the request |
-| AC-37.1 | The RSVP last date was 31 Dec and it is 1 Jan, 00:01 India time | The Verma family opens Screen 2 with no reply | The page shows "Replies are closed. Contact <organizer name>." |
+| AC-37.1 | The RSVP last date was 31 Dec and it is 1 Jan, 00:01 India time | The Verma family opens Screen 2 with no reply | The page shows "Replies are closed. Contact Rohan." (or "Contact the person who sent you the card." if the family has no organizer) |
 | AC-37.2 | It is after the RSVP last date | Rohan enters a reply for the Verma family | The reply is saved |
 | AC-38.1 | Priya sends the RSVP link on WhatsApp | WhatsApp shows the preview | The preview shows only the banner, "Priya & Rahul's Wedding" and "January 2027" |
 | AC-39.1 | Meena's daughter does not know the numbers | She pushes "Request access", types "Priya Sharma" and selects the Sharma family | The request shows in the Requests list with the name, family and time. Rohan (assigned organizer) sees it first |
@@ -563,7 +565,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | ID | Question | Owner | Needed by | Proposal |
 |---|---|---|---|---|
 | Q-1 | How many devices can each family have? | Builder | Before the build of FR-30 | Decided 2026-10-24: 12 devices `[Confirmed]` |
-| Q-2 | How many incorrect attempts cause a stop, and for how long? What is the total limit for one device? | Builder | Before the build of FR-31 | Decided 2026-10-24: 5 incorrect attempts for one family, then a 15-minute stop. 20 attempts for one device in one hour. `[Confirmed]` |
+| Q-2 | How many incorrect attempts cause a stop, and for how long? What is the total limit for one device? | Builder | Before the build of FR-31 | Decided 2026-10-24: 5 incorrect attempts for one family, then a 15-minute stop. 20 attempts for one device in one hour. Added 2026-10-30, because a script can drop the device cookie: 30 wrong tries for one family in 24 hours from all devices, and 30 wrong tries per hour for one internet address. `[Confirmed]` |
 | Q-3 | What is the format of the RSVP link? | Builder | Before the build of FR-22 | Decided 2026-10-24: the app suggests a short name of the couple (`/priya-rahul`). The admin can change it. It must be unique. It locks when the first family is marked "Invitation sent". `[Confirmed]` |
 | Q-4 | Which providers for the database, hosting, photos and backups? | Builder | Start of the build | Decided on 2026-10-24: Neon, Vercel, Cloudflare R2, GitHub Actions (D-1). Check the current free plan rules at setup. |
 | Q-5 | How long are daily database copies kept? | Owner | Before the build of FR-66 | 30 days `[Proposed]` |
@@ -679,7 +681,7 @@ No other research or data was used.
 ### Top 5 decisions to confirm
 
 1. **Backup copies:** keep 30 days (Q-5).
-2. **Attempt and device limits:** 12 devices, 5 incorrect attempts then a 15-minute stop, 20 attempts for one device each hour (Q-1, Q-2).
+2. **Attempt and device limits:** 12 devices, 5 incorrect attempts then a 15-minute stop, 20 attempts for one device each hour, 30 wrong tries for one family each day, 30 wrong tries for one internet address each hour (Q-1, Q-2).
 3. **Event type list, icons and colors as Must items** by 10 Nov (FR-5, FR-6).
 4. **Real last dates:** the RSVP last date and the stay last date (Q-6).
 5. **Go criteria and the plan if the app fails** in December (Section 14.2).
