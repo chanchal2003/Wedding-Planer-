@@ -264,10 +264,10 @@ Tests for each role:
 **Done when:** AC-2.1 and AC-2.2 pass.
 **Commit:** `feat: make a wedding with suggested rsvp link`
 
-### 5.2 Test weddings 🤖
-Test flag, a "TEST" badge on team pages and a "TEST" ribbon on guest pages, delete in one step with confirmation (FR-3).
+### 5.2 Test weddings ✅ done 🤖
+Test flag, a "TEST" badge on team pages, delete in one step with confirmation (FR-3). The "TEST" ribbon on guest pages is part of step 7.1.
 **Delete a wedding (FR-68), done 2026-10-31:** any admin deletes a test wedding; only a bride or groom admin deletes a real wedding. Type the name to confirm. A section on the wedding page (it moves into Settings at 5.3). Built: `checkDeleteWedding` (with tests), `deleteWeddingData` (ordered delete in one transaction), `deleteWedding`, `countWeddingData`. A plain delete of the wedding fails because of the links to team members, so the delete runs in order: attempt logs, families, wedding. The migration `20261031062628_members_no_action_for_wedding_delete` changes those three links to `NO ACTION` (the same protection, checked at the end of the statement). It was not enough alone, but it is harmless and stays.
-**Still to do in this step:** the TEST badge on every team page and the TEST ribbon on guest pages (FR-3).
+**The TEST badge, done 2026-10-31:** `app/(team)/w/[weddingId]/layout.tsx` draws a top bar (`components/layout/wedding-top-bar.tsx`) on every page of a wedding, with a back link, the names of the couple and the TEST chip of a test wedding. A later page gets it for free. The layout does not protect its pages: it only asks the guard what to show, and every page still calls the guard itself. The navigation (bottom bar, sidebar) starts at step 5.4.
 **Done when:** AC-3.1 and AC-3.2 pass.
 **Commit:** `feat: add test weddings`
 
@@ -344,7 +344,7 @@ One family at a time, many at once (for example by side), and from the import co
 ## Phase 7: RSVP page for guests
 
 ### 7.1 Screen 1 and the link preview 🤖
-The `/[couple]` page: banner, couple names, search box, 4-digit box. Open Graph tags show only the banner, "<Bride> & <Groom>'s Wedding", and the month and year.
+The `/[couple]` page: banner, couple names, search box, 4-digit box. A "TEST" ribbon shows on the guest page of a test wedding (FR-3, AC-3.1). Open Graph tags show only the banner, "<Bride> & <Groom>'s Wedding", and the month and year.
 **Done when:** AC-27.1 passes. The preview card is correct when you send the link on WhatsApp (AC-38.1).
 **Commit:** `feat: add rsvp screen 1 and safe link preview`
 
