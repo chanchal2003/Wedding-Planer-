@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, MoreHorizontal, Settings, Users } from "lucide-react";
+import { CalendarDays, Home, MoreHorizontal, Settings, UsersRound, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // The menu of one wedding (UI design, Section 7): a bar at the bottom on phones, a sidebar on
 // laptops. A section that does not exist yet is not in the list (it is hidden, not greyed out).
-// Each later step adds its item here: Families and Import (step 6). Team is in More on a phone.
+// Each later step adds its item here: Import (step 6). Team is in More on a phone.
 
 type Item = {
   href: string;
@@ -19,6 +19,7 @@ type Item = {
 
 const phoneItems = (base: string): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
+  { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) },
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
   // "More" holds the rest (Settings for admins, My weddings). Settings counts as More on a phone.
   {
@@ -31,6 +32,7 @@ const phoneItems = (base: string): Item[] => [
 
 const sideItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
+  { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) },
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
   { href: `${base}/team`, label: "Team", icon: Users, active: (path) => path.startsWith(`${base}/team`) },
   ...(isAdmin
@@ -56,7 +58,7 @@ export function WeddingNav({
         aria-label="Wedding menu"
         className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        <ul className="mx-auto grid max-w-xl grid-cols-3">
+        <ul className="mx-auto grid max-w-xl grid-cols-4">
           {phoneItems(base).map((item) => {
             const active = item.active(path, base);
             return (
