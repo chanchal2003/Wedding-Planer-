@@ -14,13 +14,15 @@ export async function listFamilies(weddingId: string, filters: FamilyFilters) {
   if (!access.ok) return access;
   const wedding = access.member.wedding.id;
 
+  // In a search, % and _ are letters of the text, not wildcards (found by the review of 2026-10-31).
+  const q = filters.q.replace(/[\\%_]/g, "\\$&");
   const where: Prisma.FamilyWhereInput = {
     weddingId: wedding,
-    ...(filters.q && {
+    ...(q && {
       OR: [
-        { familyName: { contains: filters.q, mode: "insensitive" } },
-        { contactName: { contains: filters.q, mode: "insensitive" } },
-        { city: { contains: filters.q, mode: "insensitive" } },
+        { familyName: { contains: q, mode: "insensitive" } },
+        { contactName: { contains: q, mode: "insensitive" } },
+        { city: { contains: q, mode: "insensitive" } },
       ],
     }),
     ...(filters.side && { side: filters.side }),

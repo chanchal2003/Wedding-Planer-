@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { THEME_NAMES } from "@/lib/theme";
+import { cleaned } from "@/lib/text";
 import { formatDay, todayInIndia } from "@/lib/time";
 import {
   REPLY_DAYS_BEFORE_WEDDING,
@@ -21,8 +22,8 @@ function isRealDate(value: string): boolean {
 
 export const createWeddingSchema = z
   .object({
-    brideName: z.string().trim().min(1, "Type the bride's name.").max(60, "Use at most 60 letters."),
-    groomName: z.string().trim().min(1, "Type the groom's name.").max(60, "Use at most 60 letters."),
+    brideName: cleaned(z.string().trim().min(1, "Type the bride's name.").max(60, "Use at most 60 letters.")),
+    groomName: cleaned(z.string().trim().min(1, "Type the groom's name.").max(60, "Use at most 60 letters.")),
     weddingDate: z
       .string()
       .refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && isRealDate(value), "Choose the wedding date."),
@@ -64,11 +65,7 @@ export type SettingsContext = {
 export function makeSettingsSchema(context: SettingsContext) {
   return z
     .object({
-      greeting: z
-        .string()
-        .trim()
-        .max(280, "Use at most 280 letters.")
-        .transform((value) => (value === "" ? null : value)),
+      greeting: cleaned(z.string().trim().max(280, "Use at most 280 letters.")).transform((value) => (value === "" ? null : value)),
       themeColor: z.enum(THEME_NAMES, { error: "Choose a colour." }),
       rsvpLastDate: optionalDate,
       stayLastDate: optionalDate,
@@ -84,7 +81,8 @@ export function makeSettingsSchema(context: SettingsContext) {
         if (value.rsvpLastDate !== saved.rsvpLastDate && value.rsvpLastDate < today) {
           problem("rsvpLastDate", "The reply date cannot be before today.");
         } else if (value.rsvpLastDate > latest) {
-          problem("rsvpLastDate", `The reply date must be at least ${REPLY_DAYS_BEFORE_WEDDING} days before the wedding. The latest day is ${formatDay(latest)}.`);
+          // A wedding in less than 2 days: the latest allowed day is already past, so say that.
+          problem("rsvpLastDate", latest < today ? "The wedding is too close to set this date." : `The reply date must be at least ${REPLY_DAYS_BEFORE_WEDDING} days before the wedding. The latest day is ${formatDay(latest)}.`);
         }
       }
 
@@ -96,7 +94,7 @@ export function makeSettingsSchema(context: SettingsContext) {
           // FR-4, AC-4.1: the stay last date must be earlier than the reply last date.
           problem("stayLastDate", "The stay last date must be before the reply last date.");
         } else if (value.stayLastDate > latest) {
-          problem("stayLastDate", `The stay date must be at least ${STAY_DAYS_BEFORE_WEDDING} days before the wedding. The latest day is ${formatDay(latest)}.`);
+          problem("stayLastDate", latest < today ? "The wedding is too close to set this date." : `The stay date must be at least ${STAY_DAYS_BEFORE_WEDDING} days before the wedding. The latest day is ${formatDay(latest)}.`);
         }
       }
     });

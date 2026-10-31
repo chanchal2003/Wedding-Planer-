@@ -1,22 +1,19 @@
 import { z } from "zod";
 import { optionalPhoneSchema } from "@/lib/phone";
+import { cleaned } from "@/lib/text";
 
 // What a person types in the family form (FR-15). The numbers are checked and made standard by
 // lib/phone. A family can have no number (it is flagged, FR-19), but a second number needs a
 // main number. At least one event is on every invitation (AC-15.1).
 
 const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Use at most ${max} letters.`)
-    .transform((value) => (value === "" ? null : value));
+  cleaned(z.string().trim().max(max, `Use at most ${max} letters.`)).transform((value) => (value === "" ? null : value));
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const familySchema = z
   .object({
-    familyName: z.string().trim().min(1, "Type the family name.").max(80, "Use at most 80 letters."),
+    familyName: cleaned(z.string().trim().min(1, "Type the family name.").max(80, "Use at most 80 letters.")),
     contactName: optionalText(60),
     city: optionalText(60),
     side: z.enum(["bride", "groom", "both"], { error: "Choose the side." }),
@@ -51,6 +48,9 @@ export const FAMILY_STATUSES = [
 ] as const;
 
 export const PAGE_SIZE = 50;
+// A page number in the address is never more than this. A huge number (page=99999999999999999999) made
+// the database query fail (found by the review of 2026-10-31).
+export const MAX_PAGE = 10_000;
 
 export type FamilyFilters = {
   q: string;
@@ -78,6 +78,6 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     event: UUID.test(event) ? event : "",
     organizer: organizer === "none" || UUID.test(organizer) ? organizer : "",
     status: FAMILY_STATUSES.some((s) => s.value === status) ? (status as FamilyFilters["status"]) : "",
-    page: Number.isFinite(page) && page > 0 ? page : 1,
+    page: Number.isFinite(page) && page > 0 ? Math.min(page, MAX_PAGE) : 1,
   };
 }

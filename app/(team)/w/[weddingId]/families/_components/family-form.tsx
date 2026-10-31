@@ -183,7 +183,7 @@ export function FamilyForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="notes">Notes</Label>
-        <Textarea id="notes" name="notes" defaultValue={values.notes} maxLength={600} />
+        <Textarea id="notes" name="notes" defaultValue={values.notes} maxLength={500} />
         <p className="text-muted-foreground">Optional. Only the team sees this.</p>
         {fields?.notes && <p role="alert" className="text-destructive">{fields.notes}</p>}
       </div>

@@ -83,7 +83,7 @@ export function GuestPageForm({
           id="greeting"
           name="greeting"
           defaultValue={values.greeting}
-          maxLength={400}
+          maxLength={280}
           placeholder="Namaste! We would love to celebrate with you."
           aria-invalid={fields?.greeting ? true : undefined}
         />

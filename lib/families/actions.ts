@@ -130,7 +130,7 @@ export async function updateFamily(weddingId: string, familyId: string, input: u
       const organizer = await organizerFor(tx, access, wedding, data.organizerId);
       if (organizer.error !== undefined) return fail("INVALID_INPUT", organizer.error, { organizerId: organizer.error });
 
-      await tx.family.updateMany({
+      const updated = await tx.family.updateMany({
         where: { id: current.id, weddingId: wedding },
         data: {
           familyName: data.familyName,
@@ -141,6 +141,8 @@ export async function updateFamily(weddingId: string, familyId: string, input: u
           ...(organizer.value !== undefined && { assignedMemberId: organizer.value }),
         },
       });
+      // Another person deleted the family a moment ago: say so (nothing else is changed).
+      if (updated.count === 0) return fail("NOT_FOUND", "This family was not found. It may have been deleted.");
 
       // The numbers: the old ones go and the new ones come, in this transaction. A number that stays
       // keeps its "incorrect" mark.

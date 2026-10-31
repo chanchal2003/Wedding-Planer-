@@ -162,7 +162,7 @@ export function EventForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="note">Note</Label>
-        <Textarea id="note" name="note" defaultValue={values.note} maxLength={600} aria-invalid={fields?.note ? true : undefined} />
+        <Textarea id="note" name="note" defaultValue={values.note} maxLength={500} aria-invalid={fields?.note ? true : undefined} />
         <p className="text-muted-foreground">Only the team sees this for now. Optional.</p>
         {fields?.note && <p role="alert" className="text-destructive">{fields.note}</p>}
       </div>

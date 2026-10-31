@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cleaned } from "@/lib/text";
 
 // What an admin types in the team form (FR-9). The email is saved in lowercase (the database
 // refuses capital letters). Who may be admin is a rule of lib/team/rules.ts, not of this file.
@@ -16,7 +17,7 @@ export const RELATIONS = [
 export const relationLabel = (value: string) => RELATIONS.find((relation) => relation.value === value)?.label ?? value;
 
 export const personSchema = z.object({
-  displayName: z.string().trim().min(1, "Type the person's name.").max(60, "Use at most 60 letters."),
+  displayName: cleaned(z.string().trim().min(1, "Type the person's name.").max(60, "Use at most 60 letters.")),
   email: z
     .string()
     .trim()

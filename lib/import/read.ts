@@ -2,6 +2,7 @@ import { unzipSync } from "fflate";
 import readExcelFile from "read-excel-file/node";
 import Papa from "papaparse";
 import type { Table } from "@/lib/import/types";
+import { stripNul } from "@/lib/text";
 
 // Turns an uploaded file into a plain table of text (FR-16): an Excel file (.xlsx) or a CSV file.
 // It checks the size and the shape of the file, but not what is in the cells: that is
@@ -30,7 +31,7 @@ function cellText(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   if (typeof value === "boolean") return value ? "yes" : "no";
-  return String(value).trim().slice(0, MAX_CELL);
+  return stripNul(String(value)).trim().slice(0, MAX_CELL);
 }
 
 // "XFD" -> 16384. The number of a column in a cell address like XFD1048576.

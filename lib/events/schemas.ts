@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EVENT_TYPE_VALUES, HOSTED_BY_VALUES } from "@/lib/events";
+import { cleaned } from "@/lib/text";
 import { formatDay } from "@/lib/time";
 
 // What a person types in the event form (FR-5). The same checks run on the server.
@@ -11,11 +12,7 @@ function isRealDate(value: string): boolean {
 }
 
 const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Use at most ${max} letters.`)
-    .transform((value) => (value === "" ? null : value));
+  cleaned(z.string().trim().max(max, `Use at most ${max} letters.`)).transform((value) => (value === "" ? null : value));
 
 // A map link must be a web address (http or https), never something like javascript:.
 const optionalMapLink = z
@@ -46,7 +43,7 @@ export function makeEventSchema(context: EventSchemaContext) {
   return z
     .object({
       type: z.enum(EVENT_TYPE_VALUES, { error: "Choose the type of the event." }),
-      name: z.string().trim().min(1, "Type the name of the event.").max(80, "Use at most 80 letters."),
+      name: cleaned(z.string().trim().min(1, "Type the name of the event.").max(80, "Use at most 80 letters.")),
       day: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && isRealDate(value), "Choose the date."),
       time: z.string().refine((value) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value), "Choose the start time."),
       venueName: optionalText(120),
