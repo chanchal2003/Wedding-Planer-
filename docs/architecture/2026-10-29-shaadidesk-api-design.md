@@ -135,12 +135,12 @@ These functions are the first line of every read function and action. Small Vite
 |---|---|---|---|---|---|
 | `listMyWeddings()` | Read | Signed-in user | — | First calls `linkPendingInvitations` (Section 4). Then the weddings where the user is active: id, bride and groom names, date, `isTest`, the user's role | — |
 | `createWedding(input)` | Action | Signed-in user | `brideName`, `groomName`, `weddingDate`, `relation` (bride, groom, parent or sibling), `isTest` | `{ weddingId }` | `INVALID_INPUT` (a name is empty, or the date is before today in India: "The wedding date cannot be before today." This applies to test weddings too.) |
-| `getWeddingSettings(weddingId)` | Read | Member | — | Names, date, greeting, theme colour, banner address, last dates, slug, `slugLocked`, `isTest` | — |
-| `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` ("The stay last date must be before the reply last date.") |
-| `checkSlug(weddingId, slug)` | Read | Admin | A link name | `{ available: boolean, suggestion }` | — |
+| `getWeddingSettings(weddingId)` | Read | Admin | — | Names, date, greeting, theme colour, the date of the banner (never its bytes), last dates, slug, `slugLocked`, `isTest`. It calls the admin guard itself. | `NO_ACCESS` |
+| `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` (the stay last date is not before the reply last date; a reply date later than 2 days before the wedding; a stay date later than 3 days before the wedding; a new date before today in India. A saved date that has passed is not refused again. Rules in `lib/weddings/rules.ts`.) |
 | `updateSlug(weddingId, slug)` | Action | Admin | A link name: lowercase letters, numbers and dashes | The new slug | `CONFLICT` (name taken or reserved: "This link name is not available."), `NOT_ALLOWED_NOW` ("The link is locked, because invitations were sent.") |
-| `createBannerUploadUrl(weddingId, fileType)` | Action | Admin | `image/jpeg` or `image/webp` | A short-life R2 upload address and the file key | `INVALID_INPUT` |
-| `saveBanner(weddingId, fileKey)` | Action | Admin | The file key from the upload | The banner address | `NOT_FOUND` (no file at that key) |
+| `uploadBanner(weddingId, formData)` | Action | Admin | One photo (JPEG, PNG or WebP, at most 1 MB) | — | `INVALID_INPUT` (not a real photo of those types, or too big) |
+| `removeBanner(weddingId)` | Action | Admin | — | — | — |
+| `GET /<link name>/banner` | Route | Anyone (public on purpose) | — | The banner photo, or 404 | — |
 | `getWeddingDeleteInfo` (`countWeddingData`) | Read | Admin who may delete | — | The numbers for the warning: events, families, replies, team members | — |
 | `deleteWedding(weddingId, typedName)` | Action | Test wedding: any admin. Real wedding: an admin who is the bride or the groom (`requireDeleteWedding`) | The wedding name, typed again (capital letters, extra spaces and "and" for "&" are ignored) | — | `NO_ACCESS`, `INVALID_INPUT` (name does not match) |
 
@@ -155,7 +155,7 @@ These functions are the first line of every read function and action. Small Vite
 
 **Slug lock:** the first `markInvitationSent` of a wedding sets `slug_locked = true` in the same transaction (Section 10). After that, `updateSlug` refuses.
 
-**Banner upload:** the browser makes the photo smaller (about 300 KB) and sends it straight to R2 with the upload address. Then it calls `saveBanner`. The photo never passes through Vercel. Needs step 0.5 (R2).
+**Banner upload** (decided 2026-10-31): the browser makes the photo smaller (a wide 1600 x 900 picture, about 300 KB, cropped from the middle, with a preview) and sends it to the Server Action `uploadBanner`. The server looks at the first bytes of the file to find the real type (JPEG, PNG or WebP; SVG is refused, because it can carry scripts), checks the size, and saves it in the table `wedding_banners` (one row for each wedding). Guests and the WhatsApp preview get it from the public address `/<link name>/banner`, which the browser may keep for 5 minutes. Nothing is stored in a folder or in R2, so it works the same on the laptop and online, and the nightly database copy includes it. When the wedding is deleted, its banner goes with it. `updateSlug` also covers the check of a taken or reserved name, so a separate `checkSlug` is not needed.
 
 ## 6. Events (build plan 5.4) — FR-5, FR-7, FR-8
 

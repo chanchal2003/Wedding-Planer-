@@ -184,7 +184,7 @@ footer { color: var(--muted); font-size: 0.875rem; border-top: 1px solid var(--l
 <tr><td><code>is_test</code></td><td class="mono">boolean</td><td></td><td>Default false. A practice wedding with fake data.</td></tr>
 <tr><td><code>greeting</code></td><td class="mono">text</td><td></td><td>Optional welcome text for guests</td></tr>
 <tr><td><code>theme_color</code></td><td class="mono">text</td><td></td><td>Optional. One hex color, like #9A3B3B.</td></tr>
-<tr><td><code>banner_key</code></td><td class="mono">text</td><td></td><td>Optional. Where the banner photo is stored in R2.</td></tr>
+<tr><td><code>banner_key</code></td><td class="mono">text</td><td></td><td>The banner photo is in its own table, wedding_banners (one row for each wedding, 1 MB at most, saved in the database). The old column banner_key was removed on 2026-10-31.</td></tr>
 <tr><td><code>rsvp_last_date</code></td><td class="mono">date</td><td></td><td>Optional. Guests can reply until 23:59 India time on this day.</td></tr>
 <tr><td><code>stay_last_date</code></td><td class="mono">date</td><td></td><td>Optional. Must be earlier than rsvp_last_date.</td></tr>
 <tr><td><code>created_by</code></td><td class="mono">uuid</td><td><span class="pill fk">FK</span></td><td>users.id: who made the wedding</td></tr>

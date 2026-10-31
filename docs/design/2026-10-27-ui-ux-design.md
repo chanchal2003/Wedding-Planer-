@@ -251,7 +251,7 @@ A calm page: the wordmark, the tagline "Plan the shaadi, not the chaos.", and on
 ### 6.5 My weddings and Make a wedding `[Confirmed]`
 PRD FR-2, FR-3.
 - **My weddings:** a list of cards, each with the couple's names, the date and a TEST badge if needed. A button "Make a wedding".
-- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens. **Delete wedding** (FR-68): a section at the bottom of the wedding page, shown only to an admin who may delete (any admin for a test wedding; for a real wedding only an admin who is the bride or the groom). It says what will be deleted ("3 events, 500 families, 12 replies and 4 team members. This cannot be undone."), asks the person to type the wedding name, and the button stays off until the name matches. It is an outlined button, not a red one (Section 9). It moves into Settings at step 5.3. `[Confirmed]` 2026-10-31
+- **Make a wedding:** one short form. Bride's name, groom's name, wedding date, "You are the…" (Bride, Groom, Parent, Sibling), and a checkbox "This is a test wedding". After that, the guided home opens. **Delete wedding** (FR-68): a small link with a trash icon at the bottom of the Settings page (not a big box), shown only to an admin who may delete (any admin for a test wedding; for a real wedding only an admin who is the bride or the groom). It says what will be deleted ("3 events, 500 families, 12 replies and 4 team members. This cannot be undone."), asks the person to type the wedding name, and the button stays off until the name matches. It is an outlined button, not a red one (Section 9). Clicking the link opens its own page, `/w/<id>/settings/delete`, with the warning, the counts, the name box and a Cancel button. `[Confirmed]` 2026-10-31
 
 ### 6.6 The guided home (dashboard) `[Confirmed]`
 PRD FR-24, FR-43, FR-44.
@@ -358,7 +358,7 @@ PRD FR-16, FR-17. Three screens.
 
 ### 6.10 Setup screens: settings, events, team `[Proposed]`
 PRD FR-4 to FR-13.
-- **Settings:** banner (with a crop preview), greeting, one theme colour (a choice of the 5 colours; the wedding stores the colour name), reply last date and stay last date, the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
+- **Settings:** banner (with a crop preview), greeting, one theme colour (a choice of the 5 colours; the wedding stores the colour name), reply last date and stay last date (the pickers grey out days that are not allowed: before today, and after the latest allowed day, which is 2 days before the wedding for the reply date and 3 days before for the stay date), the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
 - **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has a type list, name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
 - **Team:** a list with role, relation and status chips (Active, Pending, Removed) and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
 

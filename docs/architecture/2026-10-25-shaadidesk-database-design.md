@@ -21,6 +21,7 @@ erDiagram
     users ||--o{ weddings : "makes"
     users |o--o{ wedding_members : "signs in as"
     weddings ||--o{ wedding_members : "has team"
+    weddings ||--o| wedding_banners : "has banner"
     weddings ||--o{ events : "has"
     weddings ||--o{ families : "invites"
     wedding_members |o--o{ families : "looks after"
@@ -162,7 +163,7 @@ One row per wedding. The couple's names do not have to be unique. Only the id an
 | `is_test` | boolean |  | Default false. A practice wedding with fake data. |
 | `greeting` | text |  | Optional welcome text for guests |
 | `theme_color` | text |  | Optional. The name of one of 5 colours: `plum` (the default when empty), `rose`, `indigo`, `slate`, `charcoal`. The app keeps the hex codes and soft tints in one list (UI design, Section 4.1). Decided 2026-10-30. |
-| `banner_key` | text |  | Optional. Where the banner photo is stored in R2. |
+| *(banner)* |  |  | The banner photo is in its own table, `wedding_banners` (below). The old column `banner_key` was removed on 2026-10-31. |
 | `rsvp_last_date` | date |  | Optional. Guests can reply until 23:59 India time on this day. |
 | `stay_last_date` | date |  | Optional. Must be earlier than rsvp_last_date. |
 | `created_by` | uuid | FK | users.id: who made the wedding |
@@ -176,6 +177,18 @@ One row per wedding. The couple's names do not have to be unique. Only the id an
 | w1… | priya-rahul | Priya | Rahul | 2027-01-15 | yes | 2026-12-31 | 2026-12-20 | no |
 
 If a second wedding for Priya and Rahul is made, it gets its own row and its own slug (for example priya-rahul-2).
+
+### `wedding_banners`
+
+The banner photo of a wedding: at most one row for each wedding. It has its own table, so an ordinary wedding query never loads the image bytes. The photo is saved here, in the database (decided 2026-10-31), so it works on the laptop and online, needs no extra service, and the nightly copy includes it.
+
+| Column | Type | Key | Meaning |
+|---|---|---|---|
+| `wedding_id` | uuid | PK, FK | weddings.id. The key is the wedding itself, so a wedding has at most one banner. Cascade: delete the wedding and the banner goes too. |
+| `content_type` | text |  | `image/jpeg`, `image/png` or `image/webp`. A database check refuses any other value. |
+| `data` | bytea |  | The photo. A database check refuses more than 1 MB (the browser shrinks it to about 300 KB). |
+| `created_at` | timestamptz |  |  |
+| `updated_at` | timestamptz |  | Used in the address (`?v=`) so a new photo shows at once. |
 
 ### `wedding_members`
 

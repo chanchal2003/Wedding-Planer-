@@ -251,7 +251,7 @@ Label: `[Confirmed]`.
 | 2 | Attempt limits are kept in a PostgreSQL table. No Redis. | `[Confirmed]` |
 | 3 | Every page and Server Action calls `lib/access` first. Hiding a button is not protection. | `[Confirmed]` |
 | 4 | Phone numbers are kept in one standard format (`libphonenumber-js`). | `[Confirmed]` |
-| 5 | Photos are made smaller in the browser (approximately 300 KB) and uploaded to R2 directly. Bills are private. The banner is public. | `[Confirmed]` |
+| 5 | Photos are made smaller in the browser (approximately 300 KB). The banner photo is saved in the database (table `wedding_banners`) and shown at the public address `/<link name>/banner` (changed 2026-10-31, so it needs no card and no extra service). Bill photos, later, go to a private R2 bucket. | `[Confirmed]` |
 | 6 | Times are saved in UTC and shown in India time. | `[Confirmed]` |
 | 7 | Money is saved as whole paise (`bigint`) and shown in the Indian format, for example ₹1,50,000. | `[Confirmed]` |
 | 8 | Secrets (database password, R2 keys, Google keys) are only in Vercel environment variables and GitHub Secrets. Never in the code. | `[Confirmed]` |

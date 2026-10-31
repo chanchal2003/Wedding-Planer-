@@ -94,7 +94,7 @@ Neon is only for the deployed app on Vercel and the nightly backup. The app does
 
 **Done when:** you have 2 connection strings saved, and none of them is in the chat.
 
-### 0.5 Cloudflare R2 👤 (do this before step 5.3, because the banner photo uploads to R2. Decided 2026-10-30.)
+### 0.5 Cloudflare R2 👤 (moved: do this at the end, before step 9.2. The banner photo is saved in the database, so R2 is needed only for the nightly backup. Decided 2026-10-31, because R2 needs a payment card.)
 1. Sign up at cloudflare.com.
 2. Open R2 and turn it on. Cloudflare can ask for a payment card, also for the free plan. Read the free limits on that page before you continue.
 3. Make two **private** buckets: `shaadidesk-photos` and `shaadidesk-backups`.
@@ -266,12 +266,13 @@ Tests for each role:
 
 ### 5.2 Test weddings ✅ done 🤖
 Test flag, a "TEST" badge on team pages, delete in one step with confirmation (FR-3). The "TEST" ribbon on guest pages is part of step 7.1.
-**Delete a wedding (FR-68), done 2026-10-31:** any admin deletes a test wedding; only a bride or groom admin deletes a real wedding. Type the name to confirm. A section on the wedding page (it moves into Settings at 5.3). Built: `checkDeleteWedding` (with tests), `deleteWeddingData` (ordered delete in one transaction), `deleteWedding`, `countWeddingData`. A plain delete of the wedding fails because of the links to team members, so the delete runs in order: attempt logs, families, wedding. The migration `20261031062628_members_no_action_for_wedding_delete` changes those three links to `NO ACTION` (the same protection, checked at the end of the statement). It was not enough alone, but it is harmless and stays.
+**Delete a wedding (FR-68), done 2026-10-31:** any admin deletes a test wedding; only a bride or groom admin deletes a real wedding. Type the name to confirm. A small link at the bottom of the settings page opens its own page, `/w/<id>/settings/delete`, with the warning and the name box. Built: `checkDeleteWedding` (with tests), `deleteWeddingData` (ordered delete in one transaction), `deleteWedding`, `countWeddingData`. A plain delete of the wedding fails because of the links to team members, so the delete runs in order: attempt logs, families, wedding. The migration `20261031062628_members_no_action_for_wedding_delete` changes those three links to `NO ACTION` (the same protection, checked at the end of the statement). It was not enough alone, but it is harmless and stays.
 **The TEST badge, done 2026-10-31:** `app/(team)/w/[weddingId]/layout.tsx` draws a top bar (`components/layout/wedding-top-bar.tsx`) on every page of a wedding, with a back link, the names of the couple and the TEST chip of a test wedding. A later page gets it for free. The layout does not protect its pages: it only asks the guard what to show, and every page still calls the guard itself. The navigation (bottom bar, sidebar) starts at step 5.4.
 **Done when:** AC-3.1 and AC-3.2 pass.
 **Commit:** `feat: add test weddings`
 
-### 5.3 Wedding settings 🤖
+### 5.3 Wedding settings ✅ built (waiting for the owner's test) 🤖
+**Built 2026-10-31:** the page `/w/<id>/settings` (admins only): banner photo, greeting, colour (stored as a name, list in `lib/theme.ts`), reply-by and stay-by dates (reply at most 2 days before the wedding, stay at most 3 days before it, none before today; the pickers grey out the other days), the Save buttons are off until something is changed (and off again right after saving), the RSVP link with Copy and an editable link name (locked after the first invitation), and a small "Delete wedding" link that opens the delete page. The banner is saved in the database (table `wedding_banners`, migration `add_wedding_banners`), shown at the public address `/<link name>/banner`; the browser shrinks and crops it, the server checks the real type and the size. R2 is not needed (see step 0.5). The wedding page has a Settings button for admins. Older text of this step follows.
 Greeting, colors, RSVP last date and stay last date (stay must be earlier: AC-4.1). Edit the link name until it locks. Banner photo: the browser makes it smaller (approximately 300 KB), uploads it to the photos bucket with a short-time upload link. The banner is public (architecture rule 5), so the guest page and the WhatsApp preview can show it.
 **Also in this step: the India time helper** (`lib/time`). It shows dates in India time and answers "is it after the last date?" (the last date closes at 23:59 India time). A short check shows the right result at 23:59 and 00:01 on the last date.
 

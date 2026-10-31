@@ -120,7 +120,7 @@ This section gives the screens, the flows between them and the states of each sc
 | Sign in | Google sign-in | Team | FR-1 |
 | My weddings | List of the weddings of the user. "Make a wedding" button. | Team | FR-2, FR-3 |
 | Wedding dashboard | Events, guest counts, organizer progress, "needs attention", tasks due soon, budget summary (money access) | Team | FR-24, FR-43, FR-44, FR-51, FR-57 |
-| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy". "Delete wedding" (FR-68; in Wave 1 it is a section at the bottom of the wedding page, and moves into the settings page at step 5.3) | Admin | FR-4, FR-22, FR-68 |
+| Wedding settings | Banner, greeting, colors, last dates, RSVP link with "Copy". "Delete wedding" (FR-68): a small link with a trash icon at the bottom of the settings page, which opens its own page with the warning and the name box | Admin | FR-4, FR-22, FR-68 |
 | Events and event page | Event list with type, icon and "hosted by". Event page with details, guest counts, tasks and money (money access). | Team | FR-5 to FR-8 |
 | Team | Admins, organizers, pending invitations, money switch, remove organizer | Admin | FR-9 to FR-13 |
 | Families | Full guest list with search and filters (side, event, organizer, no reply, no number) | Team | FR-15, FR-19, FR-20 |
@@ -272,6 +272,7 @@ Organizer opens Requests ──► Approve or Reject
 | AC-3.1 | Priya makes a test wedding | She opens any page of it | The page shows the "TEST" label |
 | AC-3.2 | A test wedding exists | Any admin types the name of the wedding and pushes "Delete wedding" | All data of the test wedding is deleted, and no other wedding is changed |
 | AC-4.1 | Priya edits the wedding settings | She sets the stay last date later than the RSVP last date | The app does not save it and shows the error |
+| AC-4.2 | The wedding is on 15 Jan 2027 | Priya sets the RSVP last date to 13 Jan, then to 14 Jan or to a date before today | 13 Jan is saved. 14 Jan and a date before today are refused with a message, and the pickers grey out those days |
 | AC-5.1 | Priya adds an event | She selects "Haldi" and fills the date, venue and "hosted by" | The event is saved with the type "Haldi" |
 | AC-5.2 | Priya adds an event | She selects "Other" and types "Mata ki Jagran" | The event is saved with the name "Mata ki Jagran" |
 | AC-6.1 | The wedding has a Haldi event | Meena opens Screen 2 | The Haldi card shows the Haldi color dot. Icons come in Wave 2. `[Proposed]` |
