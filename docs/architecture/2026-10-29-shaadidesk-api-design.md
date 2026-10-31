@@ -101,12 +101,12 @@ These functions are the first line of every read function and action. Small Vite
 | Function | Returns | Stops with | Rule |
 |---|---|---|---|
 | `getSessionUser()` | The signed-in user, or `null` | — | Reads the Better Auth session |
-| `requireUser()` | `{ user }` | `NOT_SIGNED_IN` | Any signed-in person |
+| `requireUser()` | The user | Sends a signed-out person to the sign-in page | Any signed-in person |
 | `requireMember(weddingId)` | `{ user, member, wedding }` | `NOT_SIGNED_IN`, `NO_ACCESS` | The user has an **active** row in `wedding_members` for this wedding. Pending and removed rows do not count. |
 | `requireAdmin(weddingId)` | same | same | `requireMember` and `role = admin` |
 | `requireMoneyAccess(weddingId)` | same | same | Admin, or organizer with `can_see_money`. Defined now; first used with the Money release. |
-| `getGuestFamily(weddingId)` | `{ family }` or `null` | — | Reads the guest device cookie and finds the row in `guest_devices` |
-| `requireGuestFamily(weddingId)` | `{ family, device }` | `NO_ACCESS` | Same, but stops if there is no valid cookie |
+| `getGuestFamily(slug)` | `{ family }` or `null` | — | Reads the guest device cookie and finds the row in `guest_devices` |
+| `requireGuestFamily(slug)` | `{ family, device }` | `NO_ACCESS` | Same, but stops if there is no valid cookie |
 
 **Why the check runs on every click:** sessions are kept in PostgreSQL (architecture, Section 1). If an admin removes Ankit, his next click fails at `requireMember`, because his row is now `removed`.
 
@@ -136,7 +136,7 @@ These functions are the first line of every read function and action. Small Vite
 | `listMyWeddings()` | Read | Signed-in user | — | First calls `linkPendingInvitations` (Section 4). Then the weddings where the user is active: id, bride and groom names, date, `isTest`, the user's role | — |
 | `createWedding(input)` | Action | Signed-in user | `brideName`, `groomName`, `weddingDate`, `relation` (bride, groom, parent or sibling), `isTest` | `{ weddingId }` | `INVALID_INPUT` (a name is empty, or the date is before today in India: "The wedding date cannot be before today." This applies to test weddings too.) |
 | `getWeddingSettings(weddingId)` | Read | Admin | — | Names, date, greeting, theme colour, the date of the banner (never its bytes), last dates, slug, `slugLocked`, `isTest`. It calls the admin guard itself. | `NO_ACCESS` |
-| `updateWeddingSettings(weddingId, input)` | Action | Admin | Any of: names, date, greeting, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` | The new settings | `INVALID_INPUT` (the stay last date is not before the reply last date; a reply date later than 2 days before the wedding; a stay date later than 3 days before the wedding; a new date before today in India. A saved date that has passed is not refused again. Rules in `lib/weddings/rules.ts`.) |
+| `updateWeddingSettings(weddingId, input)` | Action | Admin | `greeting`, `themeColor` (a colour name: `plum`, `rose`, `indigo`, `slate` or `charcoal`), `rsvpLastDate`, `stayLastDate` (names and date are not changed here) | `null` | `INVALID_INPUT` (the stay last date is not before the reply last date; a reply date later than 2 days before the wedding; a stay date later than 3 days before the wedding; a new date before today in India. A saved date that has passed is not refused again. Rules in `lib/weddings/rules.ts`.) |
 | `updateSlug(weddingId, slug)` | Action | Admin | A link name: lowercase letters, numbers and dashes | The new slug | `CONFLICT` (name taken or reserved: "This link name is not available."), `NOT_ALLOWED_NOW` ("The link is locked, because invitations were sent.") |
 | `uploadBanner(weddingId, formData)` | Action | Admin | One photo (JPEG, PNG or WebP, at most 1 MB) | — | `INVALID_INPUT` (not a real photo of those types, or too big) |
 | `removeBanner(weddingId)` | Action | Admin | — | — | — |
@@ -177,10 +177,10 @@ These functions are the first line of every read function and action. Small Vite
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `listTeam(weddingId)` | Read | Member | — | Each person: name, email, role, relation, status, number of assigned families, families sent and replied | — |
-| `inviteMember(weddingId, input)` | Action | Admin | `displayName`, `email`, `relation`, `role` | The pending row and the invite message | `CONFLICT` ("This email is already in the team."), `INVALID_INPUT` (a friend cannot be admin) |
+| `listTeam(weddingId)` | Read | Member | — | Each person: name, email (admins only), role, relation, status, `isYou`; for pending people (admins only) the invite message and the `wa.me` link. No family counts. | — |
+| `inviteMember(weddingId, input)` | Action | Admin | `displayName`, `email`, `relation`, `role` | `{ memberId }` (the message comes from `listTeam`) | `CONFLICT` ("This email is already in the team."), `INVALID_INPUT` (a friend cannot be admin) |
 | *(invite message)* | — | Admin | — | `listTeam` returns, for each pending person (admins only), the ready WhatsApp text with the sign-in address and the email to use, and the `wa.me` link. There is no separate function. | — |
-| `updateMember(weddingId, memberId, input)` | Action | Admin | Any of: `displayName`, `email` (pending only), `relation`, `role` | The row | `NOT_ALLOWED_NOW` (see the rules below), `INVALID_INPUT` |
+| `updateMember(weddingId, memberId, input)` | Action | Admin | All four: `displayName`, `email` (pending only can change it), `relation`, `role` | `null` | `NOT_ALLOWED_NOW` (see the rules below), `INVALID_INPUT` |
 | `removeMember(weddingId, memberId)` | Action | Admin | — | — | `NOT_ALLOWED_NOW` |
 | `restoreMember(weddingId, memberId)` | Action | Admin | — | The row, active again (or pending, if the person never signed in) | — |
 

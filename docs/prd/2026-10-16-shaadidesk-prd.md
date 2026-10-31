@@ -153,7 +153,7 @@ These persons are examples only. They are not real research.
 | UC-2 | Import the guest list and assign families to organizers | Admin |
 | UC-3 | Send the card outside the app and mark "Invitation sent" | Organizer |
 | UC-4 | Find the family, confirm with 4 digits and reply | Guest |
-| UC-5 | Request access when the guest does not know the family number | Guest, Organizer |
+| UC-5 | Request access when the guest does not know the family number (Wave 2) | Guest, Organizer |
 | UC-6 | Enter a reply that came by a phone call | Organizer |
 | UC-7 | Send reminders to families with no reply | Organizer |
 | UC-8 | Record an expense and its payments | Admin, Organizer |
@@ -317,7 +317,7 @@ All user stories come from decisions of the owner `[Confirmed]`, except where a 
 |---|---|---|
 | US-16 | As a guest, I want to find my family and confirm with 4 digits, so that I see my invitation. | Must |
 | US-17 | As a guest, I want to reply yes or no for each event, with the number of persons, so that the family can plan. | Must |
-| US-18 | As a guest who does not know the family numbers, I want to request access, so that I can still see the invitation. | Must |
+| US-18 | As a guest who does not know the family numbers, I want to request access, so that I can still see the invitation. (Wave 2) | Must |
 | US-19 | As an organizer, I want to approve or reject access requests, so that only real family members get access. | Must |
 | US-20 | As an organizer, I want to enter or change a reply for a family, so that replies by phone are recorded. | Must |
 | US-21 | As an admin, I want to see guest counts for each event and side, so that I can plan the caterer and venue. | Must |

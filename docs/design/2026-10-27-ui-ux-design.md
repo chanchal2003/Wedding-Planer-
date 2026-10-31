@@ -366,8 +366,8 @@ PRD FR-4 to FR-13.
 
 | Screen size | Navigation |
 |---|---|
-| **Phone** | A bottom bar with four items: **Home, Families, Events, More** (in Wave 1, step 5.4, only **Home, Events, More** exist; the other items join when their pages are built). Organizers see "My families" instead of "Families". "More" holds the rest (Import, Team, Settings). |
-| **Laptop** | A left sidebar with labels, in groups: **Home**, **Events**; **Guests** (Families, Import); **Team**, **Settings**. The content is never wider than about 1100 px. |
+| **Phone** | A bottom bar with four items: **Home, Families, Events, More** (built; Families is for admins and organizers, and organizers get "My families" at step 6.6). Organizers see "My families" instead of "Families". "More" holds the rest (Import, Team, Settings). |
+| **Laptop** | A left sidebar with labels, as one flat list: **Home, Families, Import** (admins), **Events, Team, Settings** (admins). The content column is narrow (about 36 rem). |
 
 - The wedding's name and the TEST badge are in the top bar of every page of a test wedding.
 - Guest pages have no navigation at all.

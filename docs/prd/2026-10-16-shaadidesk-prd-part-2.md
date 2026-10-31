@@ -478,7 +478,7 @@ All integrations are free. The app does not use paid services. `[Confirmed]`
 | Data | Kept until | FR |
 |---|---|---|
 | Phone numbers, stay data, access requests, guest devices | 6 months after the wedding date. Then the app deletes them automatically, after a warning and an export. | FR-67 |
-| Families (names), replies, expenses, payments, gifts, tasks, history | Until the bride or groom deletes the wedding | FR-68 |
+| Families (names), replies, expenses, payments, gifts, tasks, history | Until the wedding is deleted (a real wedding: by the bride or groom; a test wedding: by any admin) | FR-68 |
 | Test wedding | Until an admin deletes it | FR-3 |
 | Daily database copies | The last 30 days of copies. Older copies are deleted. Thus deleted guest data leaves the copies approximately 30 days after FR-67. `[Proposed]` (Q-5) | FR-66 |
 
@@ -592,7 +592,7 @@ Likelihood and impact are the estimate of the writer. `[Assumption]` The owner o
 | D-10 | M4 target is all expenses, of any amount. | 2026-10-16 | Owner |
 | D-11 | Simple accessibility (not full WCAG 2.2 AA). Devices as in NFR-25 and NFR-26. | 2026-10-16 | Owner |
 | D-12 | Event type list. All event types use the same form. Starter tasks in December. | 2026-10-16 | Owner (writer proposal) |
-| D-13 | Only the bride or the groom can delete a full wedding (FR-68). | 2026-10-16 | Owner |
+| D-13 | Only the bride or the groom can delete a real wedding (FR-68). Any admin can delete a test wedding (AC-3.2). | 2026-10-16 | Owner |
 | D-14 | The PRD is in STE, in two documents: Sections 1 to 8, and Sections 9 to 17. | 2026-10-16 | Owner |
 | D-15 | Import: save only with 0 errors (correct the file and upload again). Families that are already in the app are skipped (FR-17). | 2026-10-24 | Owner |
 | D-16 | The RSVP link uses a free `vercel.app` address. No own domain. | 2026-10-24 | Owner |

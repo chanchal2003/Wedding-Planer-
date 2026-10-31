@@ -406,7 +406,7 @@ A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wr
 ### The app code checks
 
 - stay_last_date is earlier than rsvp_last_date (Prisma cannot write this rule in the schema; also a database check in the first migration).
-- A family has at most 12 devices, and the attempt limits (5 wrong tries then 15 minutes, 20 tries each hour for one device).
+- A family has at most 12 devices, and the attempt limits (5 wrong tries then 15 minutes, 20 tries each hour for one device, 30 wrong tries each day for one family, 30 wrong tries each hour for one internet address).
 - Admins must be bride, groom, parent or sibling. Friends can only be organizers.
 - persons is at least 1 when attending is yes (also a database check in the first migration).
 - The last admin cannot be removed. The bride and groom are protected after they sign in.
