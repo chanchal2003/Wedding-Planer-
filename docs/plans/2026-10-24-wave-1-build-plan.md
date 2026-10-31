@@ -321,7 +321,8 @@ The events in the files must match the events created in the app (Haldi, Mehendi
 **Done when:** AC-16.1 passes, and both sample files exist.
 **Commit:** `feat: add import template download and sample guest files`
 
-### 6.3 Import step 1: file validation 🤖
+### 6.3 Import step 1: file validation ✅ built 🤖
+**Built 2026-10-31 (it has no screen; the proof is 30 tests):** `lib/import/types.ts` (the list of problems with their kinds and titles, the shapes), `lib/import/read.ts` (`.xlsx` with `read-excel-file`, `.csv` with `papaparse`: BOM, comma or semicolon; refuses over 2 MB, over 2,000 families, over 40 columns, an old `.xls`, a wrong type, an empty file, a file that is not really Excel), `lib/import/validateImportFile.ts` (a pure function: the table and the events go in, the report comes out; row numbers as in Excel, first family is row 2) and `lib/import/report.ts` (`groupProblems`, for the screens). The sample files were changed: the "Sharma family" row is now in the clean file (499 new, 1 already in the app), and the messy file has the "Gupta family" row with the same number. Tests: `tests/import-file.test.ts`; I broke the checker eight ways on purpose and the tests caught all eight. Older text of this step follows.
 `lib/import/validateImportFile`: read `.xlsx` (ExcelJS) or `.csv` (Papa Parse) into rows, then check each row with a Zod schema. Duplicates inside the file. No database.
 **Done when:** unit tests for AC-16.2, AC-17.2 and AC-17.3 pass.
 **Commit:** `feat: add import file validation`
