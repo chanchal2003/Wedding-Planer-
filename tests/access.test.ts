@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import {
   checkAdmin,
+  checkDeleteWedding,
   checkGuestDevice,
   checkMember,
   checkMoneyAccess,
@@ -113,6 +114,73 @@ describe("team access", () => {
 
       expect((await checkMoneyAccess(rohan.id, wedding.id)).ok).toBe(false);
     });
+  });
+});
+
+describe("who may delete a wedding", () => {
+  beforeEach(resetDatabase);
+  afterAll(async () => {
+    await resetDatabase();
+    await db.$disconnect();
+  });
+
+  it("lets any admin delete a TEST wedding", async () => {
+    const dad = await makeUser("Dad");
+    const wedding = await makeWedding("priya-rahul", dad.id, true);
+    await addMember(wedding.id, dad, { role: "admin", relation: "parent" });
+
+    expect((await checkDeleteWedding(dad.id, wedding.id)).ok).toBe(true);
+  });
+
+  it("lets the bride or the groom (as admin) delete a REAL wedding", async () => {
+    const priya = await makeUser("Priya");
+    const rahul = await makeUser("Rahul");
+    const wedding = await makeWedding("priya-rahul", priya.id, false);
+    await addMember(wedding.id, priya, { role: "admin", relation: "bride" });
+    await addMember(wedding.id, rahul, { role: "admin", relation: "groom" });
+
+    expect((await checkDeleteWedding(priya.id, wedding.id)).ok).toBe(true);
+    expect((await checkDeleteWedding(rahul.id, wedding.id)).ok).toBe(true);
+  });
+
+  it("does not let a parent or sibling admin delete a REAL wedding", async () => {
+    const priya = await makeUser("Priya");
+    const dad = await makeUser("Dad");
+    const sister = await makeUser("Sister");
+    const wedding = await makeWedding("priya-rahul", priya.id, false);
+    await addMember(wedding.id, priya, { role: "admin", relation: "bride" });
+    await addMember(wedding.id, dad, { role: "admin", relation: "parent" });
+    await addMember(wedding.id, sister, { role: "admin", relation: "sibling" });
+
+    expect((await checkDeleteWedding(dad.id, wedding.id)).ok).toBe(false);
+    expect((await checkDeleteWedding(sister.id, wedding.id)).ok).toBe(false);
+  });
+
+  it("never lets an organizer delete anything, even with relation bride", async () => {
+    const priya = await makeUser("Priya");
+    const rohan = await makeUser("Rohan");
+    const test = await makeWedding("test-one", priya.id, true);
+    const real = await makeWedding("real-one", priya.id, false);
+    for (const w of [test, real]) {
+      await addMember(w.id, rohan, { role: "organizer", relation: "bride" });
+      expect((await checkDeleteWedding(rohan.id, w.id)).ok).toBe(false);
+    }
+  });
+
+  it("refuses pending and removed people, and members of another wedding", async () => {
+    const priya = await makeUser("Priya");
+    const ankit = await makeUser("Ankit");
+    const sita = await makeUser("Sita");
+    const meena = await makeUser("Meena");
+    const wedding = await makeWedding("priya-rahul", priya.id, true);
+    const other = await makeWedding("meena-niece", meena.id, true);
+    await addMember(wedding.id, ankit, { role: "admin", relation: "parent", status: "pending" });
+    await addMember(wedding.id, sita, { role: "admin", relation: "parent", status: "removed" });
+    await addMember(other.id, meena, { role: "admin", relation: "bride" });
+
+    expect((await checkDeleteWedding(ankit.id, wedding.id)).ok).toBe(false);
+    expect((await checkDeleteWedding(sita.id, wedding.id)).ok).toBe(false);
+    expect((await checkDeleteWedding(meena.id, wedding.id)).ok).toBe(false);
   });
 });
 

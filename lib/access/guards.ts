@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/access/session";
 import {
   checkAdmin,
+  checkDeleteWedding,
   checkGuestDevice,
   checkMember,
   checkMoneyAccess,
@@ -34,6 +35,9 @@ export const requireMember = (weddingId: string) =>
 
 export const requireAdmin = (weddingId: string) =>
   withUser((userId) => checkAdmin(userId, weddingId));
+
+export const requireDeleteWedding = (weddingId: string) =>
+  withUser((userId) => checkDeleteWedding(userId, weddingId));
 
 // Defined now; the first screen that uses it comes with the Money release.
 export const requireMoneyAccess = (weddingId: string) =>

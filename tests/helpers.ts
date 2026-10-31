@@ -14,14 +14,14 @@ export function makeUser(name: string) {
   });
 }
 
-export function makeWedding(slug: string, createdById: string) {
+export function makeWedding(slug: string, createdById: string, isTest = true) {
   return db.wedding.create({
     data: {
       slug,
       brideName: "Priya",
       groomName: "Rahul",
       weddingDate: new Date("2027-01-15"),
-      isTest: true,
+      isTest,
       createdById,
     },
   });
@@ -29,6 +29,7 @@ export function makeWedding(slug: string, createdById: string) {
 
 type MemberOptions = {
   role?: "admin" | "organizer";
+  relation?: "bride" | "groom" | "parent" | "sibling" | "relative" | "friend" | "other";
   status?: "pending" | "active" | "removed";
   canSeeMoney?: boolean;
 };
@@ -42,7 +43,7 @@ export function addMember(weddingId: string, user: { id: string; email: string }
       email: user.email,
       userId: status === "pending" ? null : user.id,
       role: o.role ?? "organizer",
-      relation: "friend",
+      relation: o.relation ?? "friend",
       status,
       canSeeMoney: o.canSeeMoney ?? false,
     },

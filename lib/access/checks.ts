@@ -53,6 +53,25 @@ export async function checkMoneyAccess(userId: string, weddingId: string) {
   return access;
 }
 
+// Who may delete a wedding (PRD FR-3 and FR-68; decided 2026-10-31).
+// A test wedding: any admin. A real wedding: only an admin who is the bride or the groom,
+// so a parent who is an admin cannot wipe the real wedding by mistake.
+// A pure rule, so the page can use it to hide the button and the server can use it to refuse.
+export function mayDeleteWedding(
+  member: { role: string; relation: string },
+  wedding: { isTest: boolean },
+): boolean {
+  if (member.role !== "admin") return false;
+  return wedding.isTest || member.relation === "bride" || member.relation === "groom";
+}
+
+export async function checkDeleteWedding(userId: string, weddingId: string) {
+  const access = await checkMember(userId, weddingId);
+  if (!access.ok) return access;
+  if (!mayDeleteWedding(access.member, access.member.wedding)) return NO_ACCESS;
+  return access;
+}
+
 // A guest device (a cookie code) that belongs to a family of THIS wedding.
 // The result holds only the family of the device. Nothing here lets a guest reach
 // another family or another wedding (FR-64).
