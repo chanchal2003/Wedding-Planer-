@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/access/guards";
 import { requireUser } from "@/lib/access/session";
 import { linkPendingInvitations } from "@/lib/auth/link-invitations";
 
@@ -26,4 +27,31 @@ export async function listMyWeddings() {
     link,
     weddings: seats.map((seat) => ({ ...seat.wedding, role: seat.role })),
   };
+}
+
+// API design, Section 5: getWeddingSettings. For the settings page, so only an admin. It checks
+// the guard itself and returns the answer: the page turns a "no" into "page not found" with
+// forPage(). A component that calls it must sit inside <Suspense>.
+export async function getWeddingSettings(weddingId: string) {
+  const access = await requireAdmin(weddingId);
+  if (!access.ok) return access;
+
+  const settings = await db.wedding.findUniqueOrThrow({
+    where: { id: access.member.wedding.id },
+    select: {
+      slug: true,
+      slugLocked: true,
+      brideName: true,
+      groomName: true,
+      weddingDate: true,
+      isTest: true,
+      greeting: true,
+      themeColor: true,
+      rsvpLastDate: true,
+      stayLastDate: true,
+      // Only the date of the banner, never its bytes.
+      banner: { select: { updatedAt: true } },
+    },
+  });
+  return { ...access, settings };
 }

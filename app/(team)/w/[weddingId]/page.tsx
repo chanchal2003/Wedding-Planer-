@@ -2,14 +2,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
-import { mayDeleteWedding } from "@/lib/access/checks";
 import { forPage } from "@/lib/access/respond";
 import { requireMember } from "@/lib/access/guards";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/time";
-import { countWeddingData } from "@/lib/weddings/delete";
-import { weddingTitle } from "@/lib/weddings/names";
-import { DeleteWedding } from "./_components/delete-wedding";
 
 // A placeholder. The real home page (setup checklist, counts) comes at plan step 8.3.
 // It is the first page that uses the security guard: only an active team member sees it.
@@ -32,10 +28,6 @@ async function WeddingHome({ params }: { params: PageProps<"/w/[weddingId]">["pa
     select: { brideName: true, groomName: true, weddingDate: true, isTest: true },
   });
 
-  // The button is only shown to a person who may delete (the server refuses everybody else).
-  const canDelete = mayDeleteWedding(member, member.wedding);
-  const counts = canDelete ? await countWeddingData(weddingId) : null;
-
   return (
     <>
       <h1 className="text-3xl">
@@ -43,10 +35,15 @@ async function WeddingHome({ params }: { params: PageProps<"/w/[weddingId]">["pa
       </h1>
       <p className="text-lg">{formatDate(wedding.weddingDate)}</p>
       <p>You are {member.role === "admin" ? "an admin" : "an organizer"} of this wedding.</p>
+      {/* Only admins see Settings (the settings page checks it again). The menu comes at step 5.4. */}
+      {member.role === "admin" && (
+        <Button size="lg" render={<Link href={`/w/${weddingId}/settings`} />}>
+          Settings
+        </Button>
+      )}
       <Button variant="outline" size="lg" render={<Link href="/weddings" />}>
         Back to my weddings
       </Button>
-      {counts && <DeleteWedding weddingId={weddingId} title={weddingTitle(wedding)} counts={counts} />}
     </>
   );
 }
