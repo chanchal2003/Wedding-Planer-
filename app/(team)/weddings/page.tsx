@@ -1,40 +1,75 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
+import { StatusChip } from "@/components/shared/status-chip";
 import { Button } from "@/components/ui/button";
-import { requireUser } from "@/lib/access/session";
+import { Card, CardContent } from "@/components/ui/card";
 import { signOutAction } from "@/lib/auth/actions";
-import { linkPendingInvitations } from "@/lib/auth/link-invitations";
+import { formatDate } from "@/lib/time";
+import { listMyWeddings } from "@/lib/weddings/queries";
 
 export const metadata = { title: "My weddings | ShaadiDesk" };
 
-// A placeholder that proves sign-in works. The real "My weddings" list comes at plan step 5.1.
 export default function WeddingsPage() {
   return (
     <PageShell>
+      <h1 className="text-3xl">My weddings</h1>
       <Suspense fallback={<p>Loading…</p>}>
-        <SignedIn />
+        <WeddingList />
       </Suspense>
     </PageShell>
   );
 }
 
-async function SignedIn() {
-  const user = await requireUser();
-  // Every sign-in lands here, so invitations that wait for this email are connected now.
-  const link = await linkPendingInvitations(user);
+async function WeddingList() {
+  const { user, link, weddings } = await listMyWeddings();
 
   return (
     <>
-      <h1 className="text-3xl">My weddings</h1>
-      <p>
-        Signed in as <strong>{user.name}</strong> ({user.email}).
-      </p>
       {link.linked > 0 && (
-        <p>You were added to {link.linked} wedding team{link.linked > 1 ? "s" : ""}.</p>
+        <p role="status">
+          You were added to {link.linked} wedding team{link.linked > 1 ? "s" : ""}.
+        </p>
       )}
       {link.emailNotVerified && <p role="alert">Your Google email is not verified.</p>}
+
+      {weddings.length === 0 ? (
+        <p className="text-lg">You have no weddings yet. Make a wedding to begin.</p>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {weddings.map((wedding) => (
+            <li key={wedding.id}>
+              <Link
+                href={`/w/${wedding.id}`}
+                className="block rounded-xl focus-visible:outline-offset-4"
+              >
+                <Card className="transition-colors hover:bg-secondary">
+                  <CardContent className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-heading text-xl font-semibold">
+                        {wedding.brideName} &amp; {wedding.groomName}
+                      </span>
+                      {wedding.isTest && <StatusChip>TEST</StatusChip>}
+                    </div>
+                    <span className="text-muted-foreground">{formatDate(wedding.weddingDate)}</span>
+                    <span className="text-muted-foreground">
+                      You are {wedding.role === "admin" ? "an admin" : "an organizer"}
+                    </span>
+                  </CardContent>
+                </Card>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Button size="lg" render={<Link href="/weddings/new" />}>
+        Make a wedding
+      </Button>
+
+      <p className="text-muted-foreground">Signed in as {user.name} ({user.email})</p>
       <form action={signOutAction}>
-        <Button type="submit" variant="outline" size="lg">
+        <Button type="submit" variant="outline" size="lg" className="w-full">
           Sign out
         </Button>
       </form>
