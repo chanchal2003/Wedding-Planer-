@@ -15,8 +15,8 @@ model Family {
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   wedding          Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  assignedMember   WeddingMember?  @relation("AssignedMember", fields: [assignedMemberId], references: [id], onDelete: Restrict)
-  invitationSentBy WeddingMember?  @relation("InvitationSentBy", fields: [invitationSentById], references: [id], onDelete: Restrict)
+  assignedMember   WeddingMember?  @relation("AssignedMember", fields: [assignedMemberId], references: [id], onDelete: NoAction)
+  invitationSentBy WeddingMember?  @relation("InvitationSentBy", fields: [invitationSentById], references: [id], onDelete: NoAction)
   phones           FamilyPhone[]
   familyEvents     FamilyEvent[]
   devices          GuestDevice[]
@@ -78,7 +78,7 @@ model Reply {
   updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   familyEvent FamilyEvent    @relation(fields: [familyEventId], references: [id], onDelete: Cascade)
-  updatedBy   WeddingMember? @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+  updatedBy   WeddingMember? @relation(fields: [updatedById], references: [id], onDelete: NoAction)
 
   @@map("replies")
 }
