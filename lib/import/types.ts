@@ -27,6 +27,7 @@ export const PROBLEMS = {
   "number-used-by-other-family": { kind: "error", title: "Number is used by another family" },
   "organizer-not-in-team": { kind: "error", title: "Organizer is not in the team" },
   "already-in-app": { kind: "warning", title: "Already in the app (skipped)" },
+  "same-family-twice-in-file": { kind: "warning", title: "Same family twice in the file (only the first is saved)" },
 } as const satisfies Record<string, { kind: ProblemKind; title: string }>;
 
 export type ProblemCode = keyof typeof PROBLEMS;
@@ -75,3 +76,14 @@ export type EventForImport = { id: string; name: string; startsAt: Date };
 export function problem(code: ProblemCode, row: number | null, familyName: string, value: string, message: string): Problem {
   return { code, kind: PROBLEMS[code].kind, title: PROBLEMS[code].title, row, familyName, value, message };
 }
+
+// What the screens show after the check (step 6.4), and what the save returns.
+export type ImportReport = {
+  totalRows: number; // families in the file
+  newRows: number; // will be saved
+  skippedRows: number; // already in the app (or twice in the file)
+  warningRows: number; // good rows with a warning (no number, no side)
+  errorRows: number; // rows with at least one error
+  problems: Problem[];
+  canSave: boolean; // no error anywhere, and at least one new family
+};
