@@ -31,7 +31,6 @@ model Wedding {
   isTest       Boolean   @default(false) @map("is_test")
   greeting     String?
   themeColor   String?   @map("theme_color")
-  bannerKey    String?   @map("banner_key")
   rsvpLastDate DateTime? @map("rsvp_last_date") @db.Date
   stayLastDate DateTime? @map("stay_last_date") @db.Date
   createdById  String    @map("created_by") @db.Uuid
@@ -40,6 +39,7 @@ model Wedding {
 
   createdBy User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
   members   WeddingMember[]
+  banner    WeddingBanner?
   events    Event[]
   families  Family[]
   phones    FamilyPhone[]
@@ -49,6 +49,22 @@ model Wedding {
 
 // The team of one wedding. Rows are never deleted: a removed person gets
 // status = removed, so old records keep pointing to them.
+// The banner photo of a wedding: one row for each wedding. It has its own table, so an ordinary
+// wedding query never loads the image bytes. The photo is saved here (not in a folder or in R2),
+// so it works on the laptop and online, and the nightly database copy includes it.
+// Two checks in the migration limit the size (1 MB) and the type (jpeg, png or webp).
+model WeddingBanner {
+  weddingId   String   @id @map("wedding_id") @db.Uuid
+  contentType String   @map("content_type")
+  data        Bytes
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wedding Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  @@map("wedding_banners")
+}
+
 model WeddingMember {
   id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   weddingId   String         @map("wedding_id") @db.Uuid
