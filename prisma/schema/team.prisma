@@ -47,8 +47,6 @@ model Wedding {
   @@map("weddings")
 }
 
-// The team of one wedding. Rows are never deleted: a removed person gets
-// status = removed, so old records keep pointing to them.
 // The banner photo of a wedding: one row for each wedding. It has its own table, so an ordinary
 // wedding query never loads the image bytes. The photo is saved here (not in a folder or in R2),
 // so it works on the laptop and online, and the nightly database copy includes it.
@@ -65,6 +63,8 @@ model WeddingBanner {
   @@map("wedding_banners")
 }
 
+// The team of one wedding. Rows are never deleted: a removed person gets
+// status = removed, so old records keep pointing to them.
 model WeddingMember {
   id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   weddingId   String         @map("wedding_id") @db.Uuid
