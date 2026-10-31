@@ -1,5 +1,4 @@
-// Times are saved in UTC and shown in India time (CLAUDE.md rule 9). Plan step 5.3 adds
-// the last-date helper ("is it after 23:59 India time?") to this file.
+// Times are saved in UTC and shown in India time (CLAUDE.md rule 9).
 
 const INDIA = "Asia/Kolkata";
 
@@ -22,4 +21,28 @@ export function formatDate(date: Date): string {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+// A last date (the reply-by date, the stay-by date) closes at 23:59 India time on that day
+// (CLAUDE.md rule 9). Guests can reply until then. The team is never stopped by it.
+// lastDate: "2026-12-31" or a plain date from the database.
+export function lastDateClosesAt(lastDate: string | Date): Date {
+  const day = typeof lastDate === "string" ? lastDate : lastDate.toISOString().slice(0, 10);
+  return new Date(`${day}T23:59:59.999+05:30`);
+}
+
+export function isAfterLastDate(lastDate: string | Date, now: Date = new Date()): boolean {
+  return now.getTime() > lastDateClosesAt(lastDate).getTime();
+}
+
+// Adds days to a plain date: addDays("2027-01-15", -2) is "2027-01-13".
+export function addDays(day: string, days: number): string {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+// "2027-01-13" shown as "13 January 2027".
+export function formatDay(day: string): string {
+  return formatDate(new Date(`${day}T00:00:00Z`));
 }
