@@ -275,6 +275,7 @@ Organizer opens Requests ──► Approve or Reject
 | AC-4.2 | The wedding is on 15 Jan 2027 | Priya sets the RSVP last date to 13 Jan, then to 14 Jan or to a date before today | 13 Jan is saved. 14 Jan and a date before today are refused with a message, and the pickers grey out those days |
 | AC-5.1 | Priya adds an event | She selects "Haldi" and fills the date, venue and "hosted by" | The event is saved with the type "Haldi" |
 | AC-5.2 | Priya adds an event | She selects "Other" and types "Mata ki Jagran" | The event is saved with the name "Mata ki Jagran" |
+| AC-5.3 | The wedding is on 15 Jan 2027 | Priya adds an event on 15 Jan, then on 16 Jan or on a day before today | 15 Jan is saved. 16 Jan and a day before today are refused with a message, and the date picker greys out those days |
 | AC-6.1 | The wedding has a Haldi event | Meena opens Screen 2 | The Haldi card shows the Haldi color dot. Icons come in Wave 2. `[Proposed]` |
 | AC-7.1 | Ankit is an organizer | He opens an event | He can edit the time, venue and note. He cannot see the "Delete" button |
 | AC-7.2 | Ankit has no money access | He sends a request to change the budget | The server refuses the request |

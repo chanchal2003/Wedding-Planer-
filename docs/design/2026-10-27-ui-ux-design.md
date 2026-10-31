@@ -359,14 +359,14 @@ PRD FR-16, FR-17. Three screens.
 ### 6.10 Setup screens: settings, events, team `[Proposed]`
 PRD FR-4 to FR-13.
 - **Settings:** banner (with a crop preview), greeting, one theme colour (a choice of the 5 colours; the wedding stores the colour name), reply last date and stay last date (the pickers grey out days that are not allowed: before today, and after the latest allowed day, which is 2 days before the wedding for the reply date and 3 days before for the stay date), the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
-- **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has a type list, name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
+- **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has the type as seven large options you tap, each with its colour dot (not a dropdown, 2026-10-31), then the name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
 - **Team:** a list with role, relation and status chips (Active, Pending, Removed) and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
 
 ## 7. Navigation and layout `[Confirmed]`
 
 | Screen size | Navigation |
 |---|---|
-| **Phone** | A bottom bar with four items: **Home, Families, Events, More**. Organizers see "My families" instead of "Families". "More" holds the rest (Import, Team, Settings). |
+| **Phone** | A bottom bar with four items: **Home, Families, Events, More** (in Wave 1, step 5.4, only **Home, Events, More** exist; the other items join when their pages are built). Organizers see "My families" instead of "Families". "More" holds the rest (Import, Team, Settings). |
 | **Laptop** | A left sidebar with labels, in groups: **Home**, **Events**; **Guests** (Families, Import); **Team**, **Settings**. The content is never wider than about 1100 px. |
 
 - The wedding's name and the TEST badge are in the top bar of every page of a test wedding.

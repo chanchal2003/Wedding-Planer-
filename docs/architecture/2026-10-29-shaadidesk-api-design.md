@@ -169,6 +169,7 @@ These functions are the first line of every read function and action. Small Vite
 | `deleteEvent(weddingId, eventId)` | Action | Admin | — | — | `NOT_FOUND` |
 
 - The note is for the team only. The guest functions never return it (UI design 6.2).
+- `getEvent` and `getEventDeleteImpact` return "no access" for an event of another wedding, the same as for a stranger, so nobody can find out which events exist elsewhere. An event date is between today and the wedding date (decided 2026-10-31): a new date cannot be before today, and no date can be after the wedding date; a saved date that has passed is not refused again. The date and time are typed in India time and saved in UTC. The delete of an event needs a button, not the typing of a name.
 - The budget field is not in Wave 1. It comes with the Money release and needs `requireMoneyAccess`.
 - Delete: the confirm box shows "Delete Haldi? 142 families are invited and 98 have replied. Their replies for Haldi are deleted too." The database removes the `family_events` and `replies` rows (cascade).
 

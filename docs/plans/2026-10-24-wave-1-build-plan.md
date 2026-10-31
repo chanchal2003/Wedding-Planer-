@@ -279,7 +279,8 @@ Greeting, colors, RSVP last date and stay last date (stay must be earlier: AC-4.
 **Done when:** AC-4.1 passes, the banner shows on the settings page, and the time check is right.
 **Commit:** `feat: add wedding settings, banner upload and india time helper`
 
-### 5.4 Events 🤖
+### 5.4 Events ✅ built (waiting for the owner's test) 🤖
+**Built 2026-10-31:** (1) the menu: a bottom bar on phones (Home, Events, More) and a sidebar on laptops (Home, Events, Settings for admins), in the wedding layout; a More page. Each later step adds its item in `components/layout/wedding-nav.tsx`. (2) Events: the list `/w/<id>/events`, the form to add (admins) and edit (every team member), and a delete page for admins that shows how many families are invited and how many replies are lost. The name is filled in from the type and can be changed. An event date is between today and the wedding date (the wedding day is allowed; the date picker greys out the other days); a saved date that has passed is not refused again. Dates and times are typed in India time and saved in UTC. Rules in `lib/events/schemas.ts`, the colours in `lib/events.ts`. One new test: an event is never found through another wedding. Older text of this step follows.
 Event list and event form: type list (or "Other" with a typed name), date and time, venue, map link, note (team only), hosted by, and the event colour dot. Only admins add or delete. Organizers edit details. Delete shows the linked counts and asks for confirmation. The budget field and `lib/money` come with the Money release.
 
 **Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass.
