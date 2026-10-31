@@ -179,7 +179,7 @@ These functions are the first line of every read function and action. Small Vite
 |---|---|---|---|---|---|
 | `listTeam(weddingId)` | Read | Member | — | Each person: name, email, role, relation, status, number of assigned families, families sent and replied | — |
 | `inviteMember(weddingId, input)` | Action | Admin | `displayName`, `email`, `relation`, `role` | The pending row and the invite message | `CONFLICT` ("This email is already in the team."), `INVALID_INPUT` (a friend cannot be admin) |
-| `getInviteMessage(weddingId, memberId)` | Read | Admin | — | The ready WhatsApp text with the sign-in address and the email to use | `NOT_FOUND` |
+| *(invite message)* | — | Admin | — | `listTeam` returns, for each pending person (admins only), the ready WhatsApp text with the sign-in address and the email to use, and the `wa.me` link. There is no separate function. | — |
 | `updateMember(weddingId, memberId, input)` | Action | Admin | Any of: `displayName`, `email` (pending only), `relation`, `role` | The row | `NOT_ALLOWED_NOW` (see the rules below), `INVALID_INPUT` |
 | `removeMember(weddingId, memberId)` | Action | Admin | — | — | `NOT_ALLOWED_NOW` |
 | `restoreMember(weddingId, memberId)` | Action | Admin | — | The row, active again (or pending, if the person never signed in) | — |
@@ -191,7 +191,9 @@ These functions are the first line of every read function and action. Small Vite
 - `removeMember` refuses while families are assigned to the person: "Move Rohan's 80 families to someone else first." (FR-13). Removing sets `status = removed`. The row is never deleted.
 - The money switch (`setMoneyAccess`) is in the database already. Its action and screen come with the Money release (UI design 6.10).
 
-**"Invite on WhatsApp":** the page builds a `wa.me` link from `getInviteMessage`. The app never sends a message itself (architecture, Section 2).
+**Who sees what** (decided 2026-10-31): every member sees the team list, but only admins see the emails (the server does not send them to an organizer), the invite buttons, and the pages to add, change, remove or restore a person. An admin may remove themselves, unless they are the last admin or the bride or groom. Inviting an email that was removed gives "This person was removed. Restore them instead." The rules are in `lib/team/rules.ts` (a pure file, tested). Every change runs in `changeTeam` (`lib/team/change.ts`), one transaction with `SELECT ... FOR UPDATE`.
+
+**"Invite on WhatsApp":** the page opens a `wa.me` link with the ready text. The app never sends a message itself (architecture, Section 2).
 
 ## 8. Families (build plan 6.1) — FR-15, FR-18, FR-19, FR-20
 

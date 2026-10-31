@@ -360,7 +360,7 @@ PRD FR-16, FR-17. Three screens.
 PRD FR-4 to FR-13.
 - **Settings:** banner (with a crop preview), greeting, one theme colour (a choice of the 5 colours; the wedding stores the colour name), reply last date and stay last date (the pickers grey out days that are not allowed: before today, and after the latest allowed day, which is 2 days before the wedding for the reply date and 3 days before for the stay date), the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
 - **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has the type as seven large options you tap, each with its colour dot (not a dropdown, 2026-10-31), then the name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
-- **Team:** a list with role, relation and status chips (Active, Pending, Removed) and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
+- **Team:** a list with role, relation and status chips (Active, Pending, Removed), the emails for admins only, an Add person page, and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
 
 ## 7. Navigation and layout `[Confirmed]`
 

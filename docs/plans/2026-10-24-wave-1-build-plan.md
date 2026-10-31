@@ -286,7 +286,8 @@ Event list and event form: type list (or "Other" with a typed name), date and ti
 **Done when:** AC-5.1, AC-5.2, AC-7.1 and AC-8.1 (replies part) pass.
 **Commit:** `feat: add events with type list, permissions and colour dots`
 
-### 5.5 Team 🤖
+### 5.5 Team ✅ built (waiting for the owner's test) 🤖
+**Built 2026-10-31:** the Team page (`/w/<id>/team`) in the menu and in More; Add person and Edit person (admins only); the WhatsApp invite message with "Invite on WhatsApp" and "Copy invite message" on every pending card; Remove from team and Restore. The rules are in one pure file, `lib/team/rules.ts` (17 tests): only family can be admin, the last admin stays, the signed-in bride or groom is protected, removal is refused while families are assigned, one email once per wedding. Every change runs in `changeTeam` (`lib/team/change.ts`): one transaction that locks the team rows (tested: two admins removing each other at the same moment, exactly one succeeds). Organizers see the list but not the emails. Older text of this step follows.
 - Add an organizer by email: pending, "Invite on WhatsApp", "Copy invite message", change email (FR-9).
 - Make a parent or sibling admin (FR-11).
 - Protect the last admin and the signed-in bride and groom (FR-12). Each of these checks runs in one transaction that locks the wedding's team rows (`SELECT ... FOR UPDATE`), so two admins cannot demote each other at the same moment.
