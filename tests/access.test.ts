@@ -9,6 +9,7 @@ import {
 } from "@/lib/access/checks";
 import { hashToken } from "@/lib/access/hash";
 import { findEventInWedding } from "@/lib/events/lookup";
+import { findFamilyInWedding } from "@/lib/families/lookup";
 import { addMember, makeDevice, makeEvent, makeFamily, makeUser, makeWedding, resetDatabase } from "./helpers";
 
 // The access rules (FR-64). The people: Priya is the bride and an admin, Rohan and Ankit
@@ -202,6 +203,25 @@ describe("events stay inside their wedding", () => {
     expect(await findEventInWedding(weddingB.id, haldiA.id)).toBeNull();
     expect(await findEventInWedding(weddingA.id, "not-an-id")).toBeNull();
     expect(await findEventInWedding("not-an-id", haldiA.id)).toBeNull();
+  });
+});
+
+describe("families stay inside their wedding", () => {
+  beforeEach(resetDatabase);
+  afterAll(async () => {
+    await resetDatabase();
+    await db.$disconnect();
+  });
+
+  it("finds a family in its own wedding, and never through another wedding (CLAUDE.md rule 2)", async () => {
+    const priya = await makeUser("Priya");
+    const weddingA = await makeWedding("priya-rahul", priya.id);
+    const weddingB = await makeWedding("meena-niece", priya.id);
+    const sharma = await makeFamily(weddingA.id, "Sharma family");
+
+    expect((await findFamilyInWedding(weddingA.id, sharma.id))?.familyName).toBe("Sharma family");
+    expect(await findFamilyInWedding(weddingB.id, sharma.id)).toBeNull();
+    expect(await findFamilyInWedding(weddingA.id, "not-an-id")).toBeNull();
   });
 });
 
