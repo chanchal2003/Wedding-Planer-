@@ -124,7 +124,7 @@ sequenceDiagram
   A->>D: Is Ankit in this team? Money access?
   D-->>A: Member: yes. Money access: no
   A-->>P: Refused
-  P-->>K: "You do not have access to this page."
+  P-->>K: "Page not found. It may not exist, or you may not have access."
   Note over P,D: The server sends no money data
 ```
 

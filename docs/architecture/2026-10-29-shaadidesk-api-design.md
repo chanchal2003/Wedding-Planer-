@@ -67,7 +67,7 @@ type Result<T> =
 - `fields` holds one message for each wrong form field, for example `{ phone: "This is not a valid phone number" }`.
 - The form keeps what the person typed after a failed save (UI design, Section 8).
 
-Read functions that fail because of access do not return a result. They stop the page: "not signed in" goes to the sign-in page, and every other access problem shows "You do not have access to this page." (architecture, flow 3.2). A page for an ID that does not exist shows the normal "not found" page.
+Read functions that fail because of access do not return a result. They stop the page: "not signed in" goes to the sign-in page, and every other access problem shows the same "page not found" page ("This page was not found. It may not exist, or you may not have access."). A wedding that does not exist and a wedding that the person may not open look the same, so nobody can find out which weddings exist. The experimental `forbidden()` of Next.js is not used. (Decided 2026-10-31.) The guards return an answer and do not throw: a page calls `forPage()` on it, an action calls `denied()` and returns the error.
 
 ### 2.4 Error codes
 

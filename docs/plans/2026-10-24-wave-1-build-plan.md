@@ -230,7 +230,7 @@ The separate helper phase is removed (owner decision, 2026-10-26). Its work move
 
 **Done when:** the Client ID and Secret are saved in `.env` (and in Vercel after step 1.5).
 
-### 4.2 Sign-in with Better Auth 🤖
+### 4.2 Sign-in with Better Auth ✅ done 🤖
 - Read the Better Auth docs for Next.js and Prisma first, and the Next.js guide `authentication-with-cache-components.md` (CLAUDE.md rule 13: no `"use cache"`).
 - Better Auth with Google, its Prisma adapter and **database sessions** (no cookie cache, so a removed person is refused at the next click).
 - A migration adds the Better Auth columns and tables (`email_verified`, `image`, `sessions`, `accounts`, `verifications`), with UUID ids and snake_case names. The same migration adds the check `email = lower(email)` on `users` and `wedding_members`.
@@ -241,7 +241,8 @@ The separate helper phase is removed (owner decision, 2026-10-26). Its work move
 **Done when:** you sign in with Google on the laptop (and on production after step 1.5), and a team page with no sign-in sends you to sign in (AC-1.1).
 **Commit:** `feat: add google sign-in with database sessions`
 
-### 4.3 The security guard 🤖
+### 4.3 The security guard ✅ done 🤖
+Built: `lib/result.ts` (the Result type and error codes), `lib/access/checks.ts` (inner part), `lib/access/guards.ts` (outer part), `lib/access/respond.ts` (`forPage` and `denied`), `lib/access/hash.ts` (SHA-256 of the guest code), `app/not-found.tsx`, `tests/access.test.ts` (14 tests). The guards return an answer. A page turns a "no" into the sign-in page or "page not found"; an action turns it into an error. (The experimental `forbidden()` is not used.) Decided 2026-10-31. The guest cookie is named `guest-<slug>`. Issuing the cookie comes at step 7.3.
 `lib/access` with `getSessionUser`, `requireUser`, `requireMember`, `requireAdmin`, `requireMoneyAccess`, `getGuestFamily` and `requireGuestFamily` (names as in the API design, Section 3).
 Each guard has two parts: a small outer part that reads the session or the guest cookie, and an inner part that checks the rules with plain inputs (for example `checkMember(userId, weddingId)`). The tests call the inner part, so they need no browser and no sign-in. Decided 2026-10-30.
 Tests for each role:
