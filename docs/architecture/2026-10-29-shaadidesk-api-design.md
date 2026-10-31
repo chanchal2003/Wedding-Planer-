@@ -218,7 +218,7 @@ These functions are the first line of every read function and action. Small Vite
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `GET /w/<weddingId>/import/template.xlsx` | Route | Admin | — | An Excel template with one column for each event of the wedding | `NO_ACCESS` |
+| `GET /w/<weddingId>/import/template.xlsx` | Route | Admin | — | An Excel template: the sheet "Guests" with only the header row (one column for each event, two events with the same name get the date in the header) and the sheet "How to fill". All cells are text. | 404 for anybody who is not an admin of this wedding, 409 when the wedding has no events |
 | `checkImport(weddingId, formData)` | Action | Admin | The file (`.xlsx` or `.csv`, at most 2 MB and 2,000 rows) | The report (below) | `INVALID_INPUT` (wrong file type, empty file, missing columns; too big: "This file is too big. Use a file under 2 MB with at most 2,000 families.") |
 | `saveImport(weddingId, formData)` | Action | Admin | The same file again | `{ saved, skipped }` | `NOT_ALLOWED_NOW` ("Nothing was saved. Check again.") |
 | `assignFamilies(weddingId, input)` | Action | Admin | `familyIds` and `memberId`, **or** `side` and `memberId` | `{ assigned }` | `INVALID_INPUT` (the person is not an active or pending member) |

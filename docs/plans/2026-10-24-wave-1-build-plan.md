@@ -309,7 +309,8 @@ Families list with search and filters (side, event, organizer, no reply, no numb
 **Done when:** AC-15.1, AC-18.1, AC-18.2, AC-19.1 and AC-20.1 pass.
 **Commit:** `feat: add families list, family page and phone helper`
 
-### 6.2 Import template 🤖
+### 6.2 Import template ✅ built (waiting for the owner's test) 🤖
+**Built 2026-10-31:** `lib/import/columns.ts` (the columns, one for each event; two events with the same name get the date in the header), `lib/import/template.ts` (an Excel file with the sheet "Guests" (header row only) and the sheet "How to fill"; text cells), the download `GET /w/<id>/import/template.xlsx` (admins only, 404 for anybody else, 409 with no events), and a small Import page with the download button (the upload comes at 6.5), also linked in More. Libraries: `write-excel-file`, `read-excel-file` (used at 6.3), `@faker-js/faker` (development only) instead of ExcelJS, which has not been updated since December 2024. The samples: `npm run samples` makes `samples/guests-clean-500.xlsx` (500 families) and `samples/guests-messy.xlsx` (29 rows, 14 kinds of mistake), always the same files; `samples/README.md` says what to create first. An empty "Side" in a file will become Both sides with a warning (decided 2026-10-31). Older text of this step follows.
 "Download template": `.xlsx` with the columns from FR-16 and one column for each event of the wedding. The phone columns are text, so Excel does not change them to "9.88E+09".
 **Also in this step: two sample files with fake data** (made by a small script, `scripts/make-sample-guest-files.ts`, using `@faker-js/faker` for Indian names and cities; the files go in `samples/`):
 - `guests-clean-500.xlsx`: about 500 families on both sides, every family with a primary number, about 30% with a secondary number, a few with no number, different events for each family.
