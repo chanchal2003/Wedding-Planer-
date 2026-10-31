@@ -31,7 +31,7 @@ export async function checkMember(userId: string, weddingId: string) {
       relation: true,
       canSeeMoney: true,
       displayName: true,
-      wedding: { select: { id: true, slug: true, isTest: true, brideName: true, groomName: true } },
+      wedding: { select: { id: true, slug: true, isTest: true, brideName: true, groomName: true, weddingDate: true } },
     },
   });
   if (!member) return NO_ACCESS;

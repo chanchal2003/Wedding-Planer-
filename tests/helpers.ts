@@ -50,6 +50,12 @@ export function addMember(weddingId: string, user: { id: string; email: string }
   });
 }
 
+export function makeEvent(weddingId: string, name: string, type: "haldi" | "wedding" | "other" = "haldi") {
+  return db.event.create({
+    data: { weddingId, type, name, startsAt: new Date("2027-01-12T04:30:00Z"), hostedBy: "bride" },
+  });
+}
+
 export function makeFamily(weddingId: string, familyName: string) {
   return db.family.create({ data: { weddingId, familyName, side: "groom" } });
 }

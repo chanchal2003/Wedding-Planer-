@@ -8,7 +8,8 @@ import {
   checkMoneyAccess,
 } from "@/lib/access/checks";
 import { hashToken } from "@/lib/access/hash";
-import { addMember, makeDevice, makeFamily, makeUser, makeWedding, resetDatabase } from "./helpers";
+import { findEventInWedding } from "@/lib/events/lookup";
+import { addMember, makeDevice, makeEvent, makeFamily, makeUser, makeWedding, resetDatabase } from "./helpers";
 
 // The access rules (FR-64). The people: Priya is the bride and an admin, Rohan and Ankit
 // are organizers. Two weddings, A and B, so we can check that one cannot open the other.
@@ -181,6 +182,26 @@ describe("who may delete a wedding", () => {
     expect((await checkDeleteWedding(ankit.id, wedding.id)).ok).toBe(false);
     expect((await checkDeleteWedding(sita.id, wedding.id)).ok).toBe(false);
     expect((await checkDeleteWedding(meena.id, wedding.id)).ok).toBe(false);
+  });
+});
+
+describe("events stay inside their wedding", () => {
+  beforeEach(resetDatabase);
+  afterAll(async () => {
+    await resetDatabase();
+    await db.$disconnect();
+  });
+
+  it("finds an event in its own wedding, and never through another wedding (CLAUDE.md rule 2)", async () => {
+    const priya = await makeUser("Priya");
+    const weddingA = await makeWedding("priya-rahul", priya.id);
+    const weddingB = await makeWedding("meena-niece", priya.id);
+    const haldiA = await makeEvent(weddingA.id, "Haldi");
+
+    expect((await findEventInWedding(weddingA.id, haldiA.id))?.name).toBe("Haldi");
+    expect(await findEventInWedding(weddingB.id, haldiA.id)).toBeNull();
+    expect(await findEventInWedding(weddingA.id, "not-an-id")).toBeNull();
+    expect(await findEventInWedding("not-an-id", haldiA.id)).toBeNull();
   });
 });
 
