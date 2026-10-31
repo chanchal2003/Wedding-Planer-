@@ -40,7 +40,7 @@ This project uses a new Next.js version (see `package.json`) with changes from o
 4. **Transactions:** multi-step changes (import save, purchase task → expense + payment, history rows) run in one transaction.
 5. **Replies:** one reply per family and event (unique constraint). The first submit wins. Guests cannot edit after submit.
 6. **Phone numbers:** normalise with `lib/phone` before saving or comparing. Unique per wedding.
-7. **Import:** file validation → database validation → save in one transaction, which re-runs both checks first. Save only with 0 errors. Skip families already in the app (same name and number).
+7. **Import:** file validation → database validation → save in one transaction, which re-runs both checks first. Save only with 0 errors. Skip families already in the app (same name and same number; with no number: same name, contact name and city). Lib: `lib/import/` (`read`, `validateImportFile`, `validateImportAgainstDb`, `run`).
 8. **Soft delete and history** for expenses, payments and gifts.
 9. **Time:** store UTC, show India time (Asia/Kolkata). Last dates close at 23:59 India time.
 10. **Secrets** live in `.env` (never committed; one file for the app, Prisma and the scripts), Vercel environment variables and GitHub Secrets.

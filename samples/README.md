@@ -33,4 +33,6 @@ fixed, so you get exactly the same files every time.
 | No number at all | Joshi family | Warning only |
 | A column that is not an event of the wedding | the column "Mehndi" | Error for the whole file |
 
+If you import the clean file a second time, nothing new is saved: all 500 families, also the 10 with no number, are "already in the app".
+
 Import order for the practice (step 6.5): first the messy file, see all the errors, correct the file, and save it. Then the clean file (the Sharma family is skipped, because it is in the app already).

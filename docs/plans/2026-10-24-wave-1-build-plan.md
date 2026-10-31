@@ -327,7 +327,8 @@ The events in the files must match the events created in the app (Haldi, Mehendi
 **Done when:** unit tests for AC-16.2, AC-17.2 and AC-17.3 pass.
 **Commit:** `feat: add import file validation`
 
-### 6.4 Import steps 2 and 3: database check and save 🤖
+### 6.4 Import steps 2 and 3: database check and save ✅ built 🤖
+**Built 2026-10-31 (no screen yet; the proof is 20 tests on the test database):** `lib/import/validateImportAgainstDb.ts` (read only: new, already in the app, number of another family, organizer not on the team, same family twice in the file), `lib/import/run.ts` (`checkImportFile`, and `saveImportFile`: one transaction that takes a lock for the wedding, locks the organizers FOR SHARE, runs both checks again, and saves families, numbers and events with `createMany`), `lib/import/actions.ts` (`checkImport` and `saveImport`, admins only). A family is "already in the app" when a number of the row belongs to a family with the same name; with no number, when the name, contact name and city are the same (decided 2026-10-31). Also: a check of the zip file BEFORE the Excel file is read (over 20 MB unpacked, or a cell beyond row 3,000 or column 60, is refused: found by the review of 2026-10-31), and the organizer of "Add family" and "Edit family" is locked FOR SHARE, so no family is assigned to a person who is being removed. The tests were broken nine ways on purpose, and all nine were caught. Older text of this step follows.
 - `validateImportAgainstDb`: number already in the app, organizer in the team, events exist. Read only.
 - Same family name and number already in the app: "already in the app", skipped. Same number on a different family: error.
 - `saveImport`: runs both checks again, then saves all rows in **one transaction**. Saves only with 0 errors.
