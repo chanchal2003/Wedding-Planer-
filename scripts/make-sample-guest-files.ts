@@ -86,6 +86,9 @@ async function clean() {
     rows[index]["Main number"] = "";
     rows[index]["Second number"] = "";
   }
+  // Row 252 is the "Sharma family" that you add by hand before the import (samples/README.md). It is
+  // one of the 500 rows, so the import says "499 new families, 1 already in the app" (AC-17.5).
+  rows[250] = familyRow({ "Family name": "Sharma family", "Contact name": "Meena", City: "Jaipur", "Main number": "98765 11111", "Second number": "", Side: "Groom", "Organizer email": "ankit@example.com" });
   await write("samples/guests-clean-500.xlsx", HEADERS, rows);
 }
 
@@ -98,9 +101,8 @@ async function messy() {
     // 10 good rows
     ...Array.from({ length: 10 }, () => familyRow()),
 
-    // already in the app (same name and same number as the family that you add by hand): skipped
-    familyRow({ "Family name": "Sharma family", "Contact name": "Meena", City: "Jaipur", "Main number": "98765 11111", Side: "Groom", "Organizer email": "ankit@example.com" }),
-    // a number that the Sharma family has: ERROR, and it names the Sharma family
+    // a number that the Sharma family has (made by hand in the app, and also in the clean file): ERROR,
+    // and it names the Sharma family. It is not in this file twice, so the file check passes it.
     familyRow({ "Family name": "Gupta family", "Main number": "+91 98765-11111" }),
 
     // the same number twice inside the file: ERROR on both rows
