@@ -1,16 +1,22 @@
 // Sign-in users, weddings and the team of each wedding.
 
 // Everyone who signed in with Google. Guests are never here.
-// The other sign-in tables (accounts, sessions) are added at plan step 4.2.
+// The sign-in tables (sessions, accounts, verifications) are in auth.prisma.
+// emailVerified and image are filled by Better Auth from the Google account.
+// A migration check keeps email in lowercase.
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String?
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String?
+  email         String   @unique
+  emailVerified Boolean  @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   weddingsCreated Wedding[]
   memberships     WeddingMember[]
+  sessions        Session[]
+  accounts        Account[]
 
   @@map("users")
 }
