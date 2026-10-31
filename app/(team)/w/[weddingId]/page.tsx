@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import { StatusChip } from "@/components/shared/status-chip";
 import { Button } from "@/components/ui/button";
 import { mayDeleteWedding } from "@/lib/access/checks";
 import { forPage } from "@/lib/access/respond";
@@ -42,7 +41,6 @@ async function WeddingHome({ params }: { params: PageProps<"/w/[weddingId]">["pa
       <h1 className="text-3xl">
         {wedding.brideName} &amp; {wedding.groomName}
       </h1>
-      {wedding.isTest && <StatusChip className="self-start">TEST</StatusChip>}
       <p className="text-lg">{formatDate(wedding.weddingDate)}</p>
       <p>You are {member.role === "admin" ? "an admin" : "an organizer"} of this wedding.</p>
       <Button variant="outline" size="lg" render={<Link href="/weddings" />}>
