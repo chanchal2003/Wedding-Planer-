@@ -11,7 +11,8 @@ type Counts = { events: number; families: number; replies: number; teamMembers: 
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-// Shown only to a person who may delete this wedding. The server checks it again.
+// The warning and the confirmation. The page around it is only for a person who may delete this
+// wedding, and the server checks it again when the button is pressed.
 export function DeleteWedding({
   weddingId,
   title,
@@ -28,9 +29,8 @@ export function DeleteWedding({
   const error = state.fields?.confirmName ?? state.message;
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
-      <h2 className="text-xl font-semibold">Delete this wedding</h2>
-      <p>
+    <div className="flex flex-col gap-4">
+      <p className="text-lg">
         This deletes everything in this wedding: {plural(counts.events, "event", "events")},{" "}
         {plural(counts.families, "family", "families")}, {plural(counts.replies, "reply", "replies")} and{" "}
         {plural(counts.teamMembers, "team member", "team members")}. This cannot be undone.
@@ -60,6 +60,6 @@ export function DeleteWedding({
           {pending ? "Deleting…" : "Delete wedding"}
         </Button>
       </form>
-    </section>
+    </div>
   );
 }
