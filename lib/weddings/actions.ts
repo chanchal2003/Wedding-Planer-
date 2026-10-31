@@ -2,8 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { requireDeleteWedding } from "@/lib/access/guards";
+import { denied } from "@/lib/access/respond";
 import { getSessionUser } from "@/lib/access/session";
 import { fail, ok, type Result } from "@/lib/result";
+import { deleteWeddingData } from "@/lib/weddings/delete";
+import { namesMatch, weddingTitle } from "@/lib/weddings/names";
 import { createWeddingSchema } from "@/lib/weddings/schemas";
 import { slugCandidate, suggestSlug } from "@/lib/weddings/slug";
 
@@ -105,4 +109,51 @@ export async function makeWeddingAction(
     return { values, message: result.error.message, fields: result.error.fields };
   }
   redirect(`/w/${result.data.weddingId}`);
+}
+
+// API design, Section 5: deleteWedding. Test wedding: any admin. Real wedding: only an admin
+// who is the bride or the groom (checked by requireDeleteWedding). The person must type the
+// name of the wedding. Everything in the wedding is deleted and cannot be restored.
+export async function deleteWedding(weddingId: string, typedName: string): Promise<Result<null>> {
+  try {
+    const access = await requireDeleteWedding(weddingId);
+    if (!access.ok) return denied(access);
+
+    const wedding = await db.wedding.findUnique({
+      where: { id: weddingId },
+      select: { brideName: true, groomName: true },
+    });
+    if (!wedding) return fail("NOT_FOUND", "This wedding was not found. It may have been deleted already.");
+
+    const title = weddingTitle(wedding);
+    if (!namesMatch(typedName, title)) {
+      return fail("INVALID_INPUT", "The name does not match.", {
+        confirmName: `Type ${title} to confirm.`,
+      });
+    }
+
+    await deleteWeddingData(weddingId);
+    return ok(null);
+  } catch (error) {
+    console.error("deleteWedding failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", "Something went wrong. Nothing was deleted. Try again.");
+  }
+}
+
+export type DeleteWeddingState = { typedName: string; message?: string; fields?: Record<string, string> };
+
+// The delete button of the wedding page calls this one.
+export async function deleteWeddingAction(
+  _previous: DeleteWeddingState,
+  formData: FormData,
+): Promise<DeleteWeddingState> {
+  const weddingId = String(formData.get("weddingId") ?? "");
+  const typedName = String(formData.get("confirmName") ?? "");
+
+  const result = await deleteWedding(weddingId, typedName);
+  if (!result.ok) {
+    if (result.error.code === "NOT_SIGNED_IN") redirect("/sign-in");
+    return { typedName, message: result.error.message, fields: result.error.fields };
+  }
+  redirect("/weddings?deleted=1");
 }

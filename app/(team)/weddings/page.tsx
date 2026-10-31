@@ -10,22 +10,24 @@ import { listMyWeddings } from "@/lib/weddings/queries";
 
 export const metadata = { title: "My weddings | ShaadiDesk" };
 
-export default function WeddingsPage() {
+export default function WeddingsPage({ searchParams }: PageProps<"/weddings">) {
   return (
     <PageShell>
       <h1 className="text-3xl">My weddings</h1>
       <Suspense fallback={<p>Loading…</p>}>
-        <WeddingList />
+        <WeddingList searchParams={searchParams} />
       </Suspense>
     </PageShell>
   );
 }
 
-async function WeddingList() {
+async function WeddingList({ searchParams }: { searchParams: PageProps<"/weddings">["searchParams"] }) {
   const { user, link, weddings } = await listMyWeddings();
+  const { deleted } = await searchParams;
 
   return (
     <>
+      {deleted && <p role="status">The wedding was deleted.</p>}
       {link.linked > 0 && (
         <p role="status">
           You were added to {link.linked} wedding team{link.linked > 1 ? "s" : ""}.
