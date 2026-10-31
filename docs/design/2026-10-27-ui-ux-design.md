@@ -175,7 +175,7 @@ PRD FR-27 to FR-31, FR-38.
 │  └───────────────────────┘  │
 │                             │
 │      Priya  &  Rahul        │  Fraunces, large, on a plain background
-│   15 January 2027 · Delhi   │
+│      15 January 2027        │
 │                             │
 │  Namaste! Find your family  │
 │  to see your invitation.    │
@@ -238,7 +238,7 @@ PRD FR-32 to FR-37, FR-42.
 - Choosing "No" folds the "how many" part away.
 - The event cards show date, time, place and a map link. They show no dress code. The event "Note" is for the team only for now. `[Confirmed]`
 - "Review and submit" opens a summary with the warning "You cannot change this reply later. Do you want to submit?" and two buttons: "Go back" and "Yes, submit".
-- After the server confirms, the page shows the reply as read-only with "Replied by Meena, 5 Dec" and "To change your reply, contact Rohan" (with a WhatsApp button). A gentle tick appears once.
+- After the server confirms, the page shows the reply as read-only with "Replied by Meena, 5 Dec" and "To change your reply, contact Rohan". There is no WhatsApp button and no phone number of a team member in Wave 1 (decided 2026-10-30; FR-40 is a Could item). A gentle tick appears once.
 
 **States:** not replied, confirm, sending (the button cannot be pressed twice), replied, updated by the team, closed after the last date, stay not ready, network error ("Not sent. Try again." and the typed reply stays on the page).
 
@@ -268,7 +268,7 @@ PRD FR-24, FR-43, FR-44.
 │ │          [ Add team ]   │ │
 │ └─────────────────────────┘ │
 │  ✓ Wedding created          │
-│  ✓ Events added (by Dad)    │
+│  ✓ Events added             │
 │  ▸ 4 more steps             │
 │ ┌─────────────────────────┐ │
 │ │ Replies  312 of 500     │ │  summary strip (after setup)
@@ -286,9 +286,9 @@ PRD FR-24, FR-43, FR-44.
 ```
 - **During setup** the home shows the next-step card and a short, collapsed checklist. **After setup** it shows the summary strip, then "Needs attention", then the details. `[Confirmed]`
 - **Next-step card:** one step, one button. The other steps are collapsed under "4 more steps". `[Confirmed]`
-- **Checklist steps:** 1 Make the wedding, 2 Invite your helpers, 3 Add events, 4 Set the reply dates, 5 Import your guest list (locked until events and team exist, with a note), 6 Copy your RSVP link. Steps show who did them ("Events added by Dad"). `[Confirmed]`
+- **Checklist steps:** 1 Make the wedding, 2 Invite your helpers, 3 Add events, 4 Set the reply dates, 5 Import your guest list (locked until events and team exist, with a note), 6 Copy your RSVP link. Steps do not show who did them (decided 2026-10-30: the database does not record it). `[Confirmed]`
 - **Invite your helpers comes early.** Each person gets a ready WhatsApp message to join (FR-9). Then setup can run in parallel. `[Confirmed]`
-- **See it as a guest sees it:** once the names, photo and colour are set, a button opens the real RSVP page with the couple's photo and colour. It catches a bad photo before the cards are printed. `[Confirmed]`
+- **See it as a guest sees it:** once the names, photo and colour are set, a button opens the real guest Screen 1 with the couple's photo and colour (same data as `getRsvpLanding`, no new function). It catches a bad photo before the cards are printed. In Wave 1 the preview shows Screen 1 only: there is no family picker and no Screen 2 preview. `[Confirmed]` 2026-10-30
 - **Timeline strip:** Today, Replies close, Wedding, with the real dates. There is no "Cards go out" date. `[Confirmed]`
 - **Needs attention** stays in Wave 1 with three rows: families not replied, families with no phone number, invitations not sent. Event colour dots also stay. `[Confirmed]`
 - The home page changes with the stage (setup, invitations, replies, headcount). **Later, not in Wave 1.** `[Confirmed]`
@@ -316,7 +316,7 @@ PRD FR-23, FR-25.
 └─────────────────────────────┘
 ```
 - **"Mark as sent" is on the list itself.** One tap, then a message at the bottom for a few seconds: "Marked as sent. Undo". `[Confirmed]`
-- Admins see the same list under the name **Families**. Organizers see **My families**.
+- Admins see the same list under the name **Families**. Organizers see **My families**, with two chips at the top: **[My families] [All families]**. "My families" is the default. "All families" shows every family, with the organizer's own first, so organizers can help each other. No extra tab. `[Confirmed]` 2026-10-30
 - Reminders and WhatsApp buttons are a later release. In Wave 1 a family that was sent shows only the status chip.
 - Buttons are at least 44 px high, to avoid taps on the wrong family.
 
@@ -358,7 +358,7 @@ PRD FR-16, FR-17. Three screens.
 
 ### 6.10 Setup screens: settings, events, team `[Proposed]`
 PRD FR-4 to FR-13.
-- **Settings:** banner (with a crop preview), greeting, one theme colour (with the contrast check), reply last date and stay last date, the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
+- **Settings:** banner (with a crop preview), greeting, one theme colour (a choice of the 5 colours; the wedding stores the colour name), reply last date and stay last date, the RSVP link with a "Copy" button (locked after the first "Invitation sent"), and the guest preview button.
 - **Events:** a list of cards with the colour dot, type, date and "hosted by". The form has a type list, name, date and time, venue, map link, note, "hosted by" and a **Note** (hint: "Only the team sees this for now"). The budget field comes with the Money release.
 - **Team:** a list with role, relation and status chips (Active, Pending, Removed) and the buttons "Invite on WhatsApp" and "Copy invite message" for pending people. Invites go by WhatsApp message, with no email. The money switch comes with the Money release.
 
@@ -404,7 +404,17 @@ Simple accessibility (PRD Section 9.6, decision D-11), not the full WCAG standar
 
 ## 11. The Claude Design canvas
 
-The screens were designed in Claude Design in prompts 4a to 4f. The result is `docs/design/ShaadiDesk.pdf` (60 pages). It is the visual reference for the build. If the PDF and this document disagree, this document wins, and the PDF is fixed.
+The screens were designed in Claude Design in prompts 4a to 4f. The result is `docs/design/ShaadiDesk.pdf` (60 pages). It is the visual reference for **how things look** (colours, type, spacing, layout). If the PDF and this document disagree about content or behaviour, this document wins. The PDF is not changed (decided 2026-10-30). The list below says where they differ.
+
+**Differences from the PDF** (the builder follows this list, not the PDF)
+1. Guest Screen 1: no wedding city under the date. It shows only "15 January 2027".
+2. Setup checklist on the home page: no "by Dad". It shows only "Events added".
+3. Guest page after a reply: no WhatsApp button next to "To change your reply, contact Rohan". There is no phone number of a team member.
+4. Organizer's families screen: two chips at the top, **[My families] [All families]**.
+5. Organizer's "Edit event" form: the field is "Note" with the hint "Only the team sees this for now". There is no "Note for guests" and no dress code.
+6. "See it as a guest sees it": opens guest Screen 1 only. There is no family picker and no Screen 2 preview.
+7. Any "Request access" screen, link or button is a later release (Wave 2). The Wave 1 help text is "Ask the person who sent you the card".
+8. Reminders, "Send reminder" and WhatsApp buttons on the team screens are later releases.
 
 **Fixed inputs used in every prompt**
 - Product: ShaadiDesk, a web app to manage an Indian wedding. Tagline "Plan the shaadi, not the chaos."
@@ -413,10 +423,6 @@ The screens were designed in Claude Design in prompts 4a to 4f. The result is `d
 - Forbidden: Section 9.
 - Content: real sample content, never lorem ipsum. People: Priya and Rahul (the couple), Meena (Sharma family, Jaipur), Rohan and Ankit (organizers), Dad (admin).
 - Size: phone first (390 px wide), then a laptop version of the team screens.
-
-**Two fixes still to send to Claude Design**
-1. The organizer's "Edit event" form must say "Note", with the hint "Only the team sees this for now". It must not say "Note for guests" or show a dress code.
-2. In the admin guest preview, "See my invitation" must use the locked style until a family is chosen.
 
 ## 12. Open items
 None are blocking. Still open for the owner: dark mode stays off, and the colours for "Mata ki Chowki" and "Other" events are proposals.
