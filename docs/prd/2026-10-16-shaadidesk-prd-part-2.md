@@ -468,7 +468,7 @@ All integrations are free. The app does not use paid services. `[Confirmed]`
 | Maps | The map link of each venue | The team pastes a link (for example, a Google Maps link). No map API. | `[Proposed]` |
 | PostgreSQL host | The database | Neon free tier for the deployed app. It wakes in approximately 1 second. Development uses normal PostgreSQL on the laptop. | `[Confirmed]` |
 | App hosting | Frontend and server code | Vercel free plan, at a free `vercel.app` address | `[Confirmed]` |
-| Photo storage | Banner and bill photos | Cloudflare R2 (S3 API), free tier | `[Confirmed]` |
+| Photo storage | Bill photos (the banner photo is kept in the database, table `wedding_banners`) | Cloudflare R2 (S3 API), free tier | `[Confirmed]` |
 | Backup host | The daily database copy | Cloudflare R2. A GitHub Actions job makes the copy each night. | `[Confirmed]` |
 
 **Not integrated in this release** `[Confirmed]`: WhatsApp Business API, SMS or OTP, email messages, payment gateways, photo gallery, live stream.

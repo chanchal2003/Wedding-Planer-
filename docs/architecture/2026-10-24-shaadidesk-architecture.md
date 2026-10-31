@@ -54,7 +54,7 @@ flowchart LR
   end
 
   subgraph R2["Cloudflare R2 (free)"]
-    PH["photos bucket<br/>banner, bills"]
+    PH["photos bucket<br/>bills"]
     BK["backups bucket<br/>last 30 days"]
   end
 
