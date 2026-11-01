@@ -341,8 +341,9 @@ Upload → results (OK, errors, warnings, already in the app) → "Download erro
 **Done when:** you import `guests-messy.xlsx`, see all its errors, correct the file, and save it. Then you import `guests-clean-500.xlsx`, and the families list shows about 500 families.
 **Commit:** `feat: add import screens`
 
-### 6.6 Assign families to organizers 🤖
+### 6.6 Assign families to organizers ✅ built (waiting for the owner's test) 🤖
 One family at a time, many at once (for example by side), and from the import column.
+**Built 2026-11-01:** one at a time (the family form) and from the import column already worked. New: the page `/w/<id>/families/assign` (admins only): choose the families (all, groom's side, bride's side, both sides, each with its count), the box "Only families with no organizer yet" (on by default, so nobody loses families without noticing), and the person. A confirmation "Assign 120 families to Ankit?" comes before the save. The save runs in one transaction in `lib/families/assign.ts` and locks the person row. Buttons: "Assign to organizers" on the Families page and "Assign families to organizers" on the import done screen. 4 tests in `tests/assign-families.test.ts`. "My families" comes at step 8.2, so AC-21.1 is checked now with the Families filter by organizer.
 **Done when:** AC-21.1 passes.
 **Commit:** `feat: assign families to organizers`
 
