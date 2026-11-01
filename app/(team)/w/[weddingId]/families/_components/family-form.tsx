@@ -87,14 +87,11 @@ export function FamilyForm({
   );
   const { values, fields } = state;
 
-  const [selected, setSelected] = useState<string[]>(initial.eventIds);
-  const [organizer, setOrganizer] = useState(initial.organizerId);
-
   const [typed, setTyped] = useState<{ base: State; values: FamilyValues } | null>(null);
   const current = typed && typed.base === state ? typed.values : state.values;
   const changed = familyId ? !same(current, state.baseline) : true;
 
-  const dropped = events.filter((event) => repliedEventIds.includes(event.id) && !selected.includes(event.id));
+  const dropped = events.filter((event) => repliedEventIds.includes(event.id) && !current.eventIds.includes(event.id));
 
   if (events.length === 0) {
     return (
@@ -142,8 +139,7 @@ export function FamilyForm({
               type="checkbox"
               name="eventIds"
               value={event.id}
-              checked={selected.includes(event.id)}
-              onChange={(e) => setSelected((list) => (e.target.checked ? [...list, event.id] : list.filter((id) => id !== event.id)))}
+              defaultChecked={values.eventIds.includes(event.id)}
               className="size-5 accent-primary"
             />
             <EventDot type={event.type} />
@@ -169,9 +165,8 @@ export function FamilyForm({
               type="radio"
               name="organizerId"
               value={option.id}
-              checked={organizer === option.id}
+              defaultChecked={values.organizerId === option.id}
               disabled={!canAssign}
-              onChange={() => setOrganizer(option.id)}
               className="size-5 accent-primary"
             />
             <span>{option.name}</span>
