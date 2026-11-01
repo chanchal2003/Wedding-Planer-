@@ -73,7 +73,18 @@ function familyRow(over: Row = {}): Row {
 const widths = (headers: string[]) => headers.map((header) => ({ width: Math.max(14, columns.find((c) => c.header === header)?.width ?? 14) }));
 const headerCells = (headers: string[]) => headers.map((value) => ({ value, fontWeight: "bold" as const }));
 
+// To import with your own test team, set ROHAN_EMAIL and ANKIT_EMAIL. The files then go to
+// samples/local/ (git-ignored), so no real email is ever committed (CLAUDE.md rule 11).
+const SWAP: Record<string, string> = {};
+if (process.env.ROHAN_EMAIL) SWAP["rohan@example.com"] = process.env.ROHAN_EMAIL;
+if (process.env.ANKIT_EMAIL) SWAP["ankit@example.com"] = process.env.ANKIT_EMAIL;
+const LOCAL = Object.keys(SWAP).length > 0;
+
 async function write(path: string, headers: string[], rows: Row[]) {
+  if (LOCAL) {
+    path = path.replace("samples/", "samples/local/");
+    rows = rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [key, typeof value === "string" ? (SWAP[value] ?? value) : value])) as Row);
+  }
   await writeExcelFile([{ sheet: "Guests", data: [headerCells(headers), ...rows.map((row) => cells(headers, row))], columns: widths(headers) }]).toFile(path);
   console.log(`${path}: ${rows.length} rows`);
 }
