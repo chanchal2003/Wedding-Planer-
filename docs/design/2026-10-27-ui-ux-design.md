@@ -234,7 +234,7 @@ PRD FR-32 to FR-37, FR-42.
 ```
 - **All events are cards on one page.** The button is fixed at the bottom. `[Confirmed]`
 - **Nothing is pre-selected.** The guest must choose Yes or No for each event. "Review and submit" stays locked until every event has an answer. `[Confirmed]`
-- The page shows "Please reply by 31 December."
+- The page shows "Please reply by 31 December.", a required field "Your name" (for "Replied by Meena"), the privacy note ("We keep only your family name, your reply and the number of guests. Only the wedding team can see them. We delete them 6 months after the wedding.") and a small link "Not the Sharma family? Change" that gives up the phone's access (decided 2026-11-01).
 - Choosing "No" folds the "how many" part away.
 - The event cards show date, time, place and a map link. They show no dress code. The event "Note" is for the team only for now. `[Confirmed]`
 - "Review and submit" opens a summary with the warning "You cannot change this reply later. Do you want to submit?" and two buttons: "Go back" and "Yes, submit".

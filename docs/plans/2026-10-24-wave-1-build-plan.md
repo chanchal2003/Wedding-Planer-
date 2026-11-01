@@ -371,8 +371,9 @@ Check the last 4 digits against the primary or secondary number. The 15-minute s
 **Done when:** AC-29.1, AC-29.2, AC-30.1 to AC-30.3, AC-31.1 and AC-31.2 pass.
 **Commit:** `feat: add 4-digit check, device cookie, attempt limits and limit settings`
 
-### 7.4 Screen 2 and the reply 🤖
+### 7.4 Screen 2 and the reply ✅ built (waiting for the owner's test) 🤖
 Greeting, a card for each invited event only, privacy note. Yes or no, and persons. Summary and warning before submit. First reply wins. Read-only after submit, with "To change your reply, contact <organizer name>". Closed after the RSVP last date. Failed submit: "Not sent. Try again." (needs a yes on FR-42).
+**Built 2026-11-01:** `lib/rsvp/invitation.ts` (`loadInvitation`: the family's own events and replies, no event note, no budget; the guard part is `getGuestInvitation` in `lib/rsvp/guest.ts`), `lib/rsvp/submit.ts` (`submitFamilyReplies`: one transaction; the last date; one answer for every open event and for no other; a reply that exists is never changed; the unique rule makes the second of two parallel submits fail with `ALREADY_REPLIED`), the actions `submitReplies` and `leaveFamily` in `lib/rsvp/actions.ts`, and the screen `reply-form.tsx` (Yes/No cards, stepper, name field, review with the warning, "Sending…", "Not sent. Try again.", read-only replies with "Replied by Meena, 5 December" or "Updated by Rohan", "Replies are closed. Contact Rohan.", the privacy note, and "Not the <family>? Change", which gives up the phone's access and frees its slot). Decided with the plan: the name is required, persons have a technical limit of 9,999 and start at 1, the privacy note text is in `reply-form.tsx`. 11 tests in `tests/guest-reply.test.ts`; the test reset now deletes families before weddings (a reply entered by the team points at a team member).
 **Done when:** AC-32.1, AC-33.1, AC-34.1, AC-34.2, AC-35.1, AC-36.1, AC-36.2, AC-37.1 and AC-42.1 pass.
 **Commit:** `feat: add rsvp screen 2 with one-time reply`
 
