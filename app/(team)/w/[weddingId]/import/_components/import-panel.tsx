@@ -86,7 +86,8 @@ export function ImportPanel({ weddingId }: { weddingId: string }) {
       <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
         <h2 className="text-xl font-semibold">{step.saved} {step.saved === 1 ? "family" : "families"} saved</h2>
         {step.skipped > 0 && <p className="text-muted-foreground">{step.skipped} skipped, because they are already in the app.</p>}
-        <Button size="lg" render={<Link href={`/w/${weddingId}/families`} />}>See the families</Button>
+        <Button size="lg" render={<Link href={`/w/${weddingId}/families/assign`} />}>Assign families to organizers</Button>
+        <Button size="lg" variant="outline" render={<Link href={`/w/${weddingId}/families`} />}>See the families</Button>
       </section>
     );
   }

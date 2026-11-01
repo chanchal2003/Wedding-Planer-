@@ -143,7 +143,10 @@ async function FamilyList({
       <Button size="lg" render={<Link href={`/w/${weddingId}/families/new`} />}>Add family</Button>
       {/* Only admins import a guest list (the import page checks it again). */}
       {member.role === "admin" && (
-        <Button variant="outline" size="lg" render={<Link href={`/w/${weddingId}/import`} />}>Import from Excel</Button>
+        <>
+          <Button variant="outline" size="lg" render={<Link href={`/w/${weddingId}/import`} />}>Import from Excel</Button>
+          <Button variant="outline" size="lg" render={<Link href={`/w/${weddingId}/families/assign`} />}>Assign to organizers</Button>
+        </>
       )}
     </>
   );

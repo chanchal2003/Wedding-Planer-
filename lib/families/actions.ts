@@ -5,8 +5,9 @@ import { db } from "@/lib/db";
 import { isUuid } from "@/lib/access/checks";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { denied } from "@/lib/access/respond";
+import { assignByScope } from "@/lib/families/assign";
 import { findFamilyInWedding } from "@/lib/families/lookup";
-import { familySchema } from "@/lib/families/schemas";
+import { assignSchema, familySchema } from "@/lib/families/schemas";
 import { fail, ok, type Result } from "@/lib/result";
 
 // API design, Section 8. Every team member adds and edits families (FR-20), only admins delete
@@ -235,5 +236,23 @@ export async function deleteFamily(weddingId: string, familyId: string): Promise
   } catch (error) {
     console.error("deleteFamily failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", "Something went wrong. Nothing was deleted. Try again.");
+  }
+}
+
+// Only admins assign (FR-21). One transaction; the families of this wedding only.
+export async function assignFamilies(weddingId: string, input: unknown): Promise<Result<{ assigned: number; name: string }>> {
+  try {
+    const access = await requireAdmin(weddingId);
+    if (!access.ok) return denied(access);
+    const wedding = access.member.wedding.id;
+
+    const parsed = assignSchema.safeParse(input);
+    if (!parsed.success) return fail("INVALID_INPUT", "Please check the form.", fieldsFrom(parsed.error.issues));
+
+    const result = await db.$transaction((tx) => assignByScope(tx, wedding, parsed.data));
+    return result.ok ? ok({ assigned: result.assigned, name: result.name }) : fail("INVALID_INPUT", result.message, { memberId: result.message });
+  } catch (error) {
+    console.error("assignFamilies failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", SOMETHING_WRONG);
   }
 }

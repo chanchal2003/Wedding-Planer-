@@ -81,3 +81,10 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     page: Number.isFinite(page) && page > 0 ? Math.min(page, MAX_PAGE) : 1,
   };
 }
+
+// Assign many families to one organizer (step 6.6).
+export const assignSchema = z.object({
+  scope: z.enum(["all", "bride", "groom", "both"], { error: "Choose which families." }),
+  onlyUnassigned: z.boolean(),
+  memberId: z.string().regex(UUID, "Choose a person from the team."),
+});

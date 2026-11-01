@@ -129,3 +129,29 @@ export async function getFamilyDeleteInfo(weddingId: string, familyId: string) {
   const replies = family.familyEvents.filter((event) => event.reply).length;
   return { ...access, family, replies };
 }
+
+// For the "Assign families" page (admins only): how many families each choice would change, and the team.
+export async function getAssignOptions(weddingId: string) {
+  const access = await requireAdmin(weddingId);
+  if (!access.ok) return access;
+  const wedding = access.member.wedding.id;
+
+  const [all, unassigned, members] = await Promise.all([
+    db.family.groupBy({ by: ["side"], where: { weddingId: wedding }, _count: { _all: true } }),
+    db.family.groupBy({ by: ["side"], where: { weddingId: wedding, assignedMemberId: null }, _count: { _all: true } }),
+    db.weddingMember.findMany({
+      where: { weddingId: wedding, status: { not: "removed" } },
+      select: { id: true, displayName: true, status: true, user: { select: { name: true } } },
+    }),
+  ]);
+  const counts = (rows: { side: "bride" | "groom" | "both"; _count: { _all: number } }[]) => {
+    const bySide = { bride: 0, groom: 0, both: 0 };
+    for (const row of rows) bySide[row.side] = row._count._all;
+    return { ...bySide, all: bySide.bride + bySide.groom + bySide.both };
+  };
+  return {
+    ...access,
+    counts: { all: counts(all), unassigned: counts(unassigned) },
+    people: members.map((m) => ({ id: m.id, name: m.displayName ?? m.user?.name ?? "Team member", pending: m.status === "pending" })),
+  };
+}
