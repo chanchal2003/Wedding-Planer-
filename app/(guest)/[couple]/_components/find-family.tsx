@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { searchFamilies } from "@/lib/rsvp/actions";
+import { searchFamilies, verifyFamilyDigits } from "@/lib/rsvp/actions";
 import type { Match } from "@/lib/rsvp/search";
 
 // Screen 1 fields (FR-27, FR-28): the family name with its matches, and four separate boxes for
 // the last 4 digits. The boxes open the number keypad on a phone and jump to the next box by
-// themselves. Step 7.3 adds the check of the digits; until then the button stays off.
+// themselves. The button checks the digits (FR-29) and, when they are right, the page reloads and
+// shows the invitation of the family.
 
 const MIN_LETTERS = 3;
 
@@ -21,6 +23,11 @@ export function FindFamily({ slug }: { slug: string }) {
   const [chosen, setChosen] = useState<Match | null>(null);
   const [digits, setDigits] = useState(["", "", "", ""]);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
+  const router = useRouter();
+  const [checking, setChecking] = useState(false);
+  const [refreshing, startRefresh] = useTransition();
+  const [granted, setGranted] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
 
   const text = name.trim().replace(/\s+/g, " ");
   // What the screen shows is worked out from the text and the last answer.
@@ -58,6 +65,30 @@ export function FindFamily({ slug }: { slug: string }) {
     setDigits(["", "", "", ""]);
   }
 
+  async function submit() {
+    if (!chosen) return;
+    setChecking(true);
+    setGranted(false);
+    setProblem(null);
+    try {
+      const result = await verifyFamilyDigits(slug, chosen.id, digits.join(""));
+      if (result.ok) {
+        // The page now sees the cookie and shows the invitation, and this form goes away. If it does
+        // not (the phone blocks cookies), the form stays and says so below.
+        setGranted(true);
+        setChecking(false);
+        startRefresh(() => router.refresh());
+        return;
+      }
+      setProblem(result.error.message);
+    } catch {
+      setProblem("Something went wrong. Check your internet and try again.");
+    }
+    setChecking(false);
+    setDigits(["", "", "", ""]);
+    boxes.current[0]?.focus();
+  }
+
   function setDigit(index: number, value: string) {
     let typed = value.replace(/\D/g, "");
     if (typed === "" && value !== "") return; // a letter: ignore
@@ -75,7 +106,13 @@ export function FindFamily({ slug }: { slug: string }) {
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={(event) => event.preventDefault()}>
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (chosen && digits.every(Boolean) && !checking && !refreshing) submit();
+      }}
+    >
       <div className="flex flex-col gap-2">
         <Label htmlFor="familyName">Family name</Label>
         {chosen ? (
@@ -149,8 +186,14 @@ export function FindFamily({ slug }: { slug: string }) {
         </div>
       </fieldset>
 
-      <Button type="submit" size="lg" className="h-14 text-lg" disabled>
-        See my invitation
+      {problem && <p role="alert" className="text-center font-medium">{problem}</p>}
+      {granted && !refreshing && (
+        <p role="alert" className="text-center font-medium">Your phone did not keep access. Allow cookies for this page and try again.</p>
+      )}
+      {!chosen && digits.some(Boolean) && <p className="text-center text-muted-foreground">First choose your family above.</p>}
+
+      <Button type="submit" size="lg" className="h-14 text-lg" disabled={!chosen || !digits.every(Boolean) || checking || refreshing}>
+        {checking || refreshing ? "Checking…" : "See my invitation"}
       </Button>
     </form>
   );

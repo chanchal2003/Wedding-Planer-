@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getGuestFamily } from "@/lib/access/guards";
 import { authEnv } from "@/lib/auth/env";
 import { getRsvpLanding } from "@/lib/rsvp/queries";
 import { themeFor } from "@/lib/theme";
@@ -45,6 +46,9 @@ async function Landing({ params }: { params: PageProps<"/[couple]">["params"] })
   const wedding = await getRsvpLanding(couple);
   if (!wedding) notFound();
 
+  // A device with access sees the invitation (Screen 2, step 7.4). Everybody else sees Screen 1.
+  const guest = await getGuestFamily(couple);
+
   const theme = themeFor(wedding.themeColor);
   // The couple's colour replaces the app's plum on this page only.
   const style = {
@@ -70,6 +74,13 @@ async function Landing({ params }: { params: PageProps<"/[couple]">["params"] })
         <img src={`/${couple}/banner?v=${wedding.bannerVersion}`} alt="" className="mt-8 aspect-[3/2] w-full rounded-2xl object-cover" />
       )}
 
+      {guest ? (
+        <section className="flex flex-col items-center gap-3 text-center" aria-live="polite">
+          <h1 className="text-4xl">Namaste, {guest.family.familyName}</h1>
+          <p className="text-lg">You are in. Your invitation and the reply form come in the next step.</p>
+        </section>
+      ) : (
+        <>
       <header className="flex flex-col items-center gap-1 text-center">
         <h1 className="text-4xl">{wedding.brideName} &amp; {wedding.groomName}</h1>
         <p className="text-lg text-muted-foreground">{formatDate(wedding.weddingDate)}</p>
@@ -82,6 +93,8 @@ async function Landing({ params }: { params: PageProps<"/[couple]">["params"] })
       <p className="text-center text-muted-foreground">
         Don&apos;t know the number? Ask the person who sent you the card.
       </p>
+        </>
+      )}
     </main>
   );
 }

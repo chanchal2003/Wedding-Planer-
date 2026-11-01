@@ -103,10 +103,14 @@ model AccessAttempt {
   deviceHash  String   @map("device_hash")
   familyId    String?  @map("family_id") @db.Uuid
   succeeded   Boolean
+  // A hash of the internet address (never the address itself). The limits that do not depend on the cookie use it.
+  ipHash      String   @map("ip_hash")
   attemptedAt DateTime @default(now()) @map("attempted_at") @db.Timestamptz(3)
 
   family Family? @relation(fields: [familyId], references: [id], onDelete: SetNull)
 
   @@index([deviceHash, attemptedAt])
+  @@index([familyId, attemptedAt])
+  @@index([ipHash, attemptedAt])
   @@map("access_attempts")
 }
