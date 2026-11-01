@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 
 // Weddings first (they delete their members, families and devices), then users.
 export async function resetDatabase() {
+  // The attempt log keeps its rows when a family is deleted (the family link is emptied).
+  await db.accessAttempt.deleteMany();
   await db.wedding.deleteMany();
   await db.user.deleteMany();
 }
