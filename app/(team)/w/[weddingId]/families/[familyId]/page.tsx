@@ -2,16 +2,17 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
-import { EventDot } from "@/components/shared/event-dot";
 import { StatusChip } from "@/components/shared/status-chip";
 import { Button } from "@/components/ui/button";
 import { forPage } from "@/lib/access/respond";
 import { hostedByLabel } from "@/lib/events";
 import { getFamily } from "@/lib/families/queries";
 import { displayPhone } from "@/lib/phone";
+import { formatEventDate } from "@/lib/time";
 import { FamilyForm } from "../_components/family-form";
 import { DevicesSection } from "../_components/devices-section";
 import { PhoneActions } from "../_components/phone-actions";
+import { ReplyEditor } from "../_components/reply-editor";
 
 export const metadata = { title: "Family | ShaadiDesk" };
 
@@ -34,6 +35,23 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       {children}
     </section>
   );
+}
+
+type ReplyRow = {
+  source: string;
+  repliedByName: string | null;
+  repliedAt: Date;
+  updatedAt: Date;
+  updatedBy: { displayName: string | null; user: { name: string | null } | null } | null;
+};
+
+// "Replied by Meena, 5 December" for a guest, "Updated by Rohan Verma, 5 December" for the team.
+function replyNote(reply: ReplyRow): string {
+  if (reply.source === "team") {
+    const who = reply.updatedBy?.displayName ?? reply.updatedBy?.user?.name ?? "the team";
+    return `Updated by ${who}, ${formatEventDate(reply.updatedAt)}`;
+  }
+  return `Replied by ${reply.repliedByName ?? "the family"}, ${formatEventDate(reply.repliedAt)}`;
 }
 
 async function Family({ params }: { params: PageProps<"/w/[weddingId]/families/[familyId]">["params"] }) {
@@ -63,16 +81,17 @@ async function Family({ params }: { params: PageProps<"/w/[weddingId]/families/[
       </Section>
 
       <Section title="Replies">
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-3">
           {invited.map((event) => {
             const reply = replyOf.get(event.id);
             return (
-              <li key={event.id} className="flex items-center gap-3">
-                <EventDot type={event.type} />
-                <span>
-                  {event.name}: {reply ? (reply.attending ? `Yes, ${reply.persons} ${reply.persons === 1 ? "person" : "persons"}` : "No") : "No reply yet"}
-                </span>
-              </li>
+              <ReplyEditor
+                key={event.id}
+                weddingId={weddingId}
+                familyId={family.id}
+                event={{ id: event.id, name: event.name, type: event.type }}
+                reply={reply ? { attending: reply.attending, persons: reply.persons, note: replyNote(reply) } : null}
+              />
             );
           })}
         </ul>

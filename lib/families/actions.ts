@@ -7,6 +7,7 @@ import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { denied } from "@/lib/access/respond";
 import { assignByScope } from "@/lib/families/assign";
 import { resetFamilyAccess } from "@/lib/guest/reset";
+import { saveTeamReply } from "@/lib/rsvp/team-reply";
 import { findFamilyInWedding } from "@/lib/families/lookup";
 import { assignSchema, familySchema } from "@/lib/families/schemas";
 import { fail, ok, type Result } from "@/lib/result";
@@ -274,6 +275,28 @@ export async function resetFamilyDevices(weddingId: string, familyId: string): P
     return ok({ removed: reset.devices, tries: reset.tries });
   } catch (error) {
     console.error("resetFamilyDevices failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", SOMETHING_WRONG);
+  }
+}
+
+// FR-41: a team member enters or changes the reply of one event of a family, at any time (the last
+// dates do not apply to the team). The family page shows "Updated by <name>". The saving is in
+// lib/rsvp/team-reply.ts.
+export async function setFamilyReply(weddingId: string, familyId: string, eventId: string, input: unknown): Promise<Result<null>> {
+  try {
+    const access = await requireMember(weddingId);
+    if (!access.ok) return denied(access);
+
+    const result = await saveTeamReply({
+      weddingId: access.member.wedding.id,
+      familyId: String(familyId),
+      eventId: String(eventId),
+      memberId: access.member.id,
+      reply: input,
+    });
+    return result.ok ? ok(null) : fail(result.code, result.message, result.fields);
+  } catch (error) {
+    console.error("setFamilyReply failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", SOMETHING_WRONG);
   }
 }

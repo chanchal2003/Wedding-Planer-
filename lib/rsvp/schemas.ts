@@ -45,3 +45,15 @@ export const replySchema = z
   }));
 
 export type ReplyInput = z.input<typeof replySchema>;
+
+// The team enters or changes the reply of ONE event of a family (FR-41). No name and no last date:
+// the team is not stopped by the dates. The same number rules as for a guest.
+export const teamReplySchema = z
+  .object({
+    attending: z.boolean(),
+    persons: z.number().int("Type a whole number.").min(1, "Type at least 1 person.").max(MAX_PERSONS, `Use at most ${MAX_PERSONS} persons.`).nullable(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.attending && value.persons === null) ctx.addIssue({ code: "custom", path: ["persons"], message: "Type how many people will come." });
+  })
+  .transform((value) => ({ attending: value.attending, persons: value.attending ? value.persons : null }));

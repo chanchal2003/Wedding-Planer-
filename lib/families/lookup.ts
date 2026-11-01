@@ -18,7 +18,22 @@ export async function findFamilyInWedding(weddingId: string, familyId: string) {
       assignedMemberId: true,
       invitationSentAt: true,
       phones: { select: { id: true, phone: true, kind: true, isIncorrect: true } },
-      familyEvents: { select: { eventId: true, reply: { select: { attending: true, persons: true } } } },
+      familyEvents: {
+        select: {
+          eventId: true,
+          reply: {
+            select: {
+              attending: true,
+              persons: true,
+              source: true,
+              repliedByName: true,
+              repliedAt: true,
+              updatedAt: true,
+              updatedBy: { select: { displayName: true, user: { select: { name: true } } } },
+            },
+          },
+        },
+      },
     },
   });
 }
