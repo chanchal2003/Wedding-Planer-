@@ -7,11 +7,12 @@ import { requireAdmin } from "@/lib/access/guards";
 import { forPage } from "@/lib/access/respond";
 import { db } from "@/lib/db";
 import { eventHeaders } from "@/lib/import/columns";
+import { ImportPanel } from "./_components/import-panel";
 
 export const metadata = { title: "Import | ShaadiDesk" };
 
-// Import the guest list from an Excel file (FR-16). Admins only. In this step the page has the
-// download of the template. The upload and the checks come at plan steps 6.3 to 6.5.
+// Import the guest list from an Excel file (FR-16). Admins only. The page has the
+// download of the template and the upload screens (ImportPanel, step 6.5).
 export default function ImportPage({ params }: PageProps<"/w/[weddingId]/import">) {
   return (
     <PageShell>
@@ -66,7 +67,7 @@ async function ImportContent({ params }: { params: PageProps<"/w/[weddingId]/imp
       <Button size="lg" render={<a href={`/w/${weddingId}/import/template.xlsx`} download />}>
         Download template
       </Button>
-      <p className="text-muted-foreground">Uploading the file is not ready yet. It comes in the next step.</p>
+      <ImportPanel weddingId={weddingId} />
     </>
   );
 }
