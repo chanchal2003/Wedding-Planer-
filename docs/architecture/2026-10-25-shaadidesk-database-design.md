@@ -375,7 +375,7 @@ A log of tries to confirm a family with 4 digits. It makes the limits work: 5 wr
 | `device_hash` | text |  | Hash of an anonymous device code (a cookie) that the guest's phone receives on the first visit, before access is granted |
 | `family_id` | uuid | FK | families.id. Optional. |
 | `succeeded` | boolean |  |  |
-| `ip_hash` | text |  | Hash of the internet address of the request (never the address itself). Added by a new migration at step 7.3. |
+| `ip_hash` | text |  | Hash of the internet address of the request (never the address itself). Added by the migration `add_access_attempt_ip_hash` (step 7.3, built 2026-11-01); the hash is an HMAC made with `BETTER_AUTH_SECRET`. |
 | `attempted_at` | timestamptz |  | Index with device_hash, index with family_id, index with ip_hash. Old rows are deleted later. |
 
 **Sample rows**

@@ -282,7 +282,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 | `getRsvpLanding(slug)` (built in step 7.1, `lib/rsvp/queries.ts`) | Read | Anyone (the team's "See it as a guest sees it" button also opens this page; Wave 1 has no family preview) | — | Bride and groom names, date (no wedding city; each event has its own venue), banner, greeting, theme colour, `isTest`, `isClosed`, `rsvpLastDate` | Not found page |
 | `generateMetadata` for `/[couple]` | Read | Anyone (WhatsApp) | — | Title "Priya & Rahul's Wedding", the month and year, the banner. Nothing else (FR-38). | — |
 | `searchFamilies(slug, text)` (built in step 7.2, `lib/rsvp/`) | Action | Anyone | At least 3 letters (the server checks it) | At most 10 matches: id, family name, and a hint (contact name and city together, for example "Meena, Jaipur"). Only the family name is searched. Names that start with the text come first. Families with no number are included. There is no limit on the number of searches: the owner accepts this risk (NFR-11, R-6; decided 2026-10-30). | `INVALID_INPUT` ("Type at least 3 letters.") |
-| `verifyFamilyDigits(slug, familyId, digits)` | Action | Anyone | 4 digits | `{ ok: true }` and the family cookie | `INVALID_INPUT` ("The number does not match. Check the last 4 digits and try again."), `TOO_MANY_TRIES`, `NOT_ALLOWED_NOW` ("Too many devices. Ask the person who sent you the card.") |
+| `verifyFamilyDigits(slug, familyId, digits)` (built in step 7.3; the check is `lib/guest/verify.ts`) | Action | Anyone | 4 digits | `{ ok: true }` and the family cookie | `INVALID_INPUT` ("The number does not match. Check the last 4 digits and try again."), `TOO_MANY_TRIES`, `NOT_ALLOWED_NOW` ("Too many devices. Ask the person who sent you the card.") |
 | `getGuestInvitation(slug)` | Read | Guest with the family cookie | — | Family name, the invited events only (name, type colour, date, time, venue, map link), the replies if any, "Replied by Meena, 5 Dec", organizer's first name, `isClosed` | Screen 1 (no cookie) |
 | `submitReplies(slug, input)` | Action | Guest with the family cookie | `repliedByName`, and for each invited event **that has no reply yet**: `attending`, `persons` (at least 1 for yes) | The saved replies | `CLOSED`, `ALREADY_REPLIED` (every event already has a reply), `INVALID_INPUT` (an open event is missing, or an event is not on the invitation) |
 
@@ -305,7 +305,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
 | `setFamilyReply(weddingId, familyId, eventId, input)` | Action | Member | `attending`, `persons` | The reply, with "Updated by Rohan" | `NOT_FOUND` (event not on the invitation), `INVALID_INPUT` |
-| `resetFamilyDevices(weddingId, familyId)` | Action | Member | — | `{ removed }` | — |
+| `resetFamilyDevices(weddingId, familyId)` (built in step 7.3) | Action | Member | — | `{ removed, tries }`: it deletes the devices of the family and its tries in the attempt log, so a family that a stranger locked out (30 wrong tries in a day) can try again (decided 2026-11-01) | `NOT_FOUND` (the family is not in this wedding) |
 
 - The team is not limited by the last dates (FR-37).
 - `setFamilyReply` makes or changes the row, with `source = team` and `updated_by` = the member. `source` shows who made the latest version: a guest reply that the team changes later counts as a team reply (decided 2026-10-30; no extra column).
