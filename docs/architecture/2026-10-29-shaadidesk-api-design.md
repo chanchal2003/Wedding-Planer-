@@ -305,7 +305,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `setFamilyReply(weddingId, familyId, eventId, input)` | Action | Member | `attending`, `persons` | The reply, with "Updated by Rohan" | `NOT_FOUND` (event not on the invitation), `INVALID_INPUT` |
+| `setFamilyReply(weddingId, familyId, eventId, input)` (built in step 8.1; the saving is `lib/rsvp/team-reply.ts`) | Action | Member | `attending`, `persons` | The reply, with "Updated by Rohan" | `NOT_FOUND` (event not on the invitation, or the family or the member is not in this wedding), `INVALID_INPUT` (Yes needs 1 to 9,999 persons) |
 | `resetFamilyDevices(weddingId, familyId)` (built in step 7.3) | Action | Member | — | `{ removed, tries }`: it deletes the devices of the family and its tries in the attempt log, so a family that a stranger locked out (30 wrong tries in a day) can try again (decided 2026-11-01) | `NOT_FOUND` (the family is not in this wedding) |
 
 - The team is not limited by the last dates (FR-37).

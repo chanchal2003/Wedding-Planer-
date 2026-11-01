@@ -384,8 +384,9 @@ The Playwright test of the RSVP flow is removed (no Playwright). The owner tries
 
 ## Phase 8: Team tracking
 
-### 8.1 Team enters replies 🤖
+### 8.1 Team enters replies ✅ built (waiting for the owner's test) 🤖
 An organizer or admin enters or changes the reply of a family at any time, also after the last date. The app shows "Updated by <name>".
+**Built 2026-11-01:** `lib/rsvp/team-reply.ts` (`saveTeamReply`: the member must be active in THIS wedding, the event must be on the family's invitation, one reply is made or changed with `source = team` and `updated_by`; a clash with a guest who saves at the same moment is retried once as an update), the action `setFamilyReply` in `lib/families/actions.ts`, and the Replies section of the family page (`reply-editor.tsx`: "Enter reply" or "Change" for each invited event, Yes/No, the stepper, Save; no "clear" button). The page shows "Replied by Meena, 5 December" or "Updated by Rohan Verma, 5 December" (the guest page shows only the first name). Any team member can enter a reply for any family. 7 tests in `tests/team-reply.test.ts`.
 **Done when:** AC-41.1 and AC-37.2 pass.
 **Commit:** `feat: team members enter and change replies`
 
