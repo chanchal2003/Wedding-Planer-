@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 export async function resetDatabase() {
   // The attempt log keeps its rows when a family is deleted (the family link is emptied).
   await db.accessAttempt.deleteMany();
+  // Families first: a reply entered by the team points at a team member, so the members cannot go before the replies (like deleteWeddingData).
+  await db.family.deleteMany();
   await db.wedding.deleteMany();
   await db.user.deleteMany();
 }
