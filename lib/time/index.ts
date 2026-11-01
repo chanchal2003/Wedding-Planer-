@@ -28,6 +28,14 @@ export function formatMonthYear(date: Date): string {
   return new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", month: "long", year: "numeric" }).format(date);
 }
 
+// An event moment in India time, for the guest page: "12 January" and "10:00 am".
+export function formatEventDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-IN", { timeZone: INDIA, day: "numeric", month: "long" }).format(date);
+}
+export function formatEventTime(date: Date): string {
+  return new Intl.DateTimeFormat("en-IN", { timeZone: INDIA, hour: "numeric", minute: "2-digit", hour12: true }).format(date);
+}
+
 // A last date (the reply-by date, the stay-by date) closes at 23:59 India time on that day
 // (CLAUDE.md rule 9). Guests can reply until then. The team is never stopped by it.
 // lastDate: "2026-12-31" or a plain date from the database.

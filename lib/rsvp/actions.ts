@@ -1,11 +1,12 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { guestCookieName } from "@/lib/access/guards";
+import { guestCookieName, requireGuestFamily } from "@/lib/access/guards";
 import { hashToken } from "@/lib/access/hash";
 import { db } from "@/lib/db";
 import { deviceCookieName, guestCookieOptions, ipHashOf, newDeviceCode } from "@/lib/guest/request";
 import { verifyDigits } from "@/lib/guest/verify";
+import { submitFamilyReplies } from "@/lib/rsvp/submit";
 import { MESSAGES } from "@/lib/limits";
 import { findFamiliesByName, type Match } from "@/lib/rsvp/search";
 import { searchTextSchema } from "@/lib/rsvp/schemas";
@@ -73,6 +74,36 @@ export async function verifyFamilyDigits(slug: string, familyId: string, digits:
     }
   } catch (error) {
     console.error("verifyFamilyDigits failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", "Something went wrong. Try again.");
+  }
+}
+
+// FR-33 to FR-37, FR-42. Only a phone with access to a family can reply, and only for that family
+// (the guard runs first, rule 1). The saving is in lib/rsvp/submit.ts. The page shows "Thank you"
+// only after this returns ok (FR-42).
+export async function submitReplies(slug: string, input: unknown): Promise<Result<{ saved: number }>> {
+  try {
+    const guest = await requireGuestFamily(String(slug));
+    if (!guest.ok) return fail("NO_ACCESS", "Type the last 4 digits of your family's number first.");
+
+    const result = await submitFamilyReplies({ weddingId: guest.family.weddingId, familyId: guest.family.id, reply: input });
+    return result.ok ? ok({ saved: result.saved }) : fail(result.code, result.message, result.fields);
+  } catch (error) {
+    console.error("submitReplies failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", "Not sent. Try again.");
+  }
+}
+
+// "Not your family? Change": this phone gives up its access, so the slot is free again and Screen 1 shows.
+export async function leaveFamily(slug: string): Promise<Result<null>> {
+  try {
+    const jar = await cookies();
+    const token = jar.get(guestCookieName(String(slug)))?.value;
+    if (token) await db.guestDevice.deleteMany({ where: { tokenHash: hashToken(token) } });
+    jar.set(guestCookieName(String(slug)), "", { ...guestCookieOptions(String(slug)), maxAge: 0 });
+    return ok(null);
+  } catch (error) {
+    console.error("leaveFamily failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", "Something went wrong. Try again.");
   }
 }

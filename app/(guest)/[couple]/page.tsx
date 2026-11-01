@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getGuestFamily } from "@/lib/access/guards";
 import { authEnv } from "@/lib/auth/env";
+import { getGuestInvitation } from "@/lib/rsvp/guest";
 import { getRsvpLanding } from "@/lib/rsvp/queries";
 import { themeFor } from "@/lib/theme";
 import { formatDate, formatMonthYear } from "@/lib/time";
 import { FindFamily } from "./_components/find-family";
+import { ReplyForm } from "./_components/reply-form";
 
 // The guest page (FR-27): Screen 1, "find your family". Guests never sign in, so this page is
 // public and shows only what getRsvpLanding returns. Step 7.2 adds the search, step 7.3 the check
@@ -47,7 +48,7 @@ async function Landing({ params }: { params: PageProps<"/[couple]">["params"] })
   if (!wedding) notFound();
 
   // A device with access sees the invitation (Screen 2, step 7.4). Everybody else sees Screen 1.
-  const guest = await getGuestFamily(couple);
+  const invitation = await getGuestInvitation(couple);
 
   const theme = themeFor(wedding.themeColor);
   // The couple's colour replaces the app's plum on this page only.
@@ -67,18 +68,15 @@ async function Landing({ params }: { params: PageProps<"/[couple]">["params"] })
         </p>
       )}
 
-      {wedding.bannerVersion && (
+      {!invitation && wedding.bannerVersion && (
         // The photo is unknown, so no text goes on it (UI design 6.1). A plain img is used on purpose:
         // the file is already made small in the browser when the couple uploads it.
         // eslint-disable-next-line @next/next/no-img-element
         <img src={`/${couple}/banner?v=${wedding.bannerVersion}`} alt="" className="mt-8 aspect-[3/2] w-full rounded-2xl object-cover" />
       )}
 
-      {guest ? (
-        <section className="flex flex-col items-center gap-3 text-center" aria-live="polite">
-          <h1 className="text-4xl">Namaste, {guest.family.familyName}</h1>
-          <p className="text-lg">You are in. Your invitation and the reply form come in the next step.</p>
-        </section>
+      {invitation ? (
+        <ReplyForm slug={couple} invitation={invitation} />
       ) : (
         <>
       <header className="flex flex-col items-center gap-1 text-center">
