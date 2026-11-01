@@ -6,6 +6,7 @@ import { isUuid } from "@/lib/access/checks";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { denied } from "@/lib/access/respond";
 import { assignByScope } from "@/lib/families/assign";
+import { resetFamilyAccess } from "@/lib/guest/reset";
 import { findFamilyInWedding } from "@/lib/families/lookup";
 import { assignSchema, familySchema } from "@/lib/families/schemas";
 import { fail, ok, type Result } from "@/lib/result";
@@ -253,6 +254,26 @@ export async function assignFamilies(weddingId: string, input: unknown): Promise
     return result.ok ? ok({ assigned: result.assigned, name: result.name }) : fail("INVALID_INPUT", result.message, { memberId: result.message });
   } catch (error) {
     console.error("assignFamilies failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", SOMETHING_WRONG);
+  }
+}
+
+// FR-30, AC-30.3: a team member removes all devices that have access to ONE family, and its wrong
+// tries (so a family that a stranger locked out can try again). The guests type the 4 digits again.
+// Only the family of this wedding is touched (rule 2).
+export async function resetFamilyDevices(weddingId: string, familyId: string): Promise<Result<{ removed: number; tries: number }>> {
+  try {
+    const access = await requireMember(weddingId);
+    if (!access.ok) return denied(access);
+    const wedding = access.member.wedding.id;
+
+    const family = await findFamilyInWedding(wedding, familyId);
+    if (!family) return fail("NOT_FOUND", "This family was not found. It may have been deleted.");
+
+    const reset = await resetFamilyAccess(wedding, family.id);
+    return ok({ removed: reset.devices, tries: reset.tries });
+  } catch (error) {
+    console.error("resetFamilyDevices failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", SOMETHING_WRONG);
   }
 }

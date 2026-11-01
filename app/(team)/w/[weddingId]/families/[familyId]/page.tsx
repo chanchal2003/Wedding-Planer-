@@ -10,6 +10,7 @@ import { hostedByLabel } from "@/lib/events";
 import { getFamily } from "@/lib/families/queries";
 import { displayPhone } from "@/lib/phone";
 import { FamilyForm } from "../_components/family-form";
+import { DevicesSection } from "../_components/devices-section";
 import { PhoneActions } from "../_components/phone-actions";
 
 export const metadata = { title: "Family | ShaadiDesk" };
@@ -37,7 +38,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 async function Family({ params }: { params: PageProps<"/w/[weddingId]/families/[familyId]">["params"] }) {
   const { weddingId, familyId } = await params;
-  const { member, family, events, organizers } = forPage(await getFamily(weddingId, familyId));
+  const { member, family, access, events, organizers } = forPage(await getFamily(weddingId, familyId));
 
   const phones = [...family.phones]
     .sort((a, b) => a.kind.localeCompare(b.kind))
@@ -75,6 +76,10 @@ async function Family({ params }: { params: PageProps<"/w/[weddingId]/families/[
             );
           })}
         </ul>
+      </Section>
+
+      <Section title="Guest devices">
+        <DevicesSection weddingId={weddingId} familyId={family.id} devices={access.devices} wrongTries={access.wrongTries} triesLimit={access.limit} />
       </Section>
 
       <Section title="Details">

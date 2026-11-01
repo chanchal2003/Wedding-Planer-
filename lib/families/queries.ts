@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { NO_ACCESS } from "@/lib/access/checks";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { findFamilyInWedding } from "@/lib/families/lookup";
+import { getFamilyAccessInfo } from "@/lib/guest/reset";
 import { PAGE_SIZE, type FamilyFilters } from "@/lib/families/schemas";
 
 // API design, Section 8. Every read function calls the guard first and returns its answer, and
@@ -84,16 +85,18 @@ export async function getFamily(weddingId: string, familyId: string) {
   const family = await findFamilyInWedding(wedding, familyId);
   if (!family) return NO_ACCESS;
 
-  const [events, members] = await Promise.all([
+  const [events, members, devices] = await Promise.all([
     db.event.findMany({ where: { weddingId: wedding }, orderBy: { startsAt: "asc" }, select: { id: true, name: true, type: true } }),
     db.weddingMember.findMany({
       where: { weddingId: wedding, status: { not: "removed" } },
       select: { id: true, displayName: true, user: { select: { name: true } } },
     }),
+    getFamilyAccessInfo(wedding, family.id),
   ]);
   return {
     ...access,
     family,
+    access: devices,
     events,
     organizers: members.map((m) => ({ id: m.id, name: m.displayName ?? m.user?.name ?? "Team member" })),
   };
