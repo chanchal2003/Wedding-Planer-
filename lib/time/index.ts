@@ -23,6 +23,11 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
+// The month and year of a wedding date, for the link preview: "January 2027".
+export function formatMonthYear(date: Date): string {
+  return new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", month: "long", year: "numeric" }).format(date);
+}
+
 // A last date (the reply-by date, the stay-by date) closes at 23:59 India time on that day
 // (CLAUDE.md rule 9). Guests can reply until then. The team is never stopped by it.
 // lastDate: "2026-12-31" or a plain date from the database.

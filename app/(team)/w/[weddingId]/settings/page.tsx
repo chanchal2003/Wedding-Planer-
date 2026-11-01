@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
 import { mayDeleteWedding } from "@/lib/access/checks";
 import { forPage } from "@/lib/access/respond";
 import { authEnv } from "@/lib/auth/env";
@@ -65,6 +66,9 @@ async function Settings({ params }: { params: PageProps<"/w/[weddingId]/settings
       </Section>
       <Section title="RSVP link">
         <LinkForm weddingId={weddingId} baseUrl={authEnv.BETTER_AUTH_URL} slug={settings.slug} locked={settings.slugLocked} />
+        <Button variant="outline" size="lg" render={<a href={`/${settings.slug}`} target="_blank" rel="noopener noreferrer" />}>
+          See it as a guest sees it
+        </Button>
       </Section>
       {canDelete && (
         <Link
