@@ -351,13 +351,15 @@ One family at a time, many at once (for example by side), and from the import co
 
 ## Phase 7: RSVP page for guests
 
-### 7.1 Screen 1 and the link preview 🤖
+### 7.1 Screen 1 and the link preview ✅ built (waiting for the owner's test) 🤖
 The `/[couple]` page: banner, couple names, search box, 4-digit box. A "TEST" ribbon shows on the guest page of a test wedding (FR-3, AC-3.1). Open Graph tags show only the banner, "<Bride> & <Groom>'s Wedding", and the month and year.
-**Done when:** AC-27.1 passes. The preview card is correct when you send the link on WhatsApp (AC-38.1).
+**Built 2026-11-01:** `lib/rsvp/queries.ts` (`getRsvpLanding`: only public fields), the page `app/(guest)/[couple]/page.tsx` with `generateMetadata` (title "<Bride> & <Groom>'s Wedding", description "January 2027", the banner as the image, `noindex`), `find-family.tsx` (the name field and four digit boxes; the button stays off until 7.3), the theme colour as CSS variables, the TEST label, `formatMonthYear` in `lib/time`, and the button "See it as a guest sees it" in Settings. `metadataBase` comes from `BETTER_AUTH_URL`: change it when the app is deployed. 2 tests in `tests/rsvp-landing.test.ts`. An unknown link shows the "Page not found" page, but the status is 200 because the page streams (known; see the review notes).
+**Done when:** AC-27.1 passes. The preview card is correct when you send the link on WhatsApp (AC-38.1). WhatsApp cannot open localhost, so until deployment the tags are checked in the page source.
 **Commit:** `feat: add rsvp screen 1 and safe link preview`
 
-### 7.2 Family search 🤖
+### 7.2 Family search ✅ built (waiting for the owner's test) 🤖
 Matches only after 3 letters. Each match shows the family name and the contact name or city. Never the full list. At most 10 matches. No search-count limit: the owner accepts this risk (NFR-11, R-6; decided 2026-10-30).
+**Built 2026-11-01:** `searchFamilies(slug, text)` in `lib/rsvp/actions.ts` (public, no guard, the link name picks the wedding), the rule of 3 letters in `lib/rsvp/schemas.ts` (the server checks it too), and the database part in `lib/rsvp/search.ts`: it searches the family name only, in one wedding, and returns only `id`, `familyName` and `hint` (contact name and city, for example "Meena, Jaipur"). Names that start with the text come first, at most 10. Families with no number are shown too. The guest page waits 0.3 seconds, ignores old answers, and shows the chosen family with a "Change" button. 5 tests in `tests/rsvp-search.test.ts`.
 **Done when:** AC-28.1 and AC-28.2 pass.
 **Commit:** `feat: add rsvp family search`
 
