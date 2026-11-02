@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ChevronRight, FileUp, Home, Settings, Users } from "lucide-react";
+import { ChevronRight, Download, FileUp, Home, Settings, Users } from "lucide-react";
 import { PageShell } from "@/components/page-shell";
 import { requireMember } from "@/lib/access/guards";
 import { forPage } from "@/lib/access/respond";
@@ -29,6 +29,7 @@ async function MoreLinks({ params }: { params: PageProps<"/w/[weddingId]/more">[
     ...(member.role === "admin"
       ? [
           { href: `/w/${weddingId}/import`, label: "Import guest list", icon: FileUp },
+          { href: `/w/${weddingId}/export`, label: "Export data", icon: Download },
           { href: `/w/${weddingId}/settings`, label: "Settings", icon: Settings },
         ]
       : []),
