@@ -3,12 +3,13 @@ import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { forPage } from "@/lib/access/respond";
-import { requireMember } from "@/lib/access/guards";
-import { db } from "@/lib/db";
-import { formatDate } from "@/lib/time";
+import { getDashboard } from "@/lib/dashboard/queries";
+import { Attention, Card, CountsCard, Organizers, RepliesSummary, SetupCard, Timeline } from "./_components/dashboard-parts";
 
-// A placeholder. The real home page (setup checklist, counts) comes at plan step 8.3.
-// It is the first page that uses the security guard: only an active team member sees it.
+export const metadata = { title: "Home | ShaadiDesk" };
+
+// The home page of a wedding (FR-24, FR-43, FR-44): the timeline, the setup steps for admins, the replies,
+// "needs attention", the guest counts and the progress of each organizer. Every team member sees the counts.
 export default function WeddingHomePage({ params }: PageProps<"/w/[weddingId]">) {
   return (
     <PageShell>
@@ -21,29 +22,38 @@ export default function WeddingHomePage({ params }: PageProps<"/w/[weddingId]">)
 
 async function WeddingHome({ params }: { params: PageProps<"/w/[weddingId]">["params"] }) {
   const { weddingId } = await params;
-  const { member } = forPage(await requireMember(weddingId));
-
-  const wedding = await db.wedding.findUniqueOrThrow({
-    where: { id: member.wedding.id },
-    select: { brideName: true, groomName: true, weddingDate: true, isTest: true },
-  });
+  const home = forPage(await getDashboard(weddingId));
+  const { stats } = home;
+  const id = home.member.wedding.id;
 
   return (
     <>
-      <h1 className="text-3xl">
-        {wedding.brideName} &amp; {wedding.groomName}
-      </h1>
-      <p className="text-lg">{formatDate(wedding.weddingDate)}</p>
-      <p>You are {member.role === "admin" ? "an admin" : "an organizer"} of this wedding.</p>
-      {/* Only admins see Settings (the settings page checks it again). The menu comes at step 5.4. */}
-      {member.role === "admin" && (
-        <Button size="lg" render={<Link href={`/w/${weddingId}/settings`} />}>
-          Settings
-        </Button>
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl">{home.couple}</h1>
+        <p className="text-lg">{home.weddingDate} · {home.daysText}</p>
+        <Timeline {...home.timeline} />
+      </header>
+
+      {home.isAdmin && <SetupCard steps={home.steps} />}
+
+      {home.mine && (
+        <Card title="Your families">
+          <p className="text-lg">{home.mine.total} {home.mine.total === 1 ? "family" : "families"} · {home.mine.sent} sent · {home.mine.replied} replied</p>
+          <Button variant="outline" size="lg" render={<Link href={`/w/${id}/my-families`} />}>Open my families</Button>
+        </Card>
       )}
-      <Button variant="outline" size="lg" render={<Link href="/weddings" />}>
-        Back to my weddings
-      </Button>
+
+      {stats.families > 0 && (
+        <>
+          <RepliesSummary replied={stats.replied} families={stats.families} />
+          <Attention weddingId={id} {...stats.attention} />
+          <CountsCard title="Whole wedding" counts={stats.wedding} />
+          {stats.events.map((event) => (
+            <CountsCard key={event.id} title={event.name} type={event.type} counts={event.counts} />
+          ))}
+          <Organizers organizers={stats.organizers} />
+        </>
+      )}
     </>
   );
 }
