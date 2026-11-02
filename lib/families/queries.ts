@@ -2,6 +2,7 @@ import type { Prisma } from "@/app/generated/prisma/client";
 import { db } from "@/lib/db";
 import { NO_ACCESS } from "@/lib/access/checks";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
+import { myFamiliesProgress } from "@/lib/families/invitation";
 import { findFamilyInWedding } from "@/lib/families/lookup";
 import { getFamilyAccessInfo } from "@/lib/guest/reset";
 import { PAGE_SIZE, type FamilyFilters } from "@/lib/families/schemas";
@@ -13,8 +14,25 @@ import { PAGE_SIZE, type FamilyFilters } from "@/lib/families/schemas";
 export async function listFamilies(weddingId: string, filters: FamilyFilters) {
   const access = await requireMember(weddingId);
   if (!access.ok) return access;
+  return { ...access, ...(await readFamilies(access.member.wedding.id, filters)) };
+}
+
+// "My families" (FR-23, FR-24): the families assigned to the person who asks, with the progress and the
+// numbers of the filter chips. The same list as above, with the organizer forced to this member.
+export async function listMyFamilies(weddingId: string, filters: FamilyFilters) {
+  const access = await requireMember(weddingId);
+  if (!access.ok) return access;
   const wedding = access.member.wedding.id;
 
+  const [list, progress] = await Promise.all([
+    readFamilies(wedding, { ...filters, organizer: access.member.id }),
+    myFamiliesProgress(wedding, access.member.id),
+  ]);
+  return { ...access, ...list, progress };
+}
+
+// Reads one page of families of ONE wedding. It does not check who is asking: the callers do.
+async function readFamilies(wedding: string, filters: FamilyFilters) {
   // In a search, % and _ are letters of the text, not wildcards (found by the review of 2026-10-31).
   const q = filters.q.replace(/[\\%_]/g, "\\$&");
   const where: Prisma.FamilyWhereInput = {
@@ -50,6 +68,7 @@ export async function listFamilies(weddingId: string, filters: FamilyFilters) {
         city: true,
         side: true,
         invitationSentAt: true,
+        invitationSentBy: { select: { displayName: true, user: { select: { name: true } } } },
         assignedMember: { select: { displayName: true, user: { select: { name: true } } } },
         phones: { select: { phone: true, kind: true, isIncorrect: true }, orderBy: { kind: "asc" } },
         familyEvents: { select: { reply: { select: { id: true } } } },
@@ -63,13 +82,13 @@ export async function listFamilies(weddingId: string, filters: FamilyFilters) {
   ]);
 
   return {
-    ...access,
     total,
     pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     families: families.map((family) => ({
       ...family,
       organizerName: family.assignedMember ? (family.assignedMember.displayName ?? family.assignedMember.user?.name ?? "Team member") : null,
       replied: family.familyEvents.some((event) => event.reply),
+      sentBy: family.invitationSentBy ? (family.invitationSentBy.displayName ?? family.invitationSentBy.user?.name ?? "Team member") : null,
     })),
     events,
     organizers: members.map((m) => ({ id: m.id, name: m.displayName ?? m.user?.name ?? "Team member" })),

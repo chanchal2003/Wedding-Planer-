@@ -6,6 +6,7 @@ import { isUuid } from "@/lib/access/checks";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { denied } from "@/lib/access/respond";
 import { assignByScope } from "@/lib/families/assign";
+import { markSent, undoSent } from "@/lib/families/invitation";
 import { resetFamilyAccess } from "@/lib/guest/reset";
 import { saveTeamReply } from "@/lib/rsvp/team-reply";
 import { findFamilyInWedding } from "@/lib/families/lookup";
@@ -297,6 +298,33 @@ export async function setFamilyReply(weddingId: string, familyId: string, eventI
     return result.ok ? ok(null) : fail(result.code, result.message, result.fields);
   } catch (error) {
     console.error("setFamilyReply failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", SOMETHING_WRONG);
+  }
+}
+
+// FR-23, AC-23.1: any team member marks that the card was sent (API design, Section 10). It records the date
+// and the person, and the first tick locks the link name of the wedding. The work is in lib/families/invitation.ts.
+export async function markInvitationSent(weddingId: string, familyId: string): Promise<Result<{ sentAt: string; by: string }>> {
+  try {
+    const access = await requireMember(weddingId);
+    if (!access.ok) return denied(access);
+    const result = await markSent(access.member.wedding.id, String(familyId), access.member.id);
+    return result.ok ? ok({ sentAt: result.sentAt.toISOString(), by: result.by }) : fail(result.code, result.message);
+  } catch (error) {
+    console.error("markInvitationSent failed:", error instanceof Error ? error.message : error);
+    return fail("SERVER_ERROR", SOMETHING_WRONG);
+  }
+}
+
+// Any team member can undo it, not only the person who marked it (decided 2026-10-30). The link name stays locked.
+export async function undoInvitationSent(weddingId: string, familyId: string): Promise<Result<null>> {
+  try {
+    const access = await requireMember(weddingId);
+    if (!access.ok) return denied(access);
+    const result = await undoSent(access.member.wedding.id, String(familyId), access.member.id);
+    return result.ok ? ok(null) : fail(result.code, result.message);
+  } catch (error) {
+    console.error("undoInvitationSent failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", SOMETHING_WRONG);
   }
 }

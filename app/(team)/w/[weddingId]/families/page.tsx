@@ -1,15 +1,15 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import { StatusChip } from "@/components/shared/status-chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { forPage } from "@/lib/access/respond";
 import { hostedByLabel } from "@/lib/events";
 import { listFamilies } from "@/lib/families/queries";
 import { FAMILY_STATUSES, parseFilters, type FamilyFilters } from "@/lib/families/schemas";
-import { displayPhone } from "@/lib/phone";
+import { FamilyRow } from "./_components/family-row";
 import { FilterChip } from "./_components/filter-chip";
+import { rowOf } from "./_components/row-data";
 
 export const metadata = { title: "Families | ShaadiDesk" };
 
@@ -57,6 +57,11 @@ async function FamilyList({
 
   return (
     <>
+      <div className="flex flex-wrap gap-2">
+        <FilterChip href={`/w/${weddingId}/families`} active>All families</FilterChip>
+        <FilterChip href={`/w/${weddingId}/my-families`} active={false}>My families</FilterChip>
+      </div>
+
       <form action={`/w/${weddingId}/families`} className="flex flex-col gap-2 sm:flex-row" role="search">
         {/* The filters stay when you search: they are sent along with the search text. */}
         {(["side", "event", "organizer", "status"] as const).map((key) => filters[key] && <input key={key} type="hidden" name={key} value={filters[key]} />)}
@@ -100,32 +105,9 @@ async function FamilyList({
       </p>
 
       <ul className="flex flex-col gap-4">
-        {families.map((family) => {
-          const primary = family.phones.find((phone) => phone.kind === "primary") ?? family.phones[0];
-          const incorrect = family.phones.some((phone) => phone.isIncorrect);
-          return (
-            <li key={family.id}>
-              <Link href={`/w/${weddingId}/families/${family.id}`} className="block rounded-xl border border-border bg-card p-4 hover:bg-secondary focus-visible:outline-offset-4">
-                <span className="flex flex-col gap-2">
-                  <span className="font-heading text-xl font-semibold">{family.familyName}</span>
-                  {(family.contactName || family.city) && (
-                    <span className="text-muted-foreground">{[family.contactName, family.city].filter(Boolean).join(" · ")}</span>
-                  )}
-                  <span>{primary ? displayPhone(primary.phone) : "No number"}</span>
-                  <span className="text-muted-foreground">
-                    {hostedByLabel(family.side)} · {family.organizerName ? `Organizer: ${family.organizerName}` : "No organizer yet"}
-                  </span>
-                  <span className="flex flex-wrap gap-2">
-                    {!primary && <StatusChip tone="warn">No number</StatusChip>}
-                    {incorrect && <StatusChip tone="error">Incorrect number</StatusChip>}
-                    {family.invitationSentAt ? <StatusChip tone="good">Sent</StatusChip> : <StatusChip>Not sent</StatusChip>}
-                    {family.replied ? <StatusChip tone="good">Replied</StatusChip> : <StatusChip>No reply</StatusChip>}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          );
-        })}
+        {families.map((family) => (
+          <FamilyRow key={family.id} weddingId={weddingId} family={rowOf(family)} />
+        ))}
       </ul>
 
       {pages > 1 && (

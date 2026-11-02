@@ -12,6 +12,7 @@ import { formatEventDate } from "@/lib/time";
 import { FamilyForm } from "../_components/family-form";
 import { DevicesSection } from "../_components/devices-section";
 import { PhoneActions } from "../_components/phone-actions";
+import { InvitationSection } from "../_components/invitation-section";
 import { ReplyEditor } from "../_components/reply-editor";
 
 export const metadata = { title: "Family | ShaadiDesk" };
@@ -78,6 +79,15 @@ async function Family({ params }: { params: PageProps<"/w/[weddingId]/families/[
 
       <Section title="Numbers">
         <PhoneActions weddingId={weddingId} familyId={family.id} phones={phones} />
+      </Section>
+
+      <Section title="Invitation">
+        <InvitationSection
+          weddingId={weddingId}
+          familyId={family.id}
+          sentOn={family.invitationSentAt ? formatEventDate(family.invitationSentAt) : null}
+          sentBy={family.invitationSentBy ? (family.invitationSentBy.displayName ?? family.invitationSentBy.user?.name ?? null) : null}
+        />
       </Section>
 
       <Section title="Replies">

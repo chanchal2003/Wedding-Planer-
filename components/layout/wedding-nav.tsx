@@ -17,9 +17,16 @@ type Item = {
   active: (path: string, base: string) => boolean;
 };
 
-const phoneItems = (base: string): Item[] => [
+// Admins have "Families". Organizers have "My families" instead (UI design, Section 7); the two chips on
+// those pages switch between the two lists, so both addresses count as this item.
+const familiesItem = (base: string, isAdmin: boolean): Item =>
+  isAdmin
+    ? { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) || path.startsWith(`${base}/my-families`) }
+    : { href: `${base}/my-families`, label: "My families", icon: UsersRound, active: (path) => path.startsWith(`${base}/my-families`) || path.startsWith(`${base}/families`) };
+
+const phoneItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
-  { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) },
+  familiesItem(base, isAdmin),
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
   // "More" holds the rest (Settings for admins, My weddings). Settings counts as More on a phone.
   {
@@ -32,7 +39,7 @@ const phoneItems = (base: string): Item[] => [
 
 const sideItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
-  { href: `${base}/families`, label: "Families", icon: UsersRound, active: (path) => path.startsWith(`${base}/families`) },
+  familiesItem(base, isAdmin),
   ...(isAdmin
     ? [{ href: `${base}/import`, label: "Import", icon: FileUp, active: (path: string) => path.startsWith(`${base}/import`) }]
     : []),
@@ -62,7 +69,7 @@ export function WeddingNav({
         className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         <ul className="mx-auto grid max-w-xl grid-cols-4">
-          {phoneItems(base).map((item) => {
+          {phoneItems(base, isAdmin).map((item) => {
             const active = item.active(path, base);
             return (
               <li key={item.label}>

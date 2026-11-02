@@ -17,6 +17,7 @@ export async function findFamilyInWedding(weddingId: string, familyId: string) {
       notes: true,
       assignedMemberId: true,
       invitationSentAt: true,
+      invitationSentBy: { select: { displayName: true, user: { select: { name: true } } } },
       phones: { select: { id: true, phone: true, kind: true, isIncorrect: true } },
       familyEvents: {
         select: {
