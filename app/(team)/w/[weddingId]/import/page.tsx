@@ -31,7 +31,7 @@ async function ImportContent({ params }: { params: PageProps<"/w/[weddingId]/imp
   const events = await db.event.findMany({
     where: { weddingId: member.wedding.id },
     orderBy: { startsAt: "asc" },
-    select: { id: true, name: true, type: true, startsAt: true },
+    select: { id: true, name: true, type: true, startsAt: true, hostedBy: true },
   });
   const headers = eventHeaders(events);
 

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireAdmin, requireMember } from "@/lib/access/guards";
 import { denied } from "@/lib/access/respond";
+import { eventClash } from "@/lib/events/rules";
 import { findEventInWedding } from "@/lib/events/lookup";
 import { makeEventSchema } from "@/lib/events/schemas";
 import { fail, ok, type Result } from "@/lib/result";
@@ -29,11 +30,21 @@ export async function createEvent(weddingId: string, input: unknown): Promise<Re
     if (!parsed.success) return fail("INVALID_INPUT", "Please check the form.", fieldsFrom(parsed.error.issues));
     const { day, time, ...data } = parsed.data;
 
-    const event = await db.event.create({
-      data: { ...data, weddingId: access.member.wedding.id, startsAt: parseIndiaDateTime(day, time) },
-      select: { id: true },
+    const wedding = access.member.wedding.id;
+    // One transaction with a lock on the wedding's events, so two admins who add the same event at the same
+    // moment cannot both pass the check.
+    return await db.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`events:${wedding}`}, 0))`;
+      const others = await tx.event.findMany({ where: { weddingId: wedding }, select: { id: true, name: true, hostedBy: true } });
+      const clash = eventClash({ name: data.name, hostedBy: data.hostedBy }, others);
+      if (clash) return fail("CONFLICT", clash, { name: clash });
+
+      const event = await tx.event.create({
+        data: { ...data, weddingId: wedding, startsAt: parseIndiaDateTime(day, time) },
+        select: { id: true },
+      });
+      return ok({ eventId: event.id });
     });
-    return ok({ eventId: event.id });
   } catch (error) {
     console.error("createEvent failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", SOMETHING_WRONG);
@@ -53,12 +64,20 @@ export async function updateEvent(weddingId: string, eventId: string, input: unk
     if (!parsed.success) return fail("INVALID_INPUT", "Please check the form.", fieldsFrom(parsed.error.issues));
     const { day, time, ...data } = parsed.data;
 
-    // "weddingId" is part of the filter: an event of another wedding can never be changed here.
-    await db.event.updateMany({
-      where: { id: current.id, weddingId: access.member.wedding.id },
-      data: { ...data, startsAt: parseIndiaDateTime(day, time) },
+    const wedding = access.member.wedding.id;
+    return await db.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`events:${wedding}`}, 0))`;
+      const others = await tx.event.findMany({ where: { weddingId: wedding }, select: { id: true, name: true, hostedBy: true } });
+      const clash = eventClash({ id: current.id, name: data.name, hostedBy: data.hostedBy }, others);
+      if (clash) return fail("CONFLICT", clash, { name: clash });
+
+      // "weddingId" is part of the filter: an event of another wedding can never be changed here.
+      await tx.event.updateMany({
+        where: { id: current.id, weddingId: wedding },
+        data: { ...data, startsAt: parseIndiaDateTime(day, time) },
+      });
+      return ok(null);
     });
-    return ok(null);
   } catch (error) {
     console.error("updateEvent failed:", error instanceof Error ? error.message : error);
     return fail("SERVER_ERROR", SOMETHING_WRONG);

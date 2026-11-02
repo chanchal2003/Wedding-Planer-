@@ -15,7 +15,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/w/[weddingId]/i
   const events = await db.event.findMany({
     where: { weddingId: id },
     orderBy: { startsAt: "asc" },
-    select: { id: true, name: true, startsAt: true },
+    select: { id: true, name: true, startsAt: true, hostedBy: true },
   });
   if (events.length === 0) return new Response("Add an event first.", { status: 409 });
 

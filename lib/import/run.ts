@@ -13,7 +13,7 @@ import type { ImportReport, Table } from "@/lib/import/types";
 
 // Runs both checks. `client` is the database, or the transaction of the save.
 async function analyse(client: Prisma.TransactionClient, weddingId: string, table: Table) {
-  const events = await client.event.findMany({ where: { weddingId }, orderBy: { startsAt: "asc" }, select: { id: true, name: true, startsAt: true } });
+  const events = await client.event.findMany({ where: { weddingId }, orderBy: { startsAt: "asc" }, select: { id: true, name: true, startsAt: true, hostedBy: true } });
   const fileCheck = validateImportFile(table, events);
   const dbCheck = await validateImportAgainstDb(client, weddingId, fileCheck.rows);
 

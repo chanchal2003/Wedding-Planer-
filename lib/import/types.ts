@@ -71,7 +71,7 @@ export type FileCheck = {
   canSave: boolean; // no error anywhere (also not in the columns)
 };
 
-export type EventForImport = { id: string; name: string; startsAt: Date };
+export type EventForImport = { id: string; name: string; startsAt: Date; hostedBy?: string };
 
 export function problem(code: ProblemCode, row: number | null, familyName: string, value: string, message: string): Problem {
   return { code, kind: PROBLEMS[code].kind, title: PROBLEMS[code].title, row, familyName, value, message };

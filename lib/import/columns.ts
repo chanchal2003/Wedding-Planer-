@@ -25,17 +25,29 @@ export type ColumnInfo = {
   example: string;
 };
 
-type EventForColumn = { id: string; name: string; startsAt: Date };
+type EventForColumn = { id: string; name: string; startsAt: Date; hostedBy?: string };
 
-// One column for each event of the wedding. If two events have the same name, the date is added
-// to the header ("Haldi (12 Jan)"), so every header is different.
+const SIDE_TEXT: Record<string, string> = { bride: "Bride's side", groom: "Groom's side", both: "Both sides" };
+
+// One column for each event of the wedding. If two events have the same name, the header says which one
+// it is: the side ("Haldi (Bride's side)"), and the date too when the name and the side are the same
+// ("Haldi (Bride's side, 12 Jan)"). Without a side (old files) the date alone is used. Every header is different.
 export function eventHeaders(events: EventForColumn[]): string[] {
-  const count = new Map<string, number>();
-  for (const event of events) count.set(event.name, (count.get(event.name) ?? 0) + 1);
+  const count = (key: (event: EventForColumn) => string) => {
+    const map = new Map<string, number>();
+    for (const event of events) map.set(key(event), (map.get(key(event)) ?? 0) + 1);
+    return (event: EventForColumn) => map.get(key(event)) ?? 0;
+  };
+  const sameName = count((event) => event.name);
+  const sameNameAndSide = count((event) => `${event.name}|${event.hostedBy ?? ""}`);
   return events.map((event) => {
-    if ((count.get(event.name) ?? 0) < 2) return event.name;
-    const day = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short" }).format(event.startsAt);
-    return `${event.name} (${day})`;
+    if (sameName(event) < 2) return event.name;
+    const parts: string[] = [];
+    if (event.hostedBy && SIDE_TEXT[event.hostedBy]) parts.push(SIDE_TEXT[event.hostedBy]);
+    if (parts.length === 0 || sameNameAndSide(event) > 1) {
+      parts.push(new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short" }).format(event.startsAt));
+    }
+    return `${event.name} (${parts.join(", ")})`;
   });
 }
 
