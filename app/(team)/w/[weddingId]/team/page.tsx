@@ -12,12 +12,12 @@ export const metadata = { title: "Team | ShaadiDesk" };
 
 // The team of the wedding (FR-9 to FR-13). Every member sees the list. Only admins see emails,
 // the invite buttons and the link to change a person, and only admins add people.
-export default function TeamPage({ params }: PageProps<"/w/[weddingId]/team">) {
+export default function TeamPage({ params, searchParams }: PageProps<"/w/[weddingId]/team">) {
   return (
     <PageShell>
       <h1 className="text-3xl">Team</h1>
       <Suspense fallback={<p>Loading…</p>}>
-        <TeamList params={params} />
+        <TeamList params={params} searchParams={searchParams} />
       </Suspense>
     </PageShell>
   );
@@ -29,9 +29,20 @@ const statusChip = {
   removed: { tone: "neutral", label: "Removed" },
 } as const;
 
-async function TeamList({ params }: { params: PageProps<"/w/[weddingId]/team">["params"] }) {
+// Removed people are hidden at first. "Show removed" (a plain link, ?removed=1) lists them again. They are
+// never deleted: old records point to them, and an admin can restore them.
+async function TeamList({
+  params,
+  searchParams,
+}: {
+  params: PageProps<"/w/[weddingId]/team">["params"];
+  searchParams: PageProps<"/w/[weddingId]/team">["searchParams"];
+}) {
   const { weddingId } = await params;
-  const { isAdmin, people } = forPage(await listTeam(weddingId));
+  const showRemoved = (await searchParams).removed === "1";
+  const { isAdmin, people: everybody } = forPage(await listTeam(weddingId));
+  const removedCount = everybody.filter((person) => person.status === "removed").length;
+  const people = showRemoved ? everybody : everybody.filter((person) => person.status !== "removed");
 
   return (
     <>
@@ -68,6 +79,14 @@ async function TeamList({ params }: { params: PageProps<"/w/[weddingId]/team">["
           );
         })}
       </ul>
+      {removedCount > 0 && (
+        <Link
+          href={showRemoved ? `/w/${weddingId}/team` : `/w/${weddingId}/team?removed=1`}
+          className="inline-flex min-h-11 items-center self-start text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          {showRemoved ? "Hide removed people" : `Show removed people (${removedCount})`}
+        </Link>
+      )}
       {isAdmin && (
         <Button size="lg" render={<Link href={`/w/${weddingId}/team/new`} />}>
           Add person
