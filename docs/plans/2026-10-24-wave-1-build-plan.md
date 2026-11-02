@@ -390,8 +390,9 @@ An organizer or admin enters or changes the reply of a family at any time, also 
 **Done when:** AC-41.1 and AC-37.2 pass.
 **Commit:** `feat: team members enter and change replies`
 
-### 8.2 RSVP link and "My families" 🤖
+### 8.2 RSVP link and "My families" ✅ built (waiting for the owner's test) 🤖
 "Copy" button for the RSVP link. "My families" list for each organizer, with the "Invitation sent" tick, which records the date and the person. The first tick locks the link name.
+**Built 2026-11-02:** the RSVP link with "Copy link" was built with the settings (step 5.x). New: `lib/families/invitation.ts` (`markSent`: date and person, the first tick stays, and the wedding's link name is locked in the same transaction; `undoSent`: clears both, the link name stays locked; `myFamiliesProgress`: total, sent, replied, not sent, no reply), the actions `markInvitationSent` and `undoInvitationSent`, `listMyFamilies`, the page `/w/<id>/my-families` (progress bar, filter chips with their numbers, search, chips "My families" / "All families"), the shared list row `family-row.tsx` with "Mark as sent" and "Marked as sent. Undo" for 6 seconds, the "Invitation" section on the family page ("Mark as not sent"), and the menu: organizers get "My families" instead of "Families". "All families" is the normal list; its organizer filter chip replaces "own families first" (decided 2026-11-02). 6 tests in `tests/invitation-sent.test.ts`.
 **Done when:** AC-22.1 and AC-23.1 pass, and the link name cannot be changed after the first tick.
 **Commit:** `feat: add my families with invitation sent tracking`
 

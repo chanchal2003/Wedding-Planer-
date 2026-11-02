@@ -250,15 +250,15 @@ These functions are the first line of every read function and action. Small Vite
 
 | Function | Kind | Who | Input | Output | Errors |
 |---|---|---|---|---|---|
-| `listMyFamilies(weddingId, filters)` | Read | Member | `search`, `status` (all, not sent, no reply), `page` | The families assigned to the user, 50 at a time, with counts for the filter chips | — |
-| `markInvitationSent(weddingId, familyId)` | Action | Member | — | `sentAt` | `NOT_FOUND` |
+| `listMyFamilies(weddingId, filters)` (built in step 8.2) | Read | Member | `search`, `status` (all, not sent, no reply), `page` | The families assigned to the user, 50 at a time, with `progress` (total, sent, replied, not sent, no reply) for the bar and the chips | — |
+| `markInvitationSent(weddingId, familyId)` (built in step 8.2; `lib/families/invitation.ts`) | Action | Member | — | `{ sentAt, by }` (a second tick returns the first one) | `NOT_FOUND` |
 | `undoInvitationSent(weddingId, familyId)` | Action | Member | — | — | `NOT_ALLOWED_NOW` (not sent) |
 | `getRsvpLink(weddingId)` | Read | Member | — | The full link, for "Copy" | — |
 
 - `markInvitationSent` sets `invitation_sent_at` and `invitation_sent_by`. If the slug is not locked, it locks it in the same transaction.
 - `undoInvitationSent` clears both columns. Any team member can undo it, not only the person who marked it. `[Confirmed]` 2026-10-30. The slug stays locked, because a card may already be out.
 - For admins, "Families" uses `listFamilies`. For organizers, "My families" uses `listMyFamilies`.
-- **One list with a switch** (decided 2026-10-30): the organizer's screen has two chips at the top, **My families** (the default, `listMyFamilies`) and **All families** (`listFamilies`, with the organizer's own families sorted first). Organizers use "All families" to help a guest of another organizer. There is no extra tab.
+- **One list with a switch** (decided 2026-10-30): the organizer's screen has two chips at the top, **My families** (the default, `listMyFamilies`) and **All families** (`listFamilies`, the normal list; built 2026-11-02 without "own first": the organizer filter chip does the job). Organizers use "All families" to help a guest of another organizer. There is no extra tab.
 
 ## 11. RSVP page for guests (build plan 7.1 to 7.4) — FR-27 to FR-38, FR-42
 
