@@ -396,13 +396,14 @@ An organizer or admin enters or changes the reply of a family at any time, also 
 **Done when:** AC-22.1 and AC-23.1 pass, and the link name cannot be changed after the first tick.
 **Commit:** `feat: add my families with invitation sent tracking`
 
-### 8.3 Dashboard 🤖
+### 8.3 Dashboard ✅ built (waiting for the owner's test) 🤖
 - Progress of each organizer: families, sent, replied (FR-24).
 - Guest counts for each event and the full wedding: invited, yes (persons), no, no reply, for each side and the total (FR-43), with the mixed-answer rule of the API design (Section 13).
 - The setup checklist and the timeline strip (Today, Replies close, Wedding). The checklist does not show who did each step.
 - The "needs attention" list with 3 rows: no reply, no phone number, invitation not sent (FR-44).
 - Event colour dots (FR-6).
 
+**Built 2026-11-02:** `lib/dashboard/stats.ts` (`getDashboardStats`: the counts for each event and the whole wedding, by side and in total, the organizers and the three attention rows, all with SQL `COUNT`, `SUM` and `GROUP BY` and the wedding in every query; the whole-wedding rule counts a family once, with its largest headcount), `lib/dashboard/queries.ts` (`getDashboard`: `requireMember` first, the setup steps, the timeline, days to go in India time), the home page `/w/<id>` and its pieces in `_components/dashboard-parts.tsx` (timeline, next-step card with the other steps collapsed, replies bar, needs attention with links to the filters of Families, guest counts for the whole wedding and each event with its colour dot, by organizer, and "Your families"). The setup block is for admins; every member sees the counts. The last setup step is "Send the cards" (done when the first invitation is marked sent), because the database cannot know that the link was copied. A needs-attention row with 0 is hidden. 5 tests in `tests/dashboard.test.ts`.
 **Done when:** AC-24.1 and AC-43.1 pass with the dummy data.
 **Commit:** `feat: add wedding dashboard with organizer progress and guest counts`
 

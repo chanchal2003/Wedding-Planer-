@@ -286,7 +286,7 @@ PRD FR-24, FR-43, FR-44.
 ```
 - **During setup** the home shows the next-step card and a short, collapsed checklist. **After setup** it shows the summary strip, then "Needs attention", then the details. `[Confirmed]`
 - **Next-step card:** one step, one button. The other steps are collapsed under "4 more steps". `[Confirmed]`
-- **Checklist steps:** 1 Make the wedding, 2 Invite your helpers, 3 Add events, 4 Set the reply dates, 5 Import your guest list (locked until events and team exist, with a note), 6 Copy your RSVP link. Steps do not show who did them (decided 2026-10-30: the database does not record it). `[Confirmed]`
+- **Checklist steps:** 1 Make the wedding, 2 Invite your helpers, 3 Add events, 4 Set the reply dates, 5 Import your guest list (locked until events and team exist, with a note), 6 Send the cards (done when the first invitation is marked sent; the app cannot know that the link was copied, decided 2026-11-02). Steps do not show who did them (decided 2026-10-30: the database does not record it). `[Confirmed]`
 - **Invite your helpers comes early.** Each person gets a ready WhatsApp message to join (FR-9). Then setup can run in parallel. `[Confirmed]`
 - **See it as a guest sees it:** once the names, photo and colour are set, a button opens the real guest Screen 1 with the couple's photo and colour (same data as `getRsvpLanding`, no new function). It catches a bad photo before the cards are printed. In Wave 1 the preview shows Screen 1 only: there is no family picker and no Screen 2 preview. `[Confirmed]` 2026-10-30
 - **Timeline strip:** Today, Replies close, Wedding, with the real dates. There is no "Cards go out" date. `[Confirmed]`

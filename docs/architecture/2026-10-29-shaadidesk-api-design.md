@@ -316,7 +316,7 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 
 | Function | Kind | Who | Output |
 |---|---|---|---|
-| `getDashboard(weddingId)` | Read | Member | All of the items below in one call |
+| `getDashboard(weddingId)` (built in step 8.3; the numbers are `lib/dashboard/stats.ts`) | Read | Member | All of the items below in one call |
 
 - **Setup checklist:** each step done or not. It does not show who did it, because the database does not record the creator of an event or a family (decided 2026-10-30).
 - **Counts** for each event and for the whole wedding, for bride side, groom side, both and total: invited, replied yes (persons), replied no, no reply (FR-43).
