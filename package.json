@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma skills sync || exit 0",
@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:create": "prisma migrate dev --create-only",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:neon": "node --env-file=.env.neon ./node_modules/prisma/build/index.js migrate deploy",
     "db:migrate:status": "prisma migrate status",
     "db:studio": "prisma studio",
     "test": "vitest run",
