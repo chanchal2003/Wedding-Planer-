@@ -411,8 +411,9 @@ An organizer or admin enters or changes the reply of a family at any time, also 
 
 ## Phase 9: Data safety
 
-### 9.1 CSV export 🤖
+### 9.1 CSV export ✅ built (waiting for the owner's test) 🤖
 Admins export three CSV files: families with their phone numbers, replies, and the team (FR-65). Later waves add their tables. Each route handler calls `requireAdmin`. A cell that starts with `=`, `+`, `-` or `@` gets a `'` in front, so Excel does not run it as a formula (a family name like `=HYPERLINK(...)` is text, not a formula). The files are UTF-8 with a BOM.
+**Built 2026-11-02:** `lib/export/csv.ts` (`toCsv`: BOM, CRLF, quotes, the `'` before `=`, `+`, `-`, `@`, tab and carriage return; `raw()` only for phone numbers from `lib/phone`, written as "+91 98765 11111" so Excel keeps them as text), `lib/export/build.ts` (`buildFamiliesCsv`, `buildRepliesCsv` with one row for each invitation also with no reply, and with the contact name and the city of the family, because many families have the same name (added 2026-11-02), `buildTeamCsv` with removed people marked), the route `export/[file]/route.ts` (`requireAdmin` first; anybody else and any other file name get "not found"; `private, no-store`; file names like `priya-rahul-families-2026-11-02.csv`), the page `/w/<id>/export` with a Download button for each file and "Download all three", and the menu entries (side menu and More, admins). 9 tests in `tests/export.test.ts`.
 **Done when:** AC-65.1 passes for the three files.
 **Commit:** `feat: add csv export`
 

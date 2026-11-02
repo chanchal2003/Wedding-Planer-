@@ -328,10 +328,12 @@ Both cookies are `httpOnly`, `secure`, `sameSite=lax`, and live for one year. In
 
 ## 14. Export (build plan 9.1) — FR-65
 
+Built 2026-11-02: `lib/export/` and the route `export/[file]/route.ts`. The page `/w/<weddingId>/export` (admins) has a Download button for each file and "Download all three". Phone numbers are not guarded with a `'` (they hold only `+` and digits, checked by `lib/phone`) and are written as "+91 98765 11111". The replies file has one row for each invitation, also with no reply, and the contact name and the city of the family after the family name, because many families have the same name. The team file includes removed people, with their status.
+
 | Function | Kind | Who | Output |
 |---|---|---|---|
 | `GET /w/<weddingId>/export/families.csv` | Route | Admin | One row for each family: name, contact, city, side, primary and secondary number, events, organizer, sent date, notes |
-| `GET /w/<weddingId>/export/replies.csv` | Route | Admin | One row for each family and event: family, event, attending, persons, replied by, source, date |
+| `GET /w/<weddingId>/export/replies.csv` | Route | Admin | One row for each family and event: family, contact name, city, event, attending, persons, replied by, source, date |
 | `GET /w/<weddingId>/export/team.csv` | Route | Admin | One row for each person: name, email, role, relation, status |
 
 - Dates in the files are India time. The file names have the date, for example `priya-rahul-families-2026-12-05.csv`.
