@@ -26,8 +26,8 @@ const familiesItem = (base: string, isAdmin: boolean): Item =>
 
 const phoneItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
-  familiesItem(base, isAdmin),
   { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
+  familiesItem(base, isAdmin),
   // "More" holds the rest (Settings for admins, My weddings). Settings counts as More on a phone.
   {
     href: `${base}/more`,
@@ -37,19 +37,19 @@ const phoneItems = (base: string, isAdmin: boolean): Item[] => [
   },
 ];
 
+// The side menu follows the order of the work: the team, then the events, then the families, then the
+// import and the export, and the settings last (the setup steps of the home page have the same order).
 const sideItems = (base: string, isAdmin: boolean): Item[] => [
   { href: base, label: "Home", icon: Home, active: (path) => path === base },
+  { href: `${base}/team`, label: "Team", icon: Users, active: (path) => path.startsWith(`${base}/team`) },
+  { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
   familiesItem(base, isAdmin),
   ...(isAdmin
     ? [
         { href: `${base}/import`, label: "Import", icon: FileUp, active: (path: string) => path.startsWith(`${base}/import`) },
         { href: `${base}/export`, label: "Export", icon: Download, active: (path: string) => path.startsWith(`${base}/export`) },
+        { href: `${base}/settings`, label: "Settings", icon: Settings, active: (path: string) => path.startsWith(`${base}/settings`) },
       ]
-    : []),
-  { href: `${base}/events`, label: "Events", icon: CalendarDays, active: (path) => path.startsWith(`${base}/events`) },
-  { href: `${base}/team`, label: "Team", icon: Users, active: (path) => path.startsWith(`${base}/team`) },
-  ...(isAdmin
-    ? [{ href: `${base}/settings`, label: "Settings", icon: Settings, active: (path: string) => path.startsWith(`${base}/settings`) }]
     : []),
 ];
 
