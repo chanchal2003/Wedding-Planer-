@@ -44,7 +44,9 @@ async function ImportContent({ params }: { params: PageProps<"/w/[weddingId]/imp
     );
   }
 
-  return (
+  const familyCount = await db.family.count({ where: { weddingId: member.wedding.id } });
+
+  const steps = (
     <>
       <ol className="flex list-decimal flex-col gap-3 pl-6 text-lg">
         <li>Download the template. It is an Excel file with one column for each of your events.</li>
@@ -68,6 +70,27 @@ async function ImportContent({ params }: { params: PageProps<"/w/[weddingId]/imp
         Download template
       </Button>
       <ImportPanel weddingId={weddingId} />
+    </>
+  );
+
+  // No family yet: the steps and the upload box are open. With families, a card says how many are in already,
+  // and the steps are folded away under "Import more families".
+  if (familyCount === 0) return steps;
+  return (
+    <>
+      <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
+        <h2 className="text-xl font-semibold">
+          {familyCount} {familyCount === 1 ? "family is" : "families are"} already in this wedding.
+        </h2>
+        <p className="text-lg text-muted-foreground">Do you want to import more? Families with the same name and number are skipped, so nothing is added twice.</p>
+        <Button size="lg" variant="outline" render={<Link href={`/w/${weddingId}/families`} />}>See the families</Button>
+      </section>
+      <details>
+        <summary className="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-lg font-medium text-primary-foreground hover:bg-primary-hover">
+          Import more families
+        </summary>
+        <div className="mt-6 flex flex-col gap-6">{steps}</div>
+      </details>
     </>
   );
 }

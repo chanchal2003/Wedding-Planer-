@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { checkImport, saveImport } from "@/lib/import/actions";
 import { groupProblems } from "@/lib/import/report";
@@ -19,6 +20,7 @@ type Step =
   | { name: "done"; saved: number; skipped: number };
 
 export function ImportPanel({ weddingId }: { weddingId: string }) {
+  const router = useRouter();
   const [step, setStep] = useState<Step>({ name: "choose" });
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function ImportPanel({ weddingId }: { weddingId: string }) {
     if (result.ok) {
       setBusy(false);
       setStep({ name: "done", saved: result.data.saved, skipped: result.data.skipped });
+      router.refresh(); // the card at the top of the page shows the new number of families
       return;
     }
     // Nothing was saved. Show the message and check the file again, so the screen is true.
@@ -88,6 +91,7 @@ export function ImportPanel({ weddingId }: { weddingId: string }) {
         {step.skipped > 0 && <p className="text-muted-foreground">{step.skipped} skipped, because they are already in the app.</p>}
         <Button size="lg" render={<Link href={`/w/${weddingId}/families/assign`} />}>Assign families to organizers</Button>
         <Button size="lg" variant="outline" render={<Link href={`/w/${weddingId}/families`} />}>See the families</Button>
+        <Button size="lg" variant="outline" onClick={chooseAgain}>Import another file</Button>
       </section>
     );
   }
